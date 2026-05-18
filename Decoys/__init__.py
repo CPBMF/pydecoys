@@ -65,6 +65,17 @@ from .DecoyStrategy import DecoyGenerator
 # Expose DecoyGenerator TypeAlias as part of the top-level API
 
 
+__all__ = [
+    'DecoyStrategy',
+    'DecoyGenerator',
+    'generate',
+    'register',
+]
+
+__version_info__ = (0, 1, 0)
+__version__ = '.'.join([str(i) for i in __version_info__])
+
+
 _decoy_strategy: dict[str, DecoyGenerator] = {
     "reverse": DecoyStrategy.reverse,
     "reverse-keepn": DecoyStrategy.reverse_keep_n,
@@ -190,11 +201,3 @@ def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
         raise ValueError(f"Strategy '{strategy}' already exists")
 
     _decoy_strategy[strategy] = decoy_generator_fn
-
-
-__all__ = [
-    'DecoyStrategy',
-    'DecoyGenerator',
-    'generate',
-    'register',
-]

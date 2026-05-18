@@ -15,18 +15,36 @@
 # Decoys. If not, see <https://www.gnu.org/licenses/>.
 
 
-import sys
+from pathlib import Path
 
 from Bio import SeqIO
 
 from . import generate
 
 
-def main(input: str, output: str):
+def main(input: Path, output: Path, type: str):
     targets = SeqIO.parse(input, 'fasta')
-    decoys = generate(targets, 'pseudoreverse-stricttrypsin')
+    decoys = generate(targets, type)
     SeqIO.write(decoys, output, 'fasta')
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    import argparse
+
+    from . import _decoy_strategy
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument('input', type=Path)
+    parser.add_argument('output', type=Path)
+    parser.add_argument(
+        '--type', '-t',
+        choices=_decoy_strategy.keys(),
+        default='reverse'
+    )
+
+    args = parser.parse_args()
+
+    main(args.input, args.output, args.type)

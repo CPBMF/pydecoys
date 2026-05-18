@@ -19,6 +19,7 @@
 Attributes
 ----------
 - (fn) :func:`generate`
+- (fn) :func:`from_target`
 - (fn) :func:`register`
 - (TypeAlias) :obj:`DecoyGenerator`
 - (submodule) :mod:`DecoyStrategy`
@@ -166,6 +167,59 @@ def generate(
         seq = decoy_generator(sequence.seq)
 
         yield SeqRecord(seq, id, description="")
+
+
+def from_target(
+    sequence: SeqRecord,
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True,
+) -> SeqRecord:
+    """Apply a decoy generation strategy to a given sequence.
+
+    Args:
+        sequence: A single :class:`Bio.SeqRecord.SeqRecord`.
+        strategy: Lower case string especifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's
+            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
+        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
+            Defaults to `True`.
+
+    Returns:
+        A decoy version of `sequence`.
+
+    Examples:
+        >>> from Bio.SeqRecord import SeqRecord
+        >>> from Decoys import from_target
+        >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
+        >>> decoy = from_target(seq, 'reverse')
+        >>> print(f'{decoy.id}: {decoy.seq}')
+        decoy_seq1: Seq('RYVAKYDIND')
+    """
+
+    if not isinstance(strategy, str):
+        raise TypeError("Need a string for the decoy strategy (lower case)")
+    if not strategy:
+        raise ValueError("Strategy required (lower case string)")
+    if not strategy.islower():
+        raise ValueError(f"Strategy string '{strategy}' should be lower case")
+
+    if not isinstance(decoy_tag, str):
+        raise TypeError("Need a string for the decoy tag")
+
+    decoy_generator = _decoy_strategy.get(strategy)
+
+    if decoy_generator is None:
+        raise ValueError(f"Unknown strategy: '{strategy}'")
+
+    if sequence.seq is None:
+        raise ValueError(f"Seq not present for SeqRecord '{sequence.id}'")
+
+    id = sequence.id if sequence.id else ""
+    id = decoy_tag + id if prefix else id + decoy_tag
+    seq = decoy_generator(sequence.seq)
+
+    return SeqRecord(seq, id, description="")
 
 
 def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:

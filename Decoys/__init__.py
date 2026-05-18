@@ -1,4 +1,5 @@
 # Copyright © 2026 Bruno Maestri A Becker
+#
 # This file is part of Decoys.
 #
 # Decoys is free software: you can redistribute it and/or modify it under the

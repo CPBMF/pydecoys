@@ -1,0 +1,33 @@
+[project]
+name = "Decoys"
+version = "0.1.0"
+description = "Decoy utilities for Python"
+license = "GPL-3.0-or-later"
+authors = [
+    { name = "Bruno Maestri A Becker", email = "bruno.maestri@edu.pucrs.br" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+
+
+[tool.poetry]
+name = "Decoys"
+version = "0.1.0"
+description = "Decoy utilities for Python"
+license = "GPL-3.0-or-later"
+authors = [ "Bruno Maestri A Becker <bruno.maestri@edu.pucrs.br>" ]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+biopython = "^1.87"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^2.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

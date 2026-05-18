@@ -15,16 +15,20 @@
 # Decoys. If not, see <https://www.gnu.org/licenses/>.
 
 
-from pathlib import Path
+from os import PathLike
 
 from Bio import SeqIO
 
 from . import generate
 
 
-def main(input: Path, output: Path, type: str):
+def main(
+    input: str | PathLike[str],
+    output: str | PathLike[str],
+    strategy: str
+) -> None:
     targets = SeqIO.parse(input, 'fasta')
-    decoys = generate(targets, type)
+    decoys = generate(targets, strategy)
     SeqIO.write(decoys, output, 'fasta')
 
 
@@ -37,10 +41,10 @@ if __name__ == '__main__':
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument('input', type=Path)
-    parser.add_argument('output', type=Path)
+    parser.add_argument('input')
+    parser.add_argument('output')
     parser.add_argument(
-        '--type', '-t',
+        '--strategy', '-s',
         choices=_decoy_strategy.keys(),
         default='reverse'
     )

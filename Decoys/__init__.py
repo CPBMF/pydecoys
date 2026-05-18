@@ -14,64 +14,82 @@
 # You should have received a copy of the GNU General Public License along with
 # Decoys. If not, see <https://www.gnu.org/licenses/>.
 
+"""Module for handling decoy generation from target protein sequences.
+
+Attributes
+----------
+- (fn) :func:`generate`
+- (fn) :func:`register`
+- (TypeAlias) :obj:`DecoyGenerator`
+- (submodule) :mod:`DecoyStrategy`
+
+Avaliable Decoy Strategies
+--------------------------
+Each decoy strategy is specified by a lowercase string. The
+:obj:`DecoyGenerator` fns used for each strategy are available under
+:mod:`DecoyStrategy`.
+
+- reverse:                     Reverse protein
+- reverse-keepn:               Reverse protein, except N-terminal aa
+- reverse-keepc:               Reverse protein, except C-terminal aa
+- reverse-keepterm:            Reserse protein, except terminal aas
+- shuffle:                     Shuffle protein
+- shuffle-keepn:               Shuffle protein, except N-terminal aa
+- shuffle-keepc:               Shuffle protein, except C-terminal aa
+- shuffle-keepterm:            Shuffle protein, except terminal aas
+- pseudoreverse-trypsin:       Pseudo-reverse trypsin fragments
+- pseudoreverse-stricttrypsin: Pseudo-reverse strict trypsin fragments
+- pseudoreverse-argc:          Pseudo-reverse ArgC fragments
+- pseudoreverse-aspn:          Pseudo-reverse AspN fragments
+- pseudoreverse-chymo:         Pseudo-reverse chymotrypsin fragments
+- pseudoreverse-gluc:          Pseudo-reverse GluC fragments
+- pseudoreverse-lysc:          Pseudo-reverse LysC fragments
+- pseudoreverse-lysn:          Pseudo-reverse LysN fragments
+- pseudoshuffle-trypsin:       Pseudo-shuffle trypsin fragments
+- pseudoshuffle-stricttrypsin: Pseudo-shuffle strict trypsin fragments
+- pseudoshuffle-argc:          Pseudo-shuffle ArgC fragments
+- pseudoshuffle-aspn:          Pseudo-shuffle AspN fragments
+- pseudoshuffle-chymo:         Pseudo-shuffle chymotrypsin fragments
+- pseudoshuffle-gluc:          Pseudo-shuffle GluC fragments
+- pseudoshuffle-lysc:          Pseudo-shuffle LysC fragments
+- pseudoshuffle-lysn:          Pseudo-shuffle LysN fragments
+"""
+
 
 import typing as _t
 
 from Bio.SeqRecord import SeqRecord
 
-from .DecoyStrategy import (
-    reverse,
-    reverse_keep_n,
-    reverse_keep_c,
-    reverse_keep_term,
-    shuffle,
-    PseudoReverseRule,
-    PseudoShuffleRule,
-    DecoyGenerator,
-)
-
-
-pseudoreverse_trypsin = PseudoReverseRule("KR", nocut="P")
-pseudoreverse_stricttrypsin = PseudoReverseRule("KR")
-pseudoreverse_argc = PseudoReverseRule("R", nocut="P")
-pseudoreverse_aspn = PseudoReverseRule("D", sense="N")
-pseudoreverse_chymo = PseudoReverseRule("FLWY", nocut="P")
-pseudoreverse_gluc = PseudoReverseRule("DE", nocut="P")
-pseudoreverse_lysc = PseudoReverseRule("K", nocut="P")
-pseudoreverse_lysn = PseudoReverseRule("K", sense="N")
-
-pseudoshuffle_trypsin = PseudoShuffleRule("KR", nocut="P")
-pseudoshuffle_stricttrypsin = PseudoShuffleRule("KR")
-pseudoshuffle_argc = PseudoShuffleRule("R", nocut="P")
-pseudoshuffle_aspn = PseudoShuffleRule("D", sense="N")
-pseudoshuffle_chymo = PseudoShuffleRule("FLWY", nocut="P")
-pseudoshuffle_gluc = PseudoShuffleRule("DE", nocut="P")
-pseudoshuffle_lysc = PseudoShuffleRule("K", nocut="P")
-pseudoshuffle_lysn = PseudoShuffleRule("K", sense="N")
+import DecoyStrategy
+from .DecoyStrategy import DecoyGenerator
+# Expose DecoyGenerator TypeAlias as part of the top-level API
 
 
 _decoy_strategy: dict[str, DecoyGenerator] = {
-    "reverse": reverse,
-    "reverse-keepn": reverse_keep_n,
-    "reverse-keepc": reverse_keep_c,
-    "reverse-keepterm": reverse_keep_term,
-    "shuffle": shuffle,
-    "pseudoreverse-trypsin": pseudoreverse_trypsin,
-    "pseudoreverse-stricttrypsin": pseudoreverse_stricttrypsin,
-    "pseudoreverse-argc": pseudoreverse_argc,
-    "pseudoreverse-aspn": pseudoreverse_aspn,
-    "pseudoreverse-chymo": pseudoreverse_chymo,
-    "pseudoreverse-gluc": pseudoreverse_gluc,
-    "pseudoreverse-lysc": pseudoreverse_lysc,
-    "pseudoreverse-lysn": pseudoreverse_lysn,
-    "pseudoshuffle-trypsin": pseudoshuffle_trypsin,
-    "pseudoshuffle-stricttrypsin": pseudoshuffle_stricttrypsin,
-    "pseudoshuffle-argc": pseudoreverse_argc,
-    "pseudoshuffle-aspn": pseudoshuffle_aspn,
-    "pseudoshuffle-chymo": pseudoshuffle_chymo,
-    "pseudoshuffle-gluc": pseudoshuffle_gluc,
-    "pseudoshuffle-lysc": pseudoshuffle_lysc,
-    "pseudoshuffle-lysn": pseudoshuffle_lysn,
+    "reverse": DecoyStrategy.reverse,
+    "reverse-keepn": DecoyStrategy.reverse_keep_n,
+    "reverse-keepc": DecoyStrategy.reverse_keep_c,
+    "reverse-keepterm": DecoyStrategy.reverse_keep_term,
+    "shuffle": DecoyStrategy.shuffle,
+    "shuffle-keepn": DecoyStrategy.shuffle_keep_n,
+    "shuffle-keepc": DecoyStrategy.shuffle_keep_c,
+    "shuffle-keepterm": DecoyStrategy.shuffle_keep_term,
+    "pseudoreverse-trypsin": DecoyStrategy.pseudoreverse_trypsin,
+    "pseudoreverse-stricttrypsin": DecoyStrategy.pseudoreverse_stricttrypsin,
+    "pseudoreverse-argc": DecoyStrategy.pseudoreverse_argc,
+    "pseudoreverse-aspn": DecoyStrategy.pseudoreverse_aspn,
+    "pseudoreverse-chymo": DecoyStrategy.pseudoreverse_chymo,
+    "pseudoreverse-gluc": DecoyStrategy.pseudoreverse_gluc,
+    "pseudoreverse-lysc": DecoyStrategy.pseudoreverse_lysc,
+    "pseudoreverse-lysn": DecoyStrategy.pseudoreverse_lysn,
+    "pseudoshuffle-trypsin": DecoyStrategy.pseudoshuffle_trypsin,
+    "pseudoshuffle-stricttrypsin": DecoyStrategy.pseudoshuffle_stricttrypsin,
+    "pseudoshuffle-argc": DecoyStrategy.pseudoshuffle_argc,
+    "pseudoshuffle-aspn": DecoyStrategy.pseudoshuffle_aspn,
+    "pseudoshuffle-chymo": DecoyStrategy.pseudoshuffle_chymo,
+    "pseudoshuffle-gluc": DecoyStrategy.pseudoshuffle_gluc,
+    "pseudoshuffle-lysc": DecoyStrategy.pseudoshuffle_lysc,
+    "pseudoshuffle-lysn": DecoyStrategy.pseudoshuffle_lysn,
 }
 
 
@@ -81,6 +99,35 @@ def generate(
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> _t.Generator[SeqRecord, None, None]:
+    """Lazily apply a decoy generation strategy to a set of sequences.
+
+    Args:
+        sequences: A list (or iterator) of :class:`Bio.SeqRecord.SeqRecord`
+            objects, or a single :class:`Bio.SeqRecord.SeqRecord`.
+        strategy: Lower case string especifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's
+            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
+        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
+            Defaults to `True`.
+
+    Yields:
+        A decoy version of the next SeqRecord in `sequences`.
+
+    Examples:
+        >>> from Bio.SeqRecord import SeqRecord
+        >>> from Decoys import generate
+        >>> seqs = [
+        ...     SeqRecord('DNIDYKAVYR', 'seq1'),
+        ...     SeqRecord('QSYMCTVTHP', 'seq2'),
+        ...     SeqRecord('CQWSLTEELL', 'seq3'),
+        ... ]
+        >>> for decoy in generate(seqs, 'reverse'):
+        ...     print(f'{decoy.id}: {decoy.seq}')
+        decoy_seq1: Seq('RYVAKYDIND')
+        decoy_seq2: Seq('PHTVTCMYSQ')
+        decoy_seq3: Seq('LLEETLSWQC')
+    """
+
     if not isinstance(strategy, str):
         raise TypeError("Need a string for the decoy strategy (lower case)")
     if not strategy:
@@ -111,6 +158,27 @@ def generate(
 
 
 def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
+    """Register a new decoy strategy that can be used with :func:`generate`.
+
+    Args:
+        strategy: Lower case string identifying the decoy strategy. Must not be
+            already defined.
+        decoy_generator_fn: A function that should take a :class:`Bio.Seq.Seq`
+            object and return its decoy version.
+
+    Examples:
+        Given a :func:`random_seq` function that takes a Seq and returns a new,
+        unrelated Seq:
+
+        >>> from Bio.SeqRecord import SeqRecord
+        >>> from Decoys import register, generate
+        >>> register('randomseq', random_seq)
+        >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
+        >>> decoy = from_target(seq, 'randomseq')
+        >>> print(f'{decoy.id}: {decoy.seq}')
+        decoy_seq1: Seq('LLEETLSWQC')
+    """
+
     if not isinstance(strategy, str):
         raise TypeError("Need a string for the decoy strategy (lower case)")
     if not strategy:
@@ -122,3 +190,11 @@ def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
         raise ValueError(f"Strategy '{strategy}' already exists")
 
     _decoy_strategy[strategy] = decoy_generator_fn
+
+
+__all__ = [
+    'DecoyStrategy',
+    'DecoyGenerator',
+    'generate',
+    'register',
+]

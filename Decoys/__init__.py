@@ -17,7 +17,6 @@
 
 import typing as _t
 
-from Bio.Seq import Seq, MutableSeq
 from Bio.SeqRecord import SeqRecord
 
 from .DecoyStrategy import (
@@ -32,47 +31,47 @@ from .DecoyStrategy import (
 )
 
 
-PseudoReverseTrypsin = PseudoReverseRule("KR", nocut="P")
-PseudoReverseStrictTrypsin = PseudoReverseRule("KR")
-PseudoReverseArgC = PseudoReverseRule("R", nocut="P")
-PseudoReverseAspN = PseudoReverseRule("D", sense="N")
-PseudoReverseChymo = PseudoReverseRule("FLWY", nocut="P")
-PseudoReverseGluC = PseudoReverseRule("DE", nocut="P")
-PseudoReverseLysC = PseudoReverseRule("K", nocut="P")
-PseudoReverseLysN = PseudoReverseRule("K", sense="N")
+pseudoreverse_trypsin = PseudoReverseRule("KR", nocut="P")
+pseudoreverse_stricttrypsin = PseudoReverseRule("KR")
+pseudoreverse_argc = PseudoReverseRule("R", nocut="P")
+pseudoreverse_aspn = PseudoReverseRule("D", sense="N")
+pseudoreverse_chymo = PseudoReverseRule("FLWY", nocut="P")
+pseudoreverse_gluc = PseudoReverseRule("DE", nocut="P")
+pseudoreverse_lysc = PseudoReverseRule("K", nocut="P")
+pseudoreverse_lysn = PseudoReverseRule("K", sense="N")
 
-PseudoShuffleTrypsin = PseudoShuffleRule("KR", nocut="P")
-PseudoShuffleStrictTrypsin = PseudoShuffleRule("KR")
-PseudoShuffleArgC = PseudoShuffleRule("R", nocut="P")
-PseudoShuffleAspN = PseudoShuffleRule("D", sense="N")
-PseudoShuffleChymo = PseudoShuffleRule("FLWY", nocut="P")
-PseudoShuffleGluC = PseudoShuffleRule("DE", nocut="P")
-PseudoShuffleLysC = PseudoShuffleRule("K", nocut="P")
-PseudoShuffleLysN = PseudoShuffleRule("K", sense="N")
+pseudoshuffle_trypsin = PseudoShuffleRule("KR", nocut="P")
+pseudoshuffle_stricttrypsin = PseudoShuffleRule("KR")
+pseudoshuffle_argc = PseudoShuffleRule("R", nocut="P")
+pseudoshuffle_aspn = PseudoShuffleRule("D", sense="N")
+pseudoshuffle_chymo = PseudoShuffleRule("FLWY", nocut="P")
+pseudoshuffle_gluc = PseudoShuffleRule("DE", nocut="P")
+pseudoshuffle_lysc = PseudoShuffleRule("K", nocut="P")
+pseudoshuffle_lysn = PseudoShuffleRule("K", sense="N")
 
 
-_DecoyStrategy: dict[str, DecoyGenerator] = {
+_decoy_strategy: dict[str, DecoyGenerator] = {
     "reverse": reverse,
     "reverse-keepn": reverse_keep_n,
     "reverse-keepc": reverse_keep_c,
     "reverse-keepterm": reverse_keep_term,
     "shuffle": shuffle,
-    "pseudoreverse-trypsin": PseudoReverseTrypsin,
-    "pseudoreverse-stricttrypsin": PseudoReverseStrictTrypsin,
-    "pseudoreverse-argc": PseudoReverseArgC,
-    "pseudoreverse-aspn": PseudoReverseAspN,
-    "pseudoreverse-chymo": PseudoReverseChymo,
-    "pseudoreverse-gluc": PseudoReverseGluC,
-    "pseudoreverse-lysc": PseudoReverseLysC,
-    "pseudoreverse-lysn": PseudoReverseLysN,
-    "pseudoshuffle-trypsin": PseudoShuffleTrypsin,
-    "pseudoshuffle-stricttrypsin": PseudoShuffleStrictTrypsin,
-    "pseudoshuffle-argc": PseudoReverseArgC,
-    "pseudoshuffle-aspn": PseudoShuffleAspN,
-    "pseudoshuffle-chymo": PseudoShuffleChymo,
-    "pseudoshuffle-gluc": PseudoShuffleGluC,
-    "pseudoshuffle-lysc": PseudoShuffleLysC,
-    "pseudoshuffle-lysn": PseudoShuffleLysN,
+    "pseudoreverse-trypsin": pseudoreverse_trypsin,
+    "pseudoreverse-stricttrypsin": pseudoreverse_stricttrypsin,
+    "pseudoreverse-argc": pseudoreverse_argc,
+    "pseudoreverse-aspn": pseudoreverse_aspn,
+    "pseudoreverse-chymo": pseudoreverse_chymo,
+    "pseudoreverse-gluc": pseudoreverse_gluc,
+    "pseudoreverse-lysc": pseudoreverse_lysc,
+    "pseudoreverse-lysn": pseudoreverse_lysn,
+    "pseudoshuffle-trypsin": pseudoshuffle_trypsin,
+    "pseudoshuffle-stricttrypsin": pseudoshuffle_stricttrypsin,
+    "pseudoshuffle-argc": pseudoreverse_argc,
+    "pseudoshuffle-aspn": pseudoshuffle_aspn,
+    "pseudoshuffle-chymo": pseudoshuffle_chymo,
+    "pseudoshuffle-gluc": pseudoshuffle_gluc,
+    "pseudoshuffle-lysc": pseudoshuffle_lysc,
+    "pseudoshuffle-lysn": pseudoshuffle_lysn,
 }
 
 
@@ -95,7 +94,7 @@ def generate(
     if isinstance(sequences, SeqRecord):
         sequences = [sequences]
 
-    decoy_generator = _DecoyStrategy.get(strategy)
+    decoy_generator = _decoy_strategy.get(strategy)
 
     if decoy_generator is None:
         raise ValueError(f"Unknown strategy: '{strategy}'")
@@ -111,7 +110,7 @@ def generate(
         yield SeqRecord(seq, id, description="")
 
 
-def register(strategy: str, fn: _t.Callable[[Seq | MutableSeq], Seq]) -> None:
+def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
     if not isinstance(strategy, str):
         raise TypeError("Need a string for the decoy strategy (lower case)")
     if not strategy:
@@ -119,7 +118,7 @@ def register(strategy: str, fn: _t.Callable[[Seq | MutableSeq], Seq]) -> None:
     if not strategy.islower():
         raise ValueError(f"Strategy string '{strategy}' should be lower case")
 
-    if strategy in _DecoyStrategy:
+    if strategy in _decoy_strategy:
         raise ValueError(f"Strategy '{strategy}' already exists")
 
-    _DecoyStrategy[strategy] = fn
+    _decoy_strategy[strategy] = decoy_generator_fn

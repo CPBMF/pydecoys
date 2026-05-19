@@ -154,7 +154,8 @@ class PseudoReverseRule:
         self,
         cut: str,
         sense: Literal['C', 'N'] = 'C',
-        nocut: str | None = None
+        nocut: str | None = None,
+        keep_n: bool = False
     ) -> None:
         """Initialize a pseudo-reverse :obj:`DecoyGenerator` with the specified
         enzyme specifications.
@@ -166,6 +167,8 @@ class PseudoReverseRule:
             nocut: Aminoacids that stop cleavage as a string, or `None`. If
                 given, the enzyme won't cut aminoacids followed by these.
                 Defaults to `None`.
+            keep_n: Whether to revert the N-terminal aa or not. Defaults to
+                `False`.
 
         Examples:
             To specify a pseudo-reverse generator for trypsin:
@@ -184,8 +187,11 @@ class PseudoReverseRule:
         self._nocut = nocut
         # Without type hints this is cast to a str
         self._sense: Literal['C', 'N'] = sense
+        self._keep_n: bool = keep_n
 
         pattern = rf"([{cut}])"
+        if self._keep_n:
+            pattern = f"(^.|[{cut}])"
         if nocut is not None:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
@@ -248,6 +254,11 @@ class PseudoReverseRule:
         """Aminoacids that stop cleavage as a string."""
         return self._nocut
 
+    @property
+    def keep_n(self) -> bool:
+        """Whether to revert the N-terminal aa or not."""
+        return self._keep_n
+
 
 class PseudoShuffleRule:
     """A :obj:`DecoyGenerator` that applies pseudo-shuffle decoy generation
@@ -262,7 +273,8 @@ class PseudoShuffleRule:
         self,
         cut: str,
         sense: Literal['C', 'N'] = 'C',
-        nocut: str | None = None
+        nocut: str | None = None,
+        keep_n: bool = False,
     ) -> None:
         """Initialize a pseudo-shuffle :obj:`DecoyGenerator` with the specified
         enzyme specifications.
@@ -274,6 +286,8 @@ class PseudoShuffleRule:
             nocut: Aminoacids that stop cleavage as a string, or `None`. If
                 given, the enzyme won't cut aminoacids followed by these.
                 Defaults to `None`.
+            keep_n: Whether to revert the N-terminal aa or not. Defaults to
+                `False`
 
         Examples:
             To specify a pseudo-shuffle generator for trypsin:
@@ -290,10 +304,13 @@ class PseudoShuffleRule:
 
         self._cut = cut
         self._nocut = nocut
-        # Without type hint sense is cast to str
+        # Without type hints this is cast to a str
         self._sense: Literal['C', 'N'] = sense
+        self._keep_n: bool = keep_n
 
         pattern = rf"([{cut}])"
+        if self._keep_n:
+            pattern = f"(^.|[{cut}])"
         if nocut is not None:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
@@ -356,6 +373,11 @@ class PseudoShuffleRule:
         """Aminoacids that stop cleavage as a string."""
         return self._nocut
 
+    @property
+    def keep_n(self) -> bool:
+        """Whether to revert the N-terminal aa or not."""
+        return self._keep_n
+
     def _shuffle(self, frag: str) -> str:
         new = list(frag)
         _rng.shuffle(new)
@@ -363,20 +385,22 @@ class PseudoShuffleRule:
 
 
 # Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
-pseudoreverse_trypsin = PseudoReverseRule("KR", nocut="P")  # type: ignore # noqa: E501
-pseudoreverse_stricttrypsin = PseudoReverseRule("KR")       # type: ignore # noqa: E501
-pseudoreverse_argc = PseudoReverseRule("R", nocut="P")      # type: ignore # noqa: E501
-pseudoreverse_aspn = PseudoReverseRule("D", sense="N")      # type: ignore # noqa: E501
-pseudoreverse_chymo = PseudoReverseRule("FLWY", nocut="P")  # type: ignore # noqa: E501
-pseudoreverse_gluc = PseudoReverseRule("DE", nocut="P")     # type: ignore # noqa: E501
-pseudoreverse_lysc = PseudoReverseRule("K", nocut="P")      # type: ignore # noqa: E501
-pseudoreverse_lysn = PseudoReverseRule("K", sense="N")      # type: ignore # noqa: E501
+pseudoreverse_trypsin = PseudoReverseRule("KR", nocut="P")
+pseudoreverse_stricttrypsin = PseudoReverseRule("KR")
+pseudoreverse_argc = PseudoReverseRule("R", nocut="P")
+pseudoreverse_aspn = PseudoReverseRule("D", sense="N")
+pseudoreverse_chymo = PseudoReverseRule("FLWY", nocut="P")
+pseudoreverse_gluc = PseudoReverseRule("DE", nocut="P")
+pseudoreverse_lysc = PseudoReverseRule("K", nocut="P")
+pseudoreverse_lysn = PseudoReverseRule("K", sense="N")
+pseudoreverse_stricttrypsin_keepn = PseudoReverseRule("KR", keep_n=True)
 
-pseudoshuffle_trypsin = PseudoShuffleRule("KR", nocut="P")  # type: ignore # noqa: E501
-pseudoshuffle_stricttrypsin = PseudoShuffleRule("KR")       # type: ignore # noqa: E501
-pseudoshuffle_argc = PseudoShuffleRule("R", nocut="P")      # type: ignore # noqa: E501
-pseudoshuffle_aspn = PseudoShuffleRule("D", sense="N")      # type: ignore # noqa: E501
-pseudoshuffle_chymo = PseudoShuffleRule("FLWY", nocut="P")  # type: ignore # noqa: E501
-pseudoshuffle_gluc = PseudoShuffleRule("DE", nocut="P")     # type: ignore # noqa: E501
-pseudoshuffle_lysc = PseudoShuffleRule("K", nocut="P")      # type: ignore # noqa: E501
-pseudoshuffle_lysn = PseudoShuffleRule("K", sense="N")      # type: ignore # noqa: E501
+pseudoshuffle_trypsin = PseudoShuffleRule("KR", nocut="P")
+pseudoshuffle_stricttrypsin = PseudoShuffleRule("KR")
+pseudoshuffle_argc = PseudoShuffleRule("R", nocut="P")
+pseudoshuffle_aspn = PseudoShuffleRule("D", sense="N")
+pseudoshuffle_chymo = PseudoShuffleRule("FLWY", nocut="P")
+pseudoshuffle_gluc = PseudoShuffleRule("DE", nocut="P")
+pseudoshuffle_lysc = PseudoShuffleRule("K", nocut="P")
+pseudoshuffle_lysn = PseudoShuffleRule("K", sense="N")
+pseudoshuffle_stricttrypsin_keepn = PseudoShuffleRule("KR", keep_n=True)

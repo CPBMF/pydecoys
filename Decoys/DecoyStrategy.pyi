@@ -164,6 +164,7 @@ pseudoreverse_chymo: DecoyGenerator
 pseudoreverse_gluc: DecoyGenerator
 pseudoreverse_lysc: DecoyGenerator
 pseudoreverse_lysn: DecoyGenerator
+pseudoreverse_stricttrypsin_keepn: DecoyGenerator
 
 pseudoshuffle_trypsin: DecoyGenerator
 pseudoshuffle_stricttrypsin: DecoyGenerator
@@ -173,3 +174,4 @@ pseudoshuffle_chymo: DecoyGenerator
 pseudoshuffle_gluc: DecoyGenerator
 pseudoshuffle_lysc: DecoyGenerator
 pseudoshuffle_lysn: DecoyGenerator
+pseudoshuffle_stricttrypsin_keepn: DecoyGenerator

@@ -53,6 +53,7 @@ Avaliable Decoy Strategies:
     - pseudoreverse-gluc:          Pseudo-reverse GluC fragments
     - pseudoreverse-lysc:          Pseudo-reverse LysC fragments
     - pseudoreverse-lysn:          Pseudo-reverse LysN fragments
+    - pseudoreverse-stricttrypsin-keepn: Pseudo-reverse strict trypsin fragments, except N-terminal aa
     - pseudoshuffle-trypsin:       Pseudo-shuffle trypsin fragments
     - pseudoshuffle-stricttrypsin: Pseudo-shuffle strict trypsin fragments
     - pseudoshuffle-argc:          Pseudo-shuffle ArgC fragments
@@ -61,7 +62,8 @@ Avaliable Decoy Strategies:
     - pseudoshuffle-gluc:          Pseudo-shuffle GluC fragments
     - pseudoshuffle-lysc:          Pseudo-shuffle LysC fragments
     - pseudoshuffle-lysn:          Pseudo-shuffle LysN fragments
-"""
+    - pseudoshuffle-stricttrypsin-keepn: Pseudo-shuffle strict trypsin fragments, except N-terminal aa
+"""  # noqa: E501
 
 from __future__ import annotations
 
@@ -108,6 +110,7 @@ _decoy_strategy: dict[str, DecoyStrategy.DecoyGenerator] = {
     "pseudoreverse-gluc": DecoyStrategy.pseudoreverse_gluc,
     "pseudoreverse-lysc": DecoyStrategy.pseudoreverse_lysc,
     "pseudoreverse-lysn": DecoyStrategy.pseudoreverse_lysn,
+    "pseudoreverse-stricttrypsin-keepn": DecoyStrategy.pseudoreverse_stricttrypsin_keepn,  # noqa: E501
     "pseudoshuffle-trypsin": DecoyStrategy.pseudoshuffle_trypsin,
     "pseudoshuffle-stricttrypsin": DecoyStrategy.pseudoshuffle_stricttrypsin,
     "pseudoshuffle-argc": DecoyStrategy.pseudoshuffle_argc,
@@ -116,6 +119,7 @@ _decoy_strategy: dict[str, DecoyStrategy.DecoyGenerator] = {
     "pseudoshuffle-gluc": DecoyStrategy.pseudoshuffle_gluc,
     "pseudoshuffle-lysc": DecoyStrategy.pseudoshuffle_lysc,
     "pseudoshuffle-lysn": DecoyStrategy.pseudoshuffle_lysn,
+    "pseudoshuffle-stricttrypsin-keepn": DecoyStrategy.pseudoshuffle_stricttrypsin_keepn,  # noqa: E501
 }
 
 

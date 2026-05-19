@@ -19,64 +19,79 @@
 This module serves as a namespace for all the :obj:`DecoyGenerator` functions.
 """
 
+from __future__ import annotations
 
+from functools import singledispatchmethod
 import random
 import re
-from collections.abc import Callable
-from typing import Literal, TypeAlias
+from typing import Literal, Protocol, TypeAlias, TYPE_CHECKING, overload
 
-from Bio.Seq import Seq, MutableSeq
+if TYPE_CHECKING:
+    from Bio.Seq import Seq, MutableSeq
 
 
-DecoyGenerator: TypeAlias = Callable[[Seq | MutableSeq], Seq]
+SeqLike: TypeAlias = 'str | Seq | MutableSeq'
+
+
+class DecoyGenerator(Protocol):
+    @overload
+    def __call__(self, sequence: Seq | MutableSeq) -> Seq:
+        ...
+
+    @overload
+    def __call__(self, sequence: str) -> str:
+        ...
+
+    def __call__(self, sequence: SeqLike) -> SeqLike:
+        ...
 
 
 # So shuffled decoys are always reproducible
 _rng = random.Random(10)
 
 
-def reverse(sequence: Seq | MutableSeq) -> Seq:
+def reverse(sequence: SeqLike) -> SeqLike:
     """Return the reversed `sequence`."""
     return sequence[::-1]
 
 
-def reverse_keep_n(sequence: Seq | MutableSeq) -> Seq:
+def reverse_keep_n(sequence: SeqLike) -> SeqLike:
     """Return the reversed `sequence`, except N-terminal."""
     return sequence[0] + sequence[:0:-1]
 
 
-def reverse_keep_c(sequence: Seq | MutableSeq) -> Seq:
+def reverse_keep_c(sequence: SeqLike) -> SeqLike:
     """Return the reversed `sequence`, except C-terminal."""
     return sequence[-2::-1] + sequence[-1]
 
 
-def reverse_keep_term(sequence: Seq | MutableSeq) -> Seq:
+def reverse_keep_term(sequence: SeqLike) -> SeqLike:
     """Return the reversed `sequence`, except terminals."""
     return sequence[0] + sequence[-2:0:-1] + sequence[-1]
 
 
-def shuffle(sequence: Seq | MutableSeq) -> Seq:
+def shuffle(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`."""
     new = list(sequence)
     _rng.shuffle(new)
     return Seq("".join(new))
 
 
-def shuffle_keep_n(sequence: Seq | MutableSeq) -> Seq:
+def shuffle_keep_n(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except N-terminal."""
     new = list(sequence[1:])
     _rng.shuffle(new)
     return Seq(sequence[0] + "".join(new))
 
 
-def shuffle_keep_c(sequence: Seq | MutableSeq) -> Seq:
+def shuffle_keep_c(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except C-terminal."""
     new = list(sequence[:-1])
     _rng.shuffle(new)
     return Seq("".join(new) + sequence[-1])
 
 
-def shuffle_keep_term(sequence: Seq | MutableSeq) -> Seq:
+def shuffle_keep_term(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except terminals."""
     new = list(sequence[1:-1])
     _rng.shuffle(new)
@@ -132,7 +147,8 @@ class PseudoReverseRule:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
 
-    def __call__(self, sequence: Seq | MutableSeq) -> Seq:
+    @singledispatchmethod
+    def __call__(self, sequence: SeqLike) -> SeqLike:
         """Receive a :class:`Bio.Seq.Seq` and return a pseudo-reversed decoy.
 
         Args:
@@ -150,11 +166,28 @@ class PseudoReverseRule:
             >>> print(rev(seq))
             Seq('TPKYSQRQHT')
         """
+        from . import _Bio
+        _Bio._register()
+        return self.__call__(sequence)
 
+    @__call__.register
+    def decoy_from_str(self, sequence: str) -> str:
+        """Convenience funcion. Equivalent to `PseudoReverseRule(sequence)`
+        where `sequence` is a `str`, but avoids `singledispatch` overhead.
+        """
         fragments = re.split(self._pattern, str(sequence))
 
         rev_frags = [frag[::-1] for frag in fragments]
-        return Seq("".join(rev_frags))
+        return "".join(rev_frags)
+
+    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
+        """Convenience funcion. Equivalent to `PseudoReverseRule(sequence)`
+        where `sequence` is a :class:`Bio.Seq.Seq`, but avoids `singledispatch`
+        overhead.
+        """
+        from . import _Bio
+        _Bio._register()
+        return self.decoy_from_Seq(sequence)
 
     @property
     def cut(self) -> str:
@@ -221,7 +254,8 @@ class PseudoShuffleRule:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
 
-    def __call__(self, sequence: Seq | MutableSeq) -> Seq:
+    @singledispatchmethod
+    def __call__(self, sequence: SeqLike) -> SeqLike:
         """Receive a :class:`Bio.Seq.Seq` and return a pseudo-shuffled decoy.
 
         Args:
@@ -239,11 +273,28 @@ class PseudoShuffleRule:
             >>> print(shuf(seq))
             Seq('YTSKQPRQHT')
         """
+        from . import _Bio
+        _Bio._register()
+        return self.__call__(sequence)
 
+    @__call__.register
+    def decoy_from_str(self, sequence: str) -> str:
+        """Convenience funcion. Equivalent to `PseudoShuffleRule(sequence)`
+        where `sequence` is a `str`, but avoids `singledispatch` overhead.
+        """
         fragments = re.split(self._pattern, str(sequence))
 
         shuf_frags = [self._shuffle(frag) for frag in fragments]
-        return Seq("".join(shuf_frags))
+        return "".join(shuf_frags)
+
+    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
+        """Convenience funcion. Equivalent to `PseudoShuffleRule(sequence)`
+        where `sequence` is a :class:`Bio.Seq.Seq`, but avoids `singledispatch`
+        overhead.
+        """
+        from . import _Bio
+        _Bio._register()
+        return self.decoy_from_Seq(sequence)
 
     @property
     def cut(self) -> str:
@@ -267,20 +318,20 @@ class PseudoShuffleRule:
 
 
 # Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
-pseudoreverse_trypsin: DecoyGenerator = PseudoReverseRule("KR", nocut="P")
-pseudoreverse_stricttrypsin: DecoyGenerator = PseudoReverseRule("KR")
-pseudoreverse_argc: DecoyGenerator = PseudoReverseRule("R", nocut="P")
-pseudoreverse_aspn: DecoyGenerator = PseudoReverseRule("D", sense="N")
-pseudoreverse_chymo: DecoyGenerator = PseudoReverseRule("FLWY", nocut="P")
-pseudoreverse_gluc: DecoyGenerator = PseudoReverseRule("DE", nocut="P")
-pseudoreverse_lysc: DecoyGenerator = PseudoReverseRule("K", nocut="P")
-pseudoreverse_lysn: DecoyGenerator = PseudoReverseRule("K", sense="N")
+pseudoreverse_trypsin = PseudoReverseRule("KR", nocut="P")  # type: ignore # noqa: E501
+pseudoreverse_stricttrypsin = PseudoReverseRule("KR")       # type: ignore # noqa: E501
+pseudoreverse_argc = PseudoReverseRule("R", nocut="P")      # type: ignore # noqa: E501
+pseudoreverse_aspn = PseudoReverseRule("D", sense="N")      # type: ignore # noqa: E501
+pseudoreverse_chymo = PseudoReverseRule("FLWY", nocut="P")  # type: ignore # noqa: E501
+pseudoreverse_gluc = PseudoReverseRule("DE", nocut="P")     # type: ignore # noqa: E501
+pseudoreverse_lysc = PseudoReverseRule("K", nocut="P")      # type: ignore # noqa: E501
+pseudoreverse_lysn = PseudoReverseRule("K", sense="N")      # type: ignore # noqa: E501
 
-pseudoshuffle_trypsin: DecoyGenerator = PseudoShuffleRule("KR", nocut="P")
-pseudoshuffle_stricttrypsin: DecoyGenerator = PseudoShuffleRule("KR")
-pseudoshuffle_argc: DecoyGenerator = PseudoShuffleRule("R", nocut="P")
-pseudoshuffle_aspn: DecoyGenerator = PseudoShuffleRule("D", sense="N")
-pseudoshuffle_chymo: DecoyGenerator = PseudoShuffleRule("FLWY", nocut="P")
-pseudoshuffle_gluc: DecoyGenerator = PseudoShuffleRule("DE", nocut="P")
-pseudoshuffle_lysc: DecoyGenerator = PseudoShuffleRule("K", nocut="P")
-pseudoshuffle_lysn: DecoyGenerator = PseudoShuffleRule("K", sense="N")
+pseudoshuffle_trypsin = PseudoShuffleRule("KR", nocut="P")  # type: ignore # noqa: E501
+pseudoshuffle_stricttrypsin = PseudoShuffleRule("KR")       # type: ignore # noqa: E501
+pseudoshuffle_argc = PseudoShuffleRule("R", nocut="P")      # type: ignore # noqa: E501
+pseudoshuffle_aspn = PseudoShuffleRule("D", sense="N")      # type: ignore # noqa: E501
+pseudoshuffle_chymo = PseudoShuffleRule("FLWY", nocut="P")  # type: ignore # noqa: E501
+pseudoshuffle_gluc = PseudoShuffleRule("DE", nocut="P")     # type: ignore # noqa: E501
+pseudoshuffle_lysc = PseudoShuffleRule("K", nocut="P")      # type: ignore # noqa: E501
+pseudoshuffle_lysn = PseudoShuffleRule("K", sense="N")      # type: ignore # noqa: E501

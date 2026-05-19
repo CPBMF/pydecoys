@@ -21,6 +21,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10"
+
+
+[tool.poetry.group.optional.dependencies]
 biopython = "^1.87"
 
 

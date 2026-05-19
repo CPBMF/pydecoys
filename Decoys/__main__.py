@@ -19,7 +19,7 @@ from os import PathLike
 
 from Bio import SeqIO
 
-from . import generate
+import Decoys
 
 
 def main(
@@ -28,7 +28,7 @@ def main(
     strategy: str
 ) -> None:
     targets = SeqIO.parse(input, 'fasta')
-    decoys = generate(targets, strategy)
+    decoys = Decoys.from_SeqRecords(targets, strategy)
     SeqIO.write(decoys, output, 'fasta')
 
 

@@ -1,7 +1,7 @@
 [project]
-name = "Decoys"
+name = "pydecoys"
 version = "0.1.0"
-description = "Decoy utilities for Python"
+description = "Proteomics decoy utilities for Python"
 license = "GPL-3.0-or-later"
 authors = [
     { name = "Bruno Maestri A Becker", email = "bruno.maestri@edu.pucrs.br" }
@@ -11,9 +11,9 @@ requires-python = ">=3.12"
 
 
 [tool.poetry]
-name = "Decoys"
+name = "pydecoys"
 version = "0.1.0"
-description = "Decoy utilities for Python"
+description = "Proteomics decoy utilities for Python"
 license = "GPL-3.0-or-later"
 authors = [ "Bruno Maestri A Becker <bruno.maestri@edu.pucrs.br>" ]
 readme = "README.md"

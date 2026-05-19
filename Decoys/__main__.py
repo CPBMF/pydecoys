@@ -19,7 +19,7 @@ from os import PathLike
 
 from Bio import SeqIO
 
-import Decoys
+from . import from_SeqRecords, __version__
 
 
 def main(
@@ -28,7 +28,7 @@ def main(
     strategy: str
 ) -> None:
     targets = SeqIO.parse(input, 'fasta')
-    decoys = Decoys.from_SeqRecords(targets, strategy)
+    decoys = from_SeqRecords(targets, strategy)
     SeqIO.write(decoys, output, 'fasta')
 
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--version', '-v',
         action='version',
-        version=f'%(prog)s {Decoys.__version__} (GPL-3.0-or-later)'
+        version=f'%(prog)s {__version__} (GPL-3.0-or-later)'
     )
     parser.add_argument(
         '--strategy', '-s',

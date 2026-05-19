@@ -16,8 +16,6 @@
 
 """Module for handling decoy generation from target protein sequences.
 
-Attributes
-----------
 This module exposes a series of functions to generate decoys from different
 data types, as well as some related API.
 
@@ -32,38 +30,37 @@ data types, as well as some related API.
 - (TypeAlias) :obj:`SeqLike`
 - (submodule) :mod:`DecoyStrategy`
 
-Avaliable Decoy Strategies
---------------------------
-Each decoy strategy is specified by a lowercase string. The
-:class:`DecoyGenerator` fns used for each strategy are available under
-:mod:`DecoyStrategy`. New strategies can be created by following the
-:class:`DecoyGenerator` protocol or by instantiating :class:`PseudoReverseRule`
-or :class:`PseudoShuffleRule`.
+Avaliable Decoy Strategies:
+    Each decoy strategy is specified by a lowercase string. The
+    :class:`DecoyGenerator` fns used for each strategy are available under
+    :mod:`DecoyStrategy`. New strategies can be created by following the
+    :class:`DecoyGenerator` protocol or by instantiating
+    :class:`PseudoReverseRule` or :class:`PseudoShuffleRule`.
 
-- reverse:                     Reverse protein
-- reverse-keepn:               Reverse protein, except N-terminal aa
-- reverse-keepc:               Reverse protein, except C-terminal aa
-- reverse-keepterm:            Reserse protein, except terminal aas
-- shuffle:                     Shuffle protein
-- shuffle-keepn:               Shuffle protein, except N-terminal aa
-- shuffle-keepc:               Shuffle protein, except C-terminal aa
-- shuffle-keepterm:            Shuffle protein, except terminal aas
-- pseudoreverse-trypsin:       Pseudo-reverse trypsin fragments
-- pseudoreverse-stricttrypsin: Pseudo-reverse strict trypsin fragments
-- pseudoreverse-argc:          Pseudo-reverse ArgC fragments
-- pseudoreverse-aspn:          Pseudo-reverse AspN fragments
-- pseudoreverse-chymo:         Pseudo-reverse chymotrypsin fragments
-- pseudoreverse-gluc:          Pseudo-reverse GluC fragments
-- pseudoreverse-lysc:          Pseudo-reverse LysC fragments
-- pseudoreverse-lysn:          Pseudo-reverse LysN fragments
-- pseudoshuffle-trypsin:       Pseudo-shuffle trypsin fragments
-- pseudoshuffle-stricttrypsin: Pseudo-shuffle strict trypsin fragments
-- pseudoshuffle-argc:          Pseudo-shuffle ArgC fragments
-- pseudoshuffle-aspn:          Pseudo-shuffle AspN fragments
-- pseudoshuffle-chymo:         Pseudo-shuffle chymotrypsin fragments
-- pseudoshuffle-gluc:          Pseudo-shuffle GluC fragments
-- pseudoshuffle-lysc:          Pseudo-shuffle LysC fragments
-- pseudoshuffle-lysn:          Pseudo-shuffle LysN fragments
+    - reverse:                     Reverse protein
+    - reverse-keepn:               Reverse protein, except N-terminal aa
+    - reverse-keepc:               Reverse protein, except C-terminal aa
+    - reverse-keepterm:            Reserse protein, except terminal aas
+    - shuffle:                     Shuffle protein
+    - shuffle-keepn:               Shuffle protein, except N-terminal aa
+    - shuffle-keepc:               Shuffle protein, except C-terminal aa
+    - shuffle-keepterm:            Shuffle protein, except terminal aas
+    - pseudoreverse-trypsin:       Pseudo-reverse trypsin fragments
+    - pseudoreverse-stricttrypsin: Pseudo-reverse strict trypsin fragments
+    - pseudoreverse-argc:          Pseudo-reverse ArgC fragments
+    - pseudoreverse-aspn:          Pseudo-reverse AspN fragments
+    - pseudoreverse-chymo:         Pseudo-reverse chymotrypsin fragments
+    - pseudoreverse-gluc:          Pseudo-reverse GluC fragments
+    - pseudoreverse-lysc:          Pseudo-reverse LysC fragments
+    - pseudoreverse-lysn:          Pseudo-reverse LysN fragments
+    - pseudoshuffle-trypsin:       Pseudo-shuffle trypsin fragments
+    - pseudoshuffle-stricttrypsin: Pseudo-shuffle strict trypsin fragments
+    - pseudoshuffle-argc:          Pseudo-shuffle ArgC fragments
+    - pseudoshuffle-aspn:          Pseudo-shuffle AspN fragments
+    - pseudoshuffle-chymo:         Pseudo-shuffle chymotrypsin fragments
+    - pseudoshuffle-gluc:          Pseudo-shuffle GluC fragments
+    - pseudoshuffle-lysc:          Pseudo-shuffle LysC fragments
+    - pseudoshuffle-lysn:          Pseudo-shuffle LysN fragments
 """
 
 from __future__ import annotations
@@ -192,8 +189,8 @@ def from_tuples(
     """Lazily apply a decoy generation strategy to a set of tuples.
 
     Args:
-        sequences: A list (or iterator) of `tuple`s. The first item should be
-            the seqid, and the second item should be the sequence.
+        sequences: A list (or iterator) of `tuple` objects. The first item
+            should be the seqid, and the second item should be the sequence.
         strategy: Lower case string especifying the decoy strategy to be used.
         decoy_tag: An optional tag that is to be appended to each input's
             :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.

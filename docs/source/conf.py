@@ -9,7 +9,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path('..', '..', 'Decoys').resolve()))
+sys.path.insert(0, str(Path('..', '..').resolve()))
 
 
 project = 'Decoys'

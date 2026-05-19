@@ -24,7 +24,7 @@ from typing import Generator, Iterable
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq, MutableSeq
 
-import Decoys
+import __init__
 from .DecoyStrategy import PseudoReverseRule, PseudoShuffleRule
 
 
@@ -47,7 +47,7 @@ def _decoys_from_SeqRecords(
     if isinstance(sequences, SeqRecord):
         sequences = [sequences]
 
-    decoy_generator = Decoys._decoy_strategy.get(strategy)
+    decoy_generator = __init__._decoy_strategy.get(strategy)
 
     if decoy_generator is None:
         raise ValueError(f"Unknown strategy: '{strategy}'")
@@ -86,5 +86,5 @@ def _register():
     shuffle_decoy_from_Seq.__doc__ = PseudoShuffleRule.decoy_from_Seq.__doc__
     PseudoShuffleRule.decoy_from_Seq = shuffle_decoy_from_Seq
 
-    _decoys_from_SeqRecords.__doc__ = Decoys.from_SeqRecords.__doc__
-    Decoys.from_SeqRecords = _decoys_from_SeqRecords
+    _decoys_from_SeqRecords.__doc__ = __init__.from_SeqRecords.__doc__
+    __init__.from_SeqRecords = _decoys_from_SeqRecords

@@ -43,8 +43,7 @@ class DecoyGenerator(Protocol):
     it is recommended that `__call__` be overloaded as follows:
 
     - `Callable[[str], str]`
-    - `Callable[[Seq | MutableSeq], Seq]` or
-    `Callable[[Seq | MutableSeq], Seq | MutableSeq]`
+    - `Callable[[Seq | MutableSeq], Seq]`
     """
 
     @overload

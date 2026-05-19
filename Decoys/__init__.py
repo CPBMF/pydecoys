@@ -17,8 +17,11 @@
 """Module for handling decoy generation from target protein sequences.
 
 This module exposes a series of functions to generate decoys from different
-data types, as well as some related API.
+record representations, as well as related API. The IO functions require
+`Biopython` to be installed.
 
+- (fn) :func:`from_fasta`
+- (fn) :func:`to_fasta`
 - (fn) :func:`from_SeqRecords`
 - (fn) :func:`from_seqs`
 - (fn) :func:`from_tuples`
@@ -67,6 +70,7 @@ Avaliable Decoy Strategies:
 
 from __future__ import annotations
 
+import os as _os
 import typing as _t
 
 if _t.TYPE_CHECKING:
@@ -123,6 +127,69 @@ _decoy_strategy: dict[str, DecoyStrategy.DecoyGenerator] = {
 }
 
 
+def from_fasta(
+    input: str | _os.PathLike[str],
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True,
+) -> _t.Iterable[SeqRecord]:
+    """Lazily apply a decoy generator to entries from a fasta file. This
+    function requires `Biopython`.
+
+    Args:
+        input: Path to a fasta file.
+        strategy: Lower case string specifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's id.
+        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+            Defaults to `True`.
+
+    Yields:
+        A decoy version of the next SeqRecord in the file.
+    """
+
+    from Bio import SeqIO
+    targets = SeqIO.parse(input, format='fasta')
+    yield from from_SeqRecords(targets, strategy, decoy_tag, prefix)
+
+
+def to_fasta(
+    input: str | _os.PathLike[str] | _t.Iterable[SeqRecord] | SeqRecord,
+    output: str | _os.PathLike[str],
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True
+) -> int:
+    """Apply a decoy generator to a set of sequences and write them to a file.
+    This function requires `Biopython`.
+
+    Args:
+        input: A list (or iterator) of :class:`Bio.SeqRecord.SeqRecord`
+            objects, a single :class:`Bio.SeqRecord.SeqRecord`, or the path to
+            a fasta file.
+        output: Filename to write to.
+        strategy: Lower case string specifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's id.
+        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+            Defaults to `True`.
+
+    Returns:
+        The number of targets written (as an integer).
+    """
+
+    from Bio import SeqIO
+    from Bio.SeqRecord import SeqRecord
+
+    if isinstance(input, str | _os.PathLike):
+        sequences = from_fasta(input, 'fasta')
+    elif isinstance(input, SeqRecord):
+        sequences = [input]
+    else:
+        sequences = input
+
+    decoys = from_SeqRecords(sequences, strategy, decoy_tag, prefix)
+    return SeqIO.write(decoys, output, 'fasta')
+
+
 def from_SeqRecords(
     sequences: _t.Iterable[SeqRecord] | SeqRecord,
     strategy: str,
@@ -134,10 +201,9 @@ def from_SeqRecords(
     Args:
         sequences: A list (or iterator) of :class:`Bio.SeqRecord.SeqRecord`
             objects, or a single :class:`Bio.SeqRecord.SeqRecord`.
-        strategy: Lower case string especifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's
-            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
-        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
+        strategy: Lower case string specifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's id.
+        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
             Defaults to `True`.
 
     Yields:
@@ -194,13 +260,16 @@ def from_tuples(
 ) -> _t.Generator[tuple[str, SeqLike], None, None]:
     """Lazily apply a decoy generation strategy to a set of tuples.
 
+    Differently from other functions in this module, `from_tuples` cannot
+    accept a single tuple. Be sure to always pass an iterable of tuples to it.
+    If you'd like, you can use :func:`tuple_as_decoy` instead.
+
     Args:
         sequences: A list (or iterator) of `tuple` objects. The first item
             should be the seqid, and the second item should be the sequence.
-        strategy: Lower case string especifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's
-            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
-        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
+        strategy: Lower case string specifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's id.
+        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
             Defaults to `True`.
 
     Yields:
@@ -264,8 +333,9 @@ def from_seqs(
     """Lazily apply a decoy generation strategy to a set of sequences.
 
     Args:
-        sequences: A list (or iterator) of `str`s, or a single `str`.
-        strategy: Lower case string especifying the decoy strategy to be used.
+        sequences: A list (or iterator) of :obj:`SeqLike` objects, or a single
+            :obj:`SeqLike`.
+        strategy: Lower case string specifying the decoy strategy to be used.
 
     Yields:
         A decoy version of the next sequence in `sequences`.
@@ -321,10 +391,9 @@ def SeqRecord_as_decoy(
 
     Args:
         sequence: A single :class:`Bio.SeqRecord.SeqRecord`.
-        strategy: Lower case string especifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's
-            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
-        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
+        strategy: Lower case string specifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's id.
+        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
             Defaults to `True`.
 
     Returns:
@@ -384,10 +453,9 @@ def tuple_as_decoy(
     Args:
         sequence: A single `tuple`. The first item should be the seqid, and
             the second item should be the sequence.
-        strategy: Lower case string especifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's
-            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
-        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
+        strategy: Lower case string specifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's id.
+        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
             Defaults to `True`.
 
     Returns:
@@ -440,7 +508,7 @@ def seq_as_decoy(
 
     Args:
         sequence: A single :obj:`SeqLike`.
-        strategy: Lower case string especifying the decoy strategy to be used.
+        strategy: Lower case string specifying the decoy strategy to be used.
 
     Returns:
         A decoy version of `sequence`.

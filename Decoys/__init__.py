@@ -72,7 +72,7 @@ if _t.TYPE_CHECKING:
     from Bio.SeqRecord import SeqRecord
 
 from . import DecoyStrategy
-from .DecoyStrategy import DecoyGenerator, SeqLike
+from .DecoyStrategy import SeqLike
 
 
 __all__ = [
@@ -84,7 +84,6 @@ __all__ = [
     'tuple_as_decoy',
     'register',
     'SeqLike',
-    'DecoyGenerator',
     'DecoyStrategy',
 ]
 
@@ -92,7 +91,7 @@ __version_info__ = (0, 1, 0)
 __version__ = '.'.join([str(i) for i in __version_info__])
 
 
-_decoy_strategy: dict[str, DecoyGenerator] = {
+_decoy_strategy: dict[str, DecoyStrategy.DecoyGenerator] = {
     "reverse": DecoyStrategy.reverse,
     "reverse-keepn": DecoyStrategy.reverse_keep_n,
     "reverse-keepc": DecoyStrategy.reverse_keep_c,
@@ -156,8 +155,11 @@ def from_SeqRecords(
     """
 
     from . import _Bio
-    _Bio._register()
-    yield from from_SeqRecords(sequences, strategy, decoy_tag, prefix)
+    sequences = _Bio.iter_SeqRecord(sequences)
+    tuples = (_Bio.SeqRecord_to_tuple(record) for record in sequences)
+    decoys = from_tuples(tuples, strategy, decoy_tag, prefix)
+    records = (_Bio.tuple_to_SeqRecord(decoy) for decoy in decoys)
+    yield from records
 
 
 @_t.overload
@@ -219,6 +221,12 @@ def from_tuples(
 
     if not isinstance(decoy_tag, str):
         raise TypeError("Need a string for the decoy tag")
+
+    if isinstance(decoy_generator, DecoyStrategy.ContextfulGenerator):
+        sequences = list(sequences)
+        # We extract the protein sequences itself
+        seqs_only = [s[1] for s in sequences]
+        decoy_generator.learn_context(seqs_only)
 
     for i, sequence in enumerate(sequences):
         if not sequence[1]:
@@ -283,6 +291,14 @@ def from_seqs(
     except ModuleNotFoundError:
         if isinstance(sequences, str):
             sequences = [sequences]
+
+    # if isinstance(decoy_generator, DecoyStrategy.StatefulGenerator):
+    #     sequences = decoy_generator.learn_state(sequences)
+
+    if isinstance(decoy_generator, DecoyStrategy.ContextfulGenerator):
+        sequences = list(sequences)
+        seqs_only = [s[1] for s in sequences]
+        decoy_generator.learn_context(seqs_only)
 
     for i, sequence in enumerate(sequences):
         if not sequence:
@@ -439,7 +455,10 @@ def seq_as_decoy(
     return decoy_generator(sequence[1])
 
 
-def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
+def register(
+    strategy: str,
+    decoy_generator_fn: DecoyStrategy.DecoyGenerator
+) -> None:
     """Register a new decoy strategy that can be used with :func:`generate`.
 
     Args:
@@ -474,7 +493,7 @@ def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
     _decoy_strategy[strategy] = decoy_generator_fn
 
 
-def _validate_strategy(strategy: str) -> DecoyGenerator:
+def _validate_strategy(strategy: str) -> DecoyStrategy.DecoyGenerator:
     if not isinstance(strategy, str):
         raise TypeError("Need a string for the decoy strategy (lower case)")
     if not strategy:

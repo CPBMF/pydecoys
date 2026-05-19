@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Literal, Protocol, TypeAlias, TYPE_CHECKING, overload
+from typing import (
+    Iterable,
+    Literal,
+    Protocol,
+    TypeAlias,
+    TYPE_CHECKING,
+    overload,
+    runtime_checkable
+)
 
 
 if TYPE_CHECKING:
@@ -22,6 +30,15 @@ class DecoyGenerator(Protocol):
         ...
 
     def __call__(self, sequence: SeqLike) -> SeqLike:
+        ...
+
+
+@runtime_checkable
+class ContextfulGenerator(DecoyGenerator, Protocol):
+    def learn_context(
+        self,
+        sequences: Iterable[SeqLike]
+    ) -> None:
         ...
 
 

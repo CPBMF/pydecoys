@@ -14,56 +14,46 @@
 # You should have received a copy of the GNU General Public License along with
 # Decoys. If not, see <https://www.gnu.org/licenses/>.
 
-"""Internal module responsible for lazily importing Biopython and registering
-the relevant names.
+"""Internal module responsible for lazily importing Biopython, registering
+the relevant names and namespacing utility functions related to the Biopython
+interface.
 """
 
 import re
-from typing import Generator, Iterable
+from typing import Iterable
 
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq, MutableSeq
 
-import __init__
 from .DecoyStrategy import PseudoReverseRule, PseudoShuffleRule
 
 
-def _decoys_from_SeqRecords(
-    sequences: Iterable[SeqRecord] | SeqRecord,
-    strategy: str,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
-) -> Generator[SeqRecord, None, None]:
-    if not isinstance(strategy, str):
-        raise TypeError("Need a string for the decoy strategy (lower case)")
-    if not strategy:
-        raise ValueError("Strategy required (lower case string)")
-    if not strategy.islower():
-        raise ValueError(f"Strategy string '{strategy}' should be lower case")
-
-    if not isinstance(decoy_tag, str):
-        raise TypeError("Need a string for the decoy tag")
-
-    if isinstance(sequences, SeqRecord):
-        sequences = [sequences]
-
-    decoy_generator = __init__._decoy_strategy.get(strategy)
-
-    if decoy_generator is None:
-        raise ValueError(f"Unknown strategy: '{strategy}'")
-
-    for sequence in sequences:
-        if sequence.seq is None:
-            raise ValueError(f"Seq not present for SeqRecord '{sequence.id}'")
-
-        id = sequence.id if sequence.id else ""
-        id = decoy_tag + id if prefix else id + decoy_tag
-        seq = decoy_generator(sequence.seq)
-
-        yield SeqRecord(seq, id, description="")
+def SeqRecord_to_tuple(record: SeqRecord) -> tuple[str, str]:
+    return (record.id if record.id else "", str(record.seq))
 
 
-def _register():
+def tuple_to_SeqRecord(record: tuple[str, str]) -> SeqRecord:
+    return SeqRecord(
+        Seq(record[1]),
+        record[0],
+        name="",
+        description=""
+    )
+
+
+def iter_SeqRecord(
+    seq: Iterable[SeqRecord] | SeqRecord
+) -> Iterable[SeqRecord]:
+    if isinstance(seq, SeqRecord):
+        return [seq]
+    return seq
+
+
+def str_to_Seq(sequence: str) -> Seq:
+    return Seq(sequence)
+
+
+def register():
     @PseudoReverseRule.__call__.register(Seq)         # type: ignore
     @PseudoReverseRule.__call__.register(MutableSeq)  # type: ignore
     def reverse_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
@@ -85,6 +75,3 @@ def _register():
 
     shuffle_decoy_from_Seq.__doc__ = PseudoShuffleRule.decoy_from_Seq.__doc__
     PseudoShuffleRule.decoy_from_Seq = shuffle_decoy_from_Seq
-
-    _decoys_from_SeqRecords.__doc__ = __init__.from_SeqRecords.__doc__
-    __init__.from_SeqRecords = _decoys_from_SeqRecords

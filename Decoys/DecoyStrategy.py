@@ -24,7 +24,15 @@ from __future__ import annotations
 from functools import singledispatchmethod
 import random
 import re
-from typing import Literal, Protocol, TypeAlias, TYPE_CHECKING, overload
+from typing import (
+    Iterable,
+    Literal,
+    Protocol,
+    TypeAlias,
+    TYPE_CHECKING,
+    overload,
+    runtime_checkable
+)
 
 if TYPE_CHECKING:
     from Bio.Seq import Seq, MutableSeq
@@ -62,6 +70,21 @@ class DecoyGenerator(Protocol):
 
         Returns:
             The decoy version of `sequence`.
+        """
+        ...
+
+
+@runtime_checkable
+class ContextfulGenerator(DecoyGenerator, Protocol):
+    """Protocol defining a decoy generator function that uses previously
+    learned context.
+    """
+    def learn_context(
+        self,
+        sequences: Iterable[SeqLike]
+    ) -> None:
+        """Take an Iterable of :obj:`SeqLike` to gather context prior to decoy
+        generation.
         """
         ...
 
@@ -181,19 +204,20 @@ class PseudoReverseRule:
         Example:
             >>> from Bio.Seq import Seq
             >>> from Decoys import PseudoReverseRule
-            >>> seq = Seq('QSYKPTRTHQ')
+            >>> seq = 'QSYKPTRTHQ'
             >>> rev = PseudoReverseRule("KR", nocut="P")
             >>> print(rev(seq))
-            Seq('TPKYSQRQHT')
+            'TPKYSQRQHT'
         """
         from . import _Bio
-        _Bio._register()
+        _Bio.register()
         return self.__call__(sequence)
 
     @__call__.register
     def decoy_from_str(self, sequence: str) -> str:
         """Convenience funcion. Equivalent to `PseudoReverseRule(sequence)`
-        where `sequence` is a `str`, but avoids `singledispatch` overhead.
+        where `sequence` is a `str`, but avoids
+        :class:`typing.singledispatchmethod` overhead.
         """
         fragments = re.split(self._pattern, str(sequence))
 
@@ -202,11 +226,11 @@ class PseudoReverseRule:
 
     def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
         """Convenience funcion. Equivalent to `PseudoReverseRule(sequence)`
-        where `sequence` is a :class:`Bio.Seq.Seq`, but avoids `singledispatch`
-        overhead.
+        where `sequence` is a :class:`Bio.Seq.Seq`,  but avoids
+        :class:`typing.singledispatchmethod` overhead.
         """
         from . import _Bio
-        _Bio._register()
+        _Bio.register()
         return self.decoy_from_Seq(sequence)
 
     @property
@@ -288,19 +312,20 @@ class PseudoShuffleRule:
         Example:
             >>> from Bio.Seq import Seq
             >>> from Decoys import PseudoShuffleRule
-            >>> shuf = Seq('QSYKPTRTHQ')
+            >>> shuf = 'QSYKPTRTHQ'
             >>> shuf = PseudoShuffleRule("KR", nocut="P")
             >>> print(shuf(seq))
-            Seq('YTSKQPRQHT')
+            'YTSKQPRQHT'
         """
         from . import _Bio
-        _Bio._register()
+        _Bio.register()
         return self.__call__(sequence)
 
     @__call__.register
     def decoy_from_str(self, sequence: str) -> str:
         """Convenience funcion. Equivalent to `PseudoShuffleRule(sequence)`
-        where `sequence` is a `str`, but avoids `singledispatch` overhead.
+        where `sequence` is a `str`,  but avoids
+        :class:`typing.singledispatchmethod` overhead.
         """
         fragments = re.split(self._pattern, str(sequence))
 
@@ -309,11 +334,11 @@ class PseudoShuffleRule:
 
     def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
         """Convenience funcion. Equivalent to `PseudoShuffleRule(sequence)`
-        where `sequence` is a :class:`Bio.Seq.Seq`, but avoids `singledispatch`
-        overhead.
+        where `sequence` is a :class:`Bio.Seq.Seq`,  but avoids
+        :class:`typing.singledispatchmethod` overhead.
         """
         from . import _Bio
-        _Bio._register()
+        _Bio.register()
         return self.decoy_from_Seq(sequence)
 
     @property

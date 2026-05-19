@@ -54,6 +54,16 @@ def str_to_Seq(sequence: str) -> Seq:
 
 
 def register():
+    """This function registers Biopython related methods to their
+    corresponding class.
+    """
+
+    # Hackish solution, but it allows dispatched methods to only load
+    # Biopython and reference the dispatch types when needed
+
+    # Rebinding the name makes it lose its previous __doc__, so we also have
+    # to fix them
+
     @PseudoReverseRule.__call__.register(Seq)         # type: ignore
     @PseudoReverseRule.__call__.register(MutableSeq)  # type: ignore
     def reverse_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
@@ -61,7 +71,6 @@ def register():
 
         rev_frags = [frag[::-1] for frag in fragments]
         return Seq("".join(rev_frags))
-
     reverse_decoy_from_Seq.__doc__ = PseudoReverseRule.decoy_from_Seq.__doc__
     PseudoReverseRule.decoy_from_Seq = reverse_decoy_from_Seq
 
@@ -72,6 +81,5 @@ def register():
 
         shuf_frags = [self._shuffle(frag) for frag in fragments]
         return Seq("".join(shuf_frags))
-
     shuffle_decoy_from_Seq.__doc__ = PseudoShuffleRule.decoy_from_Seq.__doc__
     PseudoShuffleRule.decoy_from_Seq = shuffle_decoy_from_Seq

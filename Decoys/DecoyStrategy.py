@@ -28,7 +28,6 @@ from typing import (
     Iterable,
     Literal,
     Protocol,
-    TypeAlias,
     TYPE_CHECKING,
     overload,
     runtime_checkable
@@ -38,7 +37,7 @@ if TYPE_CHECKING:
     from Bio.Seq import Seq, MutableSeq
 
 
-SeqLike: TypeAlias = 'str | Seq | MutableSeq'
+type SeqLike = 'str | Seq | MutableSeq'
 
 
 class DecoyGenerator(Protocol):

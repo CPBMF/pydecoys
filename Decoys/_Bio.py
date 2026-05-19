@@ -64,8 +64,7 @@ def register():
     # Rebinding the name makes it lose its previous __doc__, so we also have
     # to fix them
 
-    @PseudoReverseRule.__call__.register(Seq)         # type: ignore
-    @PseudoReverseRule.__call__.register(MutableSeq)  # type: ignore
+    @PseudoReverseRule.__call__.register  # type: ignore
     def reverse_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
         fragments = re.split(self._pattern, str(sequence))
 
@@ -74,8 +73,7 @@ def register():
     reverse_decoy_from_Seq.__doc__ = PseudoReverseRule.decoy_from_Seq.__doc__
     PseudoReverseRule.decoy_from_Seq = reverse_decoy_from_Seq
 
-    @PseudoShuffleRule.__call__.register(Seq)         # type: ignore
-    @PseudoShuffleRule.__call__.register(MutableSeq)  # type: ignore
+    @PseudoShuffleRule.__call__.register  # type: ignore
     def shuffle_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
         fragments = re.split(self._pattern, str(sequence))
 

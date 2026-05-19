@@ -68,20 +68,9 @@ Avaliable Decoy Strategies:
     - pseudoshuffle-stricttrypsin-keepn: Pseudo-shuffle strict trypsin fragments, except N-terminal aa
 """  # noqa: E501
 
-from ._decoys import (
-    from_fasta,
-    to_fasta,
-    from_SeqRecords,
-    from_seqs,
-    from_tuples,
-    SeqRecord_as_decoy,
-    seq_as_decoy,
-    tuple_as_decoy,
-    register
-)
-from . import strategies
-from .strategies import SeqLike
 
+__version_info__ = (0, 1, 0)
+__version__ = '.'.join([str(i) for i in __version_info__])
 
 __all__ = [
     'from_fasta',
@@ -97,5 +86,17 @@ __all__ = [
     'strategies',
 ]
 
-__version_info__ = (0, 1, 0)
-__version__ = '.'.join([str(i) for i in __version_info__])
+
+from . import strategies
+from .strategies import SeqLike
+from ._decoys import (
+    from_fasta,
+    to_fasta,
+    from_SeqRecords,
+    from_seqs,
+    from_tuples,
+    SeqRecord_as_decoy,
+    seq_as_decoy,
+    tuple_as_decoy,
+    register
+)

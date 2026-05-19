@@ -1,5 +1,5 @@
 [project]
-name = "pydecoys"
+name = "Decoys"
 version = "0.1.0"
 description = "Proteomics decoy utilities for Python"
 license = "GPL-3.0-or-later"
@@ -10,8 +10,12 @@ readme = "README.md"
 requires-python = ">=3.12"
 
 
+[project.scripts]
+Decoys = "Decoys.__main__:main"
+
+
 [tool.poetry]
-name = "pydecoys"
+name = "Decoys"
 version = "0.1.0"
 description = "Proteomics decoy utilities for Python"
 license = "GPL-3.0-or-later"

@@ -14,46 +14,55 @@
 # You should have received a copy of the GNU General Public License along with
 # Decoys. If not, see <https://www.gnu.org/licenses/>.
 
-
-from os import PathLike
-
 from Bio import SeqIO
 
-from . import from_SeqRecords, __version__
+from . import from_SeqRecords
 
 
-def main(
-    input: str | PathLike[str],
-    output: str | PathLike[str],
-    strategy: str
-) -> None:
-    targets = SeqIO.parse(input, 'fasta')
-    decoys = from_SeqRecords(targets, strategy)
-    SeqIO.write(decoys, output, 'fasta')
-
-
-if __name__ == '__main__':
+def main() -> None:
     import argparse
 
-    from . import _decoy_strategy
+    from . import __version__
+    from ._Decoys import _decoy_strategy
 
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        prog="Decoys",
+        description="Proteomics decoy utilities for Python. Generate decoy sequences from a fasta file."  # noqa: E501
     )
 
-    parser.add_argument('input')
-    parser.add_argument('output')
     parser.add_argument(
-        '--version', '-v',
+        '-v', '--version',
         action='version',
         version=f'%(prog)s {__version__} (GPL-3.0-or-later)'
     )
+
     parser.add_argument(
-        '--strategy', '-s',
+        'input',
+        type=argparse.FileType(),
+        default='-',
+        nargs='?',
+        help='input file (default: `stdin`)'
+    )
+    parser.add_argument(
+        'output',
+        type=argparse.FileType('w'),
+        default='-',
+        nargs='?',
+        help='output file (default: `stdout`)'
+    )
+    parser.add_argument(
+        '-s', '--strategy',
         choices=_decoy_strategy.keys(),
-        default='reverse'
+        default='reverse',
+        help='decoy generation strategy (default: \'%(default)s\')'
     )
 
     args = parser.parse_args()
 
-    main(args.input, args.output, args.strategy)
+    targets = SeqIO.parse(args.input, 'fasta')
+    decoys = from_SeqRecords(targets, args.strategy)
+    SeqIO.write(decoys, args.output, 'fasta')
+
+
+if __name__ == '__main__':
+    main()

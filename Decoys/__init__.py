@@ -18,21 +18,27 @@
 
 Attributes
 ----------
+This module exposes a series of functions to generate decoys from different
+data types, as well as some related API.
+
 - (fn) :func:`from_SeqRecords`
 - (fn) :func:`from_seqs`
 - (fn) :func:`from_tuples`
-- (fn) :func:`from_target`
+- (fn) :func:`SeqRecord_as_decoy`
+- (fn) :func:`seq_as_decoy`
+- (fn) :func:`tuple_as_decoy`
 - (fn) :func:`register`
 - (Protocol) :class:`DecoyGenerator`
 - (TypeAlias) :obj:`SeqLike`
-- (TypeAlias) :obj:`RecordLike`
 - (submodule) :mod:`DecoyStrategy`
 
 Avaliable Decoy Strategies
 --------------------------
 Each decoy strategy is specified by a lowercase string. The
-:class:`DecoyGenerator`s used for each strategy are available under
-:mod:`DecoyStrategy`.
+:class:`DecoyGenerator` fns used for each strategy are available under
+:mod:`DecoyStrategy`. New strategies can be created by following the
+:class:`DecoyGenerator` protocol or by instantiating :class:`PseudoReverseRule`
+or :class:`PseudoShuffleRule`.
 
 - reverse:                     Reverse protein
 - reverse-keepn:               Reverse protein, except N-terminal aa
@@ -73,10 +79,16 @@ from .DecoyStrategy import DecoyGenerator, SeqLike
 
 
 __all__ = [
-    'DecoyStrategy',
-    'DecoyGenerator',
     'from_SeqRecords',
+    'from_seqs',
+    'from_tuples',
+    'SeqRecord_as_decoy',
+    'seq_as_decoy',
+    'tuple_as_decoy',
     'register',
+    'SeqLike',
+    'DecoyGenerator',
+    'DecoyStrategy',
 ]
 
 __version_info__ = (0, 1, 0)
@@ -109,9 +121,6 @@ _decoy_strategy: dict[str, DecoyGenerator] = {
     "pseudoshuffle-lysc": DecoyStrategy.pseudoshuffle_lysc,
     "pseudoshuffle-lysn": DecoyStrategy.pseudoshuffle_lysn,
 }
-
-
-RecordLike: _t.TypeAlias = 'SeqRecord | tuple[str, SeqLike] | SeqLike'
 
 
 def from_SeqRecords(
@@ -209,20 +218,10 @@ def from_tuples(
         decoy_seq3: Seq('LLEETLSWQC')
     """
 
-    if not isinstance(strategy, str):
-        raise TypeError("Need a string for the decoy strategy (lower case)")
-    if not strategy:
-        raise ValueError("Strategy required (lower case string)")
-    if not strategy.islower():
-        raise ValueError(f"Strategy string '{strategy}' should be lower case")
+    decoy_generator = _validate_strategy(strategy)
 
     if not isinstance(decoy_tag, str):
         raise TypeError("Need a string for the decoy tag")
-
-    decoy_generator = _decoy_strategy.get(strategy)
-
-    if decoy_generator is None:
-        raise ValueError(f"Unknown strategy: '{strategy}'")
 
     for i, sequence in enumerate(sequences):
         if not sequence[1]:
@@ -230,7 +229,6 @@ def from_tuples(
 
         id = decoy_tag + sequence[0] if prefix else sequence[0] + decoy_tag
         seq = decoy_generator(sequence[1])
-
         yield (id, seq)
 
 
@@ -238,8 +236,6 @@ def from_tuples(
 def from_seqs(
     sequences: _t.Iterable[str] | str,
     strategy: str,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
 ) -> _t.Generator[str, None, None]:
     ...
 
@@ -248,8 +244,6 @@ def from_seqs(
 def from_seqs(
     sequences: _t.Iterable[Seq | MutableSeq] | Seq | MutableSeq,
     strategy: str,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
 ) -> _t.Generator[Seq, None, None]:
     ...
 
@@ -257,18 +251,12 @@ def from_seqs(
 def from_seqs(
     sequences: _t.Iterable[SeqLike] | SeqLike,
     strategy: str,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
 ) -> _t.Generator[SeqLike, None, None]:
     """Lazily apply a decoy generation strategy to a set of sequences.
 
     Args:
         sequences: A list (or iterator) of `str`s, or a single `str`.
         strategy: Lower case string especifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's
-            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
-        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
-            Defaults to `True`.
 
     Yields:
         A decoy version of the next sequence in `sequences`.
@@ -288,15 +276,7 @@ def from_seqs(
         'LLEETLSWQC'
     """
 
-    if not isinstance(strategy, str):
-        raise TypeError("Need a string for the decoy strategy (lower case)")
-    if not strategy:
-        raise ValueError("Strategy required (lower case string)")
-    if not strategy.islower():
-        raise ValueError(f"Strategy string '{strategy}' should be lower case")
-
-    if not isinstance(decoy_tag, str):
-        raise TypeError("Need a string for the decoy tag")
+    decoy_generator = _validate_strategy(strategy)
 
     try:
         from Bio.Seq import Seq, MutableSeq
@@ -307,11 +287,6 @@ def from_seqs(
         if isinstance(sequences, str):
             sequences = [sequences]
 
-    decoy_generator = _decoy_strategy.get(strategy)
-
-    if decoy_generator is None:
-        raise ValueError(f"Unknown strategy: '{strategy}'")
-
     for i, sequence in enumerate(sequences):
         if not sequence:
             raise ValueError(f"No seq present for item {i}")
@@ -319,7 +294,7 @@ def from_seqs(
         yield decoy_generator(sequence)
 
 
-def from_target(
+def SeqRecord_as_decoy(
     sequence: SeqRecord,
     strategy: str,
     decoy_tag: str = 'decoy_',
@@ -347,20 +322,10 @@ def from_target(
         decoy_seq1: Seq('RYVAKYDIND')
     """
 
-    if not isinstance(strategy, str):
-        raise TypeError("Need a string for the decoy strategy (lower case)")
-    if not strategy:
-        raise ValueError("Strategy required (lower case string)")
-    if not strategy.islower():
-        raise ValueError(f"Strategy string '{strategy}' should be lower case")
+    decoy_generator = _validate_strategy(strategy)
 
     if not isinstance(decoy_tag, str):
         raise TypeError("Need a string for the decoy tag")
-
-    decoy_generator = _decoy_strategy.get(strategy)
-
-    if decoy_generator is None:
-        raise ValueError(f"Unknown strategy: '{strategy}'")
 
     if sequence.seq is None:
         raise ValueError(f"Seq not present for SeqRecord '{sequence.id}'")
@@ -368,8 +333,113 @@ def from_target(
     id = sequence.id if sequence.id else ""
     id = decoy_tag + id if prefix else id + decoy_tag
     seq = decoy_generator(sequence.seq)
-
     return SeqRecord(seq, id, description="")
+
+
+@_t.overload
+def tuple_as_decoy(
+    sequence: tuple[str, str],
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True,
+) -> tuple[str, str]:
+    ...
+
+
+@_t.overload
+def tuple_as_decoy(
+    sequence: tuple[str, Seq | MutableSeq],
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True,
+) -> tuple[str, Seq]:
+    ...
+
+
+def tuple_as_decoy(
+    sequence: tuple[str, SeqLike],
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True,
+) -> tuple[str, SeqLike]:
+    """Apply a decoy generation strategy to a given sequence.
+
+    Args:
+        sequence: A single `tuple`. The first item should be the seqid, and
+            the second item should be the sequence.
+        strategy: Lower case string especifying the decoy strategy to be used.
+        decoy_tag: An optional tag that is to be appended to each input's
+            :attr:`Bio.SeqRecord.SeqRecord.id`. Defaults to `'decoy_'`.
+        prefix: If `False`, `decoy_tag` is suffixed, otherwise it's prefixed.
+            Defaults to `True`.
+
+    Returns:
+        A decoy version of `sequence`.
+
+    Examples:
+        >>> import Decoys
+        >>> from Bio.SeqRecord import SeqRecord
+        >>> from Decoys import from_target
+        >>> seq = ('seq1', 'DNIDYKAVYR')
+        >>> decoy = Decoys.tuple_as_decoy(seq, 'reverse')
+        >>> print(f'{decoy[0]}: {decoy[1]}')
+        decoy_seq1: 'RYVAKYDIND'
+    """
+
+    decoy_generator = _validate_strategy(strategy)
+
+    if not isinstance(decoy_tag, str):
+        raise TypeError("Need a string for the decoy tag")
+
+    if not sequence[1]:
+        raise ValueError(f"Seq not present for '{sequence[0]}'")
+
+    id = decoy_tag + sequence[0] if prefix else sequence[0] + decoy_tag
+    seq = decoy_generator(sequence[1])
+    return (id, seq)
+
+
+@_t.overload
+def seq_as_decoy(
+    sequence: str,
+    strategy: str,
+) -> str:
+    ...
+
+
+@_t.overload
+def seq_as_decoy(
+    sequence: Seq | MutableSeq,
+    strategy: str,
+) -> Seq:
+    ...
+
+
+def seq_as_decoy(
+    sequence: SeqLike,
+    strategy: str,
+) -> SeqLike:
+    """Apply a decoy generation strategy to a given sequence.
+
+    Args:
+        sequence: A single :obj:`SeqLike`.
+        strategy: Lower case string especifying the decoy strategy to be used.
+
+    Returns:
+        A decoy version of `sequence`.
+
+    Examples:
+        >>> import Decoys
+        >>> from Bio.SeqRecord import SeqRecord
+        >>> from Decoys import from_target
+        >>> seq = ('seq1', 'DNIDYKAVYR')
+        >>> decoy = Decoys.tuple_as_decoy(seq, 'reverse')
+        >>> print(f'{decoy[0]}: {decoy[1]}')
+        decoy_seq1: 'RYVAKYDIND'
+    """
+
+    decoy_generator = _validate_strategy(strategy)
+    return decoy_generator(sequence[1])
 
 
 def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
@@ -405,3 +475,19 @@ def register(strategy: str, decoy_generator_fn: DecoyGenerator) -> None:
         raise ValueError(f"Strategy '{strategy}' already exists")
 
     _decoy_strategy[strategy] = decoy_generator_fn
+
+
+def _validate_strategy(strategy: str) -> DecoyGenerator:
+    if not isinstance(strategy, str):
+        raise TypeError("Need a string for the decoy strategy (lower case)")
+    if not strategy:
+        raise ValueError("Strategy required (lower case string)")
+    if not strategy.islower():
+        raise ValueError(f"Strategy string '{strategy}' should be lower case")
+
+    decoy_generator = _decoy_strategy.get(strategy)
+
+    if decoy_generator is None:
+        raise ValueError(f"Unknown strategy: '{strategy}'")
+
+    return decoy_generator

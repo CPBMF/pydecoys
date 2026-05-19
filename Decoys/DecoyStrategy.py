@@ -34,6 +34,19 @@ SeqLike: TypeAlias = 'str | Seq | MutableSeq'
 
 
 class DecoyGenerator(Protocol):
+    """Protocol defining a decoy generator function that applies a decoy
+    strategy.
+
+    Classes following this protocol should implement `__call__` as a
+    `Callable[[SeqLike], SeqLile]`. For most cases, a :obj:`SeqLike` object
+    can be treated as a `str`, including splicing. Regardless, for concistency
+    it is recommended that `__call__` be overloaded as follows:
+
+    - `Callable[[str], str]`
+    - `Callable[[Seq | MutableSeq], Seq]` or
+    `Callable[[Seq | MutableSeq], Seq | MutableSeq]`
+    """
+
     @overload
     def __call__(self, sequence: Seq | MutableSeq) -> Seq:
         ...
@@ -43,6 +56,14 @@ class DecoyGenerator(Protocol):
         ...
 
     def __call__(self, sequence: SeqLike) -> SeqLike:
+        """Generate a decoy version of a given sequence.
+
+        Args:
+            sequence: A target sequence.
+
+        Returns:
+            The decoy version of `sequence`.
+        """
         ...
 
 

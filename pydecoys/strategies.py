@@ -1,18 +1,18 @@
-# Copyright © 2026 Bruno Maestri A Becker
+# Copyright (C) 2026 Bruno Maestri A Becker
 #
-# This file is part of Decoys.
+# This file is part of PyDecoys.
 #
-# Decoys is free software: you can redistribute it and/or modify it under the
+# PyDecoys is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# Decoys is distributed in the hope that it will be useful, but WITHOUT ANY
+# PyDecoys is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# Decoys. If not, see <https://www.gnu.org/licenses/>.
+# PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
 """Module that handles generating decoy proteins from target proteins.
 
@@ -173,7 +173,7 @@ class PseudoReverseRule:
             To specify a pseudo-reverse generator for trypsin:
 
             >>> from Bio.Seq import Seq
-            >>> from Decoys import PseudoReverseRule
+            >>> from pydecoys import PseudoReverseRule
             >>> rev = PseudoReverseRule("KR", nocut="P")
             >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
             KR, P, C
@@ -208,14 +208,14 @@ class PseudoReverseRule:
 
         Example:
             >>> from Bio.Seq import Seq
-            >>> from Decoys import PseudoReverseRule
+            >>> from pydecoys import PseudoReverseRule
             >>> seq = 'QSYKPTRTHQ'
             >>> rev = PseudoReverseRule("KR", nocut="P")
             >>> print(rev(seq))
             'TPKYSQRQHT'
         """
-        from . import _Bio
-        _Bio.register()
+        from . import _bio
+        _bio.register()
         return self.__call__(sequence)
 
     @__call__.register
@@ -234,8 +234,8 @@ class PseudoReverseRule:
         where `sequence` is a :class:`Bio.Seq.Seq`,  but avoids
         :class:`typing.singledispatchmethod` overhead.
         """
-        from . import _Bio
-        _Bio.register()
+        from . import _bio
+        _bio.register()
         return self.decoy_from_Seq(sequence)
 
     @property
@@ -292,7 +292,7 @@ class PseudoShuffleRule:
             To specify a pseudo-shuffle generator for trypsin:
 
             >>> from Bio.Seq import Seq
-            >>> from Decoys import PseudoShuffleRule
+            >>> from pydecoys import PseudoShuffleRule
             >>> shuf = PseudoShuffleRule("KR", nocut="P")
             >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
             KR, P, C
@@ -327,14 +327,14 @@ class PseudoShuffleRule:
 
         Example:
             >>> from Bio.Seq import Seq
-            >>> from Decoys import PseudoShuffleRule
+            >>> from pydecoys import PseudoShuffleRule
             >>> shuf = 'QSYKPTRTHQ'
             >>> shuf = PseudoShuffleRule("KR", nocut="P")
             >>> print(shuf(seq))
             'YTSKQPRQHT'
         """
-        from . import _Bio
-        _Bio.register()
+        from . import _bio
+        _bio.register()
         return self.__call__(sequence)
 
     @__call__.register
@@ -353,8 +353,8 @@ class PseudoShuffleRule:
         where `sequence` is a :class:`Bio.Seq.Seq`,  but avoids
         :class:`typing.singledispatchmethod` overhead.
         """
-        from . import _Bio
-        _Bio.register()
+        from . import _bio
+        _bio.register()
         return self.decoy_from_Seq(sequence)
 
     @property

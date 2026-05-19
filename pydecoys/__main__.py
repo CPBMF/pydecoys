@@ -1,18 +1,20 @@
-# Copyright © 2026 Bruno Maestri A Becker
+# Copyright (C) 2026 Bruno Maestri A Becker
 #
-# This file is part of Decoys.
+# This file is part of PyDecoys.
 #
-# Decoys is free software: you can redistribute it and/or modify it under the
+# PyDecoys is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# Decoys is distributed in the hope that it will be useful, but WITHOUT ANY
+# PyDecoys is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# Decoys. If not, see <https://www.gnu.org/licenses/>.
+# PyDecoys. If not, see <https://www.gnu.org/licenses/>.
+
+"""CLI entrypoint for PyDecoys."""
 
 from Bio import SeqIO
 
@@ -23,10 +25,10 @@ def main() -> None:
     import argparse
 
     from . import __version__
-    from ._Decoys import _decoy_strategy
+    from ._decoys import _decoy_strategy
 
     parser = argparse.ArgumentParser(
-        prog="Decoys",
+        prog="pydecoys",
         description="Proteomics decoy utilities for Python. Generate decoy sequences from a fasta file."  # noqa: E501
     )
 

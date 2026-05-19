@@ -1,18 +1,18 @@
-# Copyright © 2026 Bruno Maestri A Becker
+# Copyright (C) 2026 Bruno Maestri A Becker
 #
-# This file is part of Decoys.
+# This file is part of PyDecoys.
 #
-# Decoys is free software: you can redistribute it and/or modify it under the
+# PyDecoys is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# Decoys is distributed in the hope that it will be useful, but WITHOUT ANY
+# PyDecoys is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# Decoys. If not, see <https://www.gnu.org/licenses/>.
+# PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
 """Internal file to specify the logic of the module's main API."""
 
@@ -25,37 +25,37 @@ if t.TYPE_CHECKING:
     from Bio.Seq import Seq, MutableSeq
     from Bio.SeqRecord import SeqRecord
 
-from . import DecoyStrategy
-from .DecoyStrategy import SeqLike
+from . import strategies
+from .strategies import SeqLike
 
 
-_decoy_strategy: dict[str, DecoyStrategy.DecoyGenerator] = {
-    "reverse": DecoyStrategy.reverse,
-    "reverse-keepn": DecoyStrategy.reverse_keep_n,
-    "reverse-keepc": DecoyStrategy.reverse_keep_c,
-    "reverse-keepterm": DecoyStrategy.reverse_keep_term,
-    "shuffle": DecoyStrategy.shuffle,
-    "shuffle-keepn": DecoyStrategy.shuffle_keep_n,
-    "shuffle-keepc": DecoyStrategy.shuffle_keep_c,
-    "shuffle-keepterm": DecoyStrategy.shuffle_keep_term,
-    "pseudoreverse-trypsin": DecoyStrategy.pseudoreverse_trypsin,
-    "pseudoreverse-stricttrypsin": DecoyStrategy.pseudoreverse_stricttrypsin,
-    "pseudoreverse-argc": DecoyStrategy.pseudoreverse_argc,
-    "pseudoreverse-aspn": DecoyStrategy.pseudoreverse_aspn,
-    "pseudoreverse-chymo": DecoyStrategy.pseudoreverse_chymo,
-    "pseudoreverse-gluc": DecoyStrategy.pseudoreverse_gluc,
-    "pseudoreverse-lysc": DecoyStrategy.pseudoreverse_lysc,
-    "pseudoreverse-lysn": DecoyStrategy.pseudoreverse_lysn,
-    "pseudoreverse-stricttrypsin-keepn": DecoyStrategy.pseudoreverse_stricttrypsin_keepn,  # noqa: E501
-    "pseudoshuffle-trypsin": DecoyStrategy.pseudoshuffle_trypsin,
-    "pseudoshuffle-stricttrypsin": DecoyStrategy.pseudoshuffle_stricttrypsin,
-    "pseudoshuffle-argc": DecoyStrategy.pseudoshuffle_argc,
-    "pseudoshuffle-aspn": DecoyStrategy.pseudoshuffle_aspn,
-    "pseudoshuffle-chymo": DecoyStrategy.pseudoshuffle_chymo,
-    "pseudoshuffle-gluc": DecoyStrategy.pseudoshuffle_gluc,
-    "pseudoshuffle-lysc": DecoyStrategy.pseudoshuffle_lysc,
-    "pseudoshuffle-lysn": DecoyStrategy.pseudoshuffle_lysn,
-    "pseudoshuffle-stricttrypsin-keepn": DecoyStrategy.pseudoshuffle_stricttrypsin_keepn,  # noqa: E501
+_decoy_strategy: dict[str, strategies.DecoyGenerator] = {
+    "reverse": strategies.reverse,
+    "reverse-keepn": strategies.reverse_keep_n,
+    "reverse-keepc": strategies.reverse_keep_c,
+    "reverse-keepterm": strategies.reverse_keep_term,
+    "shuffle": strategies.shuffle,
+    "shuffle-keepn": strategies.shuffle_keep_n,
+    "shuffle-keepc": strategies.shuffle_keep_c,
+    "shuffle-keepterm": strategies.shuffle_keep_term,
+    "pseudoreverse-trypsin": strategies.pseudoreverse_trypsin,
+    "pseudoreverse-stricttrypsin": strategies.pseudoreverse_stricttrypsin,
+    "pseudoreverse-argc": strategies.pseudoreverse_argc,
+    "pseudoreverse-aspn": strategies.pseudoreverse_aspn,
+    "pseudoreverse-chymo": strategies.pseudoreverse_chymo,
+    "pseudoreverse-gluc": strategies.pseudoreverse_gluc,
+    "pseudoreverse-lysc": strategies.pseudoreverse_lysc,
+    "pseudoreverse-lysn": strategies.pseudoreverse_lysn,
+    "pseudoreverse-stricttrypsin-keepn": strategies.pseudoreverse_stricttrypsin_keepn,  # noqa: E501
+    "pseudoshuffle-trypsin": strategies.pseudoshuffle_trypsin,
+    "pseudoshuffle-stricttrypsin": strategies.pseudoshuffle_stricttrypsin,
+    "pseudoshuffle-argc": strategies.pseudoshuffle_argc,
+    "pseudoshuffle-aspn": strategies.pseudoshuffle_aspn,
+    "pseudoshuffle-chymo": strategies.pseudoshuffle_chymo,
+    "pseudoshuffle-gluc": strategies.pseudoshuffle_gluc,
+    "pseudoshuffle-lysc": strategies.pseudoshuffle_lysc,
+    "pseudoshuffle-lysn": strategies.pseudoshuffle_lysn,
+    "pseudoshuffle-stricttrypsin-keepn": strategies.pseudoshuffle_stricttrypsin_keepn,  # noqa: E501
 }
 
 
@@ -142,25 +142,25 @@ def from_SeqRecords(
         A decoy version of the next SeqRecord in `sequences`.
 
     Examples:
-        >>> import Decoys
+        >>> import pydecoys
         >>> from Bio.SeqRecord import SeqRecord
         >>> seqs = [
         ...     SeqRecord('DNIDYKAVYR', 'seq1'),
         ...     SeqRecord('QSYMCTVTHP', 'seq2'),
         ...     SeqRecord('CQWSLTEELL', 'seq3'),
         ... ]
-        >>> for decoy in Decoys.from_SeqRecords(seqs, 'reverse'):
+        >>> for decoy in pydecoys.from_SeqRecords(seqs, 'reverse'):
         ...     print(f'{decoy.id}: {decoy.seq}')
         decoy_seq1: Seq('RYVAKYDIND')
         decoy_seq2: Seq('PHTVTCMYSQ')
         decoy_seq3: Seq('LLEETLSWQC')
     """
 
-    from . import _Bio
-    sequences = _Bio.iter_SeqRecord(sequences)
-    tuples = (_Bio.SeqRecord_to_tuple(record) for record in sequences)
+    from . import _bio
+    sequences = _bio.iter_SeqRecord(sequences)
+    tuples = (_bio.SeqRecord_to_tuple(record) for record in sequences)
     decoys = from_tuples(tuples, strategy, decoy_tag, prefix)
-    records = (_Bio.tuple_to_SeqRecord(decoy) for decoy in decoys)
+    records = (_bio.tuple_to_SeqRecord(decoy) for decoy in decoys)
     yield from records
 
 
@@ -208,14 +208,14 @@ def from_tuples(
         A decoy version of the next tuple in `sequences`.
 
     Examples:
-        >>> import Decoys
+        >>> import pydecoys
         >>> from Bio.SeqRecord import SeqRecord
         >>> seqs = [
         ...     ('seq1', 'DNIDYKAVYR'),
         ...     ('seq2', 'QSYMCTVTHP'),
         ...     ('seq3', 'CQWSLTEELL'),
         ... ]
-        >>> for decoy in Decoys.from_tuples(seqs, 'reverse'):
+        >>> for decoy in pydecoys.from_tuples(seqs, 'reverse'):
         ...     print(f'{decoy[0]}: {decoy[1]}')
         decoy_seq1: Seq('RYVAKYDIND')
         decoy_seq2: Seq('PHTVTCMYSQ')
@@ -227,7 +227,7 @@ def from_tuples(
     if not isinstance(decoy_tag, str):
         raise TypeError("Need a string for the decoy tag")
 
-    if isinstance(decoy_generator, DecoyStrategy.ContextfulGenerator):
+    if isinstance(decoy_generator, strategies.ContextfulGenerator):
         sequences = list(sequences)
         # We extract the protein sequences itself
         seqs_only = [s[1] for s in sequences]
@@ -273,14 +273,14 @@ def from_seqs(
         A decoy version of the next sequence in `sequences`.
 
     Examples:
-        >>> import Decoys
+        >>> import pydecoys
         >>> from Bio.SeqRecord import SeqRecord
         >>> seqs = [
         ...     'DNIDYKAVYR',
         ...     'QSYMCTVTHP',
         ...     'CQWSLTEELL',
         ... ]
-        >>> for decoy in Decoys.from_seqs(seqs, 'reverse'):
+        >>> for decoy in pydecoys.from_seqs(seqs, 'reverse'):
         ...     print(decoy)
         'RYVAKYDIND'
         'PHTVTCMYSQ'
@@ -298,10 +298,10 @@ def from_seqs(
         if isinstance(sequences, str):
             sequences = [sequences]
 
-    # if isinstance(decoy_generator, DecoyStrategy.StatefulGenerator):
+    # if isinstance(decoy_generator, strategies.StatefulGenerator):
     #     sequences = decoy_generator.learn_state(sequences)
 
-    if isinstance(decoy_generator, DecoyStrategy.ContextfulGenerator):
+    if isinstance(decoy_generator, strategies.ContextfulGenerator):
         sequences = list(sequences)
         seqs_only = [s[1] for s in sequences]
         decoy_generator.learn_context(seqs_only)
@@ -333,7 +333,7 @@ def SeqRecord_as_decoy(
 
     Examples:
         >>> from Bio.SeqRecord import SeqRecord
-        >>> from Decoys import from_target
+        >>> from pydecoys import from_target
         >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
         >>> decoy = from_target(seq, 'reverse')
         >>> print(f'{decoy.id}: {decoy.seq}')
@@ -394,11 +394,11 @@ def tuple_as_decoy(
         A decoy version of `sequence`.
 
     Examples:
-        >>> import Decoys
+        >>> import pydecoys
         >>> from Bio.SeqRecord import SeqRecord
-        >>> from Decoys import from_target
+        >>> from pydecoys import from_target
         >>> seq = ('seq1', 'DNIDYKAVYR')
-        >>> decoy = Decoys.tuple_as_decoy(seq, 'reverse')
+        >>> decoy = pydecoys.tuple_as_decoy(seq, 'reverse')
         >>> print(f'{decoy[0]}: {decoy[1]}')
         decoy_seq1: 'RYVAKYDIND'
     """
@@ -446,11 +446,11 @@ def seq_as_decoy(
         A decoy version of `sequence`.
 
     Examples:
-        >>> import Decoys
+        >>> import pydecoys
         >>> from Bio.SeqRecord import SeqRecord
-        >>> from Decoys import from_target
+        >>> from pydecoys import from_target
         >>> seq = ('seq1', 'DNIDYKAVYR')
-        >>> decoy = Decoys.tuple_as_decoy(seq, 'reverse')
+        >>> decoy = pydecoys.tuple_as_decoy(seq, 'reverse')
         >>> print(f'{decoy[0]}: {decoy[1]}')
         decoy_seq1: 'RYVAKYDIND'
     """
@@ -461,7 +461,7 @@ def seq_as_decoy(
 
 def register(
     strategy: str,
-    decoy_generator_fn: DecoyStrategy.DecoyGenerator
+    decoy_generator_fn: strategies.DecoyGenerator
 ) -> None:
     """Register a new decoy strategy that can be used with :func:`generate`.
 
@@ -476,7 +476,7 @@ def register(
         unrelated Seq:
 
         >>> from Bio.SeqRecord import SeqRecord
-        >>> from Decoys import register, generate
+        >>> from pydecoys import register, generate
         >>> register('randomseq', random_seq)
         >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
         >>> decoy = from_target(seq, 'randomseq')
@@ -497,7 +497,7 @@ def register(
     _decoy_strategy[strategy] = decoy_generator_fn
 
 
-def _validate_strategy(strategy: str) -> DecoyStrategy.DecoyGenerator:
+def _validate_strategy(strategy: str) -> strategies.DecoyGenerator:
     if not isinstance(strategy, str):
         raise TypeError("Need a string for the decoy strategy (lower case)")
     if not strategy:

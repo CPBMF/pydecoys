@@ -1,18 +1,18 @@
-# Copyright © 2026 Bruno Maestri A Becker
+# Copyright (C) 2026 Bruno Maestri A Becker
 #
-# This file is part of Decoys.
+# This file is part of PyDecoys.
 #
-# Decoys is free software: you can redistribute it and/or modify it under the
+# PyDecoys is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# Decoys is distributed in the hope that it will be useful, but WITHOUT ANY
+# PyDecoys is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# Decoys. If not, see <https://www.gnu.org/licenses/>.
+# PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
 """Module for handling decoy generation from target protein sequences.
 
@@ -36,7 +36,7 @@ record representations, as well as related API. The IO functions require
 Avaliable Decoy Strategies:
     Each decoy strategy is specified by a lowercase string. The
     :class:`DecoyGenerator` fns used for each strategy are available under
-    :mod:`DecoyStrategy`. New strategies can be created by following the
+    :mod:`strategies`. New strategies can be created by following the
     :class:`DecoyGenerator` protocol or by instantiating
     :class:`PseudoReverseRule` or :class:`PseudoShuffleRule`.
 
@@ -68,7 +68,7 @@ Avaliable Decoy Strategies:
     - pseudoshuffle-stricttrypsin-keepn: Pseudo-shuffle strict trypsin fragments, except N-terminal aa
 """  # noqa: E501
 
-from ._Decoys import (
+from ._decoys import (
     from_fasta,
     to_fasta,
     from_SeqRecords,
@@ -79,8 +79,8 @@ from ._Decoys import (
     tuple_as_decoy,
     register
 )
-from . import DecoyStrategy
-from .DecoyStrategy import SeqLike
+from . import strategies
+from .strategies import SeqLike
 
 
 __all__ = [
@@ -94,7 +94,7 @@ __all__ = [
     'tuple_as_decoy',
     'register',
     'SeqLike',
-    'DecoyStrategy',
+    'strategies',
 ]
 
 __version_info__ = (0, 1, 0)

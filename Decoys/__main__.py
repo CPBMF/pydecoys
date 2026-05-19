@@ -44,6 +44,11 @@ if __name__ == '__main__':
     parser.add_argument('input')
     parser.add_argument('output')
     parser.add_argument(
+        '--version', '-v',
+        action='version',
+        version=f'%(prog)s {Decoys.__version__} (GPL-3.0-or-later)'
+    )
+    parser.add_argument(
         '--strategy', '-s',
         choices=_decoy_strategy.keys(),
         default='reverse'

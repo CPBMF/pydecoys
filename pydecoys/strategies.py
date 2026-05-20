@@ -14,11 +14,7 @@
 # You should have received a copy of the GNU General Public License along with
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
-"""
-strategies
-==========
-
-Decoy-generation logic, as well as API to write new decoy strategies.
+"""Decoy-generation logic, as well as API to write new decoy strategies.
 
 The main API of `strategies` is the :class:`DecoyGenerator` type. This is a
 simple protocol that only implements a `__call__` function and appropriate
@@ -31,33 +27,14 @@ instantiation.
 
 Available enzymes
 -----------------
-A list of pre-instantiated pseudo-reverse and pseudo-shuffle generators
-that are available, following the name scheme `pseudoreverse_<enzyme>` and
+Pre-initialized pseudo-reversers and pseudo-shufflers covering most proteases
+are available, following the name scheme `pseudoreverse_<enzyme>` and
 `pseudoshuffle_<enzyme>`.
-
-- pseudoreverse_trypsin:             cut KR, nocut P, sense C, keep_n False
-- pseudoreverse_stricttrypsin:       cut KR, nocut None, sense C, keep_n False
-- pseudoreverse_argc:                cut R, nocut P, sense C, keep_n False
-- pseudoreverse_aspn:                cut D, nocut None, sense N, keep_n False
-- pseudoreverse_chymo:               cut FLWY, nocut P, sense C, keep_n False
-- pseudoreverse_gluc:                cut DE, nocut P, sense C, keep_n False
-- pseudoreverse_lysc:                cut K, nocut P, sense C, keep_n False
-- pseudoreverse_lysn:                cut K, nocut None, sense N
-- pseudoreverse_stricttrypsin_keepn: cut KR, nocut None, sense C, keepn True
-- pseudoshuffle_trypsin:             cut KR, nocut P, sense C, keep_n False
-- pseudoshuffle_stricttrypsin:       cut KR, nocut None, sense C, keep_n False
-- pseudoshuffle_argc:                cut R, nocut P, sense C, keep_n False
-- pseudoshuffle_aspn:                cut D, nocut None, sense N, keep_n False
-- pseudoshuffle_chymo:               cut FLWY, nocut P, sense C, keep_n False
-- pseudoshuffle_gluc:                cut DE, nocut P, sense C, keep_n False
-- pseudoshuffle_lysc:                cut K, nocut P, sense C, keep_n False
-- pseudoshuffle_lysn:                cut K, nocut None, sense N
-- pseudoshuffle_stricttrypsin_keepn: cut KR, nocut None, sense C, keepn True
 """
 
 from __future__ import annotations
 
-from functools import singledispatchmethod
+from collections.abc import Sequence
 import random
 import re
 from typing import (
@@ -72,8 +49,18 @@ if TYPE_CHECKING:
     from Bio.Seq import Seq, MutableSeq
 
 
+# This file has a lot of overloads, but sphinx autodoc doesn't seem to catch
+# the overloads if I move them to a .pyi file.
+
+
 type SeqLike = 'str | Seq | MutableSeq'
 """`SeqLike` objects can be indexed and spliced; `str` at runtime."""
+
+type Seq_ = 'Seq'
+"""`Seq` type that doesn't require Biopython; `str` at runtime."""
+
+type MutableSeq_ = 'MutableSeq'
+"""`MutableSeq` type that doesn't require Biopython; `str` at runtime."""
 
 
 class DecoyGenerator(Protocol):
@@ -87,7 +74,11 @@ class DecoyGenerator(Protocol):
     """
 
     @overload
-    def __call__(self, sequence: Seq | MutableSeq) -> Seq:
+    def __call__(self, sequence: Seq) -> Seq:
+        ...
+
+    @overload
+    def __call__(self, sequence:  MutableSeq) -> MutableSeq:
         ...
 
     @overload
@@ -114,7 +105,7 @@ class ContextfulGenerator(DecoyGenerator, Protocol):
 
     def learn_context(
         self,
-        sequences: list[SeqLike]
+        sequences: Sequence[SeqLike]
     ) -> None:
         """Receive the target proteins set to generate the necessary context.
 
@@ -127,7 +118,20 @@ class ContextfulGenerator(DecoyGenerator, Protocol):
 
 
 # So shuffled decoys are always reproducible
-_rng = random.Random(10)
+rand = random.Random(10)
+"""Random number generator for stochastic decoy strategies."""
+
+
+@overload
+def reverse(sequence: Seq) -> Seq: ...
+
+
+@overload
+def reverse(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def reverse(sequence: str) -> str: ...
 
 
 def reverse(sequence: SeqLike) -> SeqLike:
@@ -135,9 +139,33 @@ def reverse(sequence: SeqLike) -> SeqLike:
     return sequence[::-1]
 
 
+@overload
+def reverse_keep_n(sequence: Seq) -> Seq: ...
+
+
+@overload
+def reverse_keep_n(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def reverse_keep_n(sequence: str) -> str: ...
+
+
 def reverse_keep_n(sequence: SeqLike) -> SeqLike:
     """Return the reversed `sequence`, except N-terminal aa."""
     return sequence[0] + sequence[:0:-1]
+
+
+@overload
+def reverse_keep_c(sequence: Seq) -> Seq: ...
+
+
+@overload
+def reverse_keep_c(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def reverse_keep_c(sequence: str) -> str: ...
 
 
 def reverse_keep_c(sequence: SeqLike) -> SeqLike:
@@ -145,36 +173,96 @@ def reverse_keep_c(sequence: SeqLike) -> SeqLike:
     return sequence[-2::-1] + sequence[-1]
 
 
+@overload
+def reverse_keep_term(sequence: Seq) -> Seq: ...
+
+
+@overload
+def reverse_keep_term(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def reverse_keep_term(sequence: str) -> str: ...
+
+
 def reverse_keep_term(sequence: SeqLike) -> SeqLike:
     """Return the reversed `sequence`, except terminal aas."""
     return sequence[0] + sequence[-2:0:-1] + sequence[-1]
 
 
+@overload
+def shuffle(sequence: Seq) -> Seq: ...
+
+
+@overload
+def shuffle(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def shuffle(sequence: str) -> str: ...
+
+
 def shuffle(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`."""
     new = list(sequence)
-    _rng.shuffle(new)
+    rand.shuffle(new)
     return _cls_cast(sequence, "".join(new))
+
+
+@overload
+def shuffle_keep_n(sequence: Seq) -> Seq: ...
+
+
+@overload
+def shuffle_keep_n(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def shuffle_keep_n(sequence: str) -> str: ...
 
 
 def shuffle_keep_n(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except N-terminal aa."""
     new = list(sequence[1:])
-    _rng.shuffle(new)
+    rand.shuffle(new)
     return _cls_cast(sequence, sequence[0] + "".join(new))
+
+
+@overload
+def shuffle_keep_c(sequence: Seq) -> Seq: ...
+
+
+@overload
+def shuffle_keep_c(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def shuffle_keep_c(sequence: str) -> str: ...
 
 
 def shuffle_keep_c(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except C-terminal aa."""
     new = list(sequence[:-1])
-    _rng.shuffle(new)
+    rand.shuffle(new)
     return _cls_cast(sequence, "".join(new) + sequence[-1])
+
+
+@overload
+def shuffle_keep_term(sequence: Seq) -> Seq: ...
+
+
+@overload
+def shuffle_keep_term(sequence: MutableSeq) -> MutableSeq: ...
+
+
+@overload
+def shuffle_keep_term(sequence: str) -> str: ...
 
 
 def shuffle_keep_term(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except terminal aas."""
     new = list(sequence[1:-1])
-    _rng.shuffle(new)
+    rand.shuffle(new)
     return _cls_cast(sequence, sequence[0] + "".join(new) + sequence[-1])
 
 
@@ -210,8 +298,6 @@ class PseudoReverseRule:
     >>> rev = PseudoReverseRule("KR", nocut="P")
     >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
     KR, P, C
-    >>> rev('QSYKPTRTHQ')
-    'TPKYSQRQHT'
     """
 
     def __init__(
@@ -237,7 +323,15 @@ class PseudoReverseRule:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
 
-    @singledispatchmethod
+    @overload
+    def __call__(self, sequence: Seq) -> Seq: ...
+
+    @overload
+    def __call__(self, sequence: MutableSeq) -> MutableSeq: ...
+
+    @overload
+    def __call__(self, sequence: str) -> str: ...
+
     def __call__(self, sequence: SeqLike) -> SeqLike:
         """Receive a sequence and return a pseudo-reversed decoy.
 
@@ -255,8 +349,6 @@ class PseudoReverseRule:
         --------
         >>> from pydecoys.strategies import PseudoReverseRule
         >>> rev = PseudoReverseRule("KR", nocut="P")
-        >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
-        KR, P, C
         >>> rev('QSYKPTRTHQ')
         'TPKYSQRQHT'
         """
@@ -271,6 +363,12 @@ class PseudoReverseRule:
         fragments = re.split(self._pattern, str(sequence))
         rev_frags = [frag[::-1] for frag in fragments]
         return "".join(rev_frags)
+
+    @overload
+    def decoy_from_Seq(self, sequence: Seq) -> Seq: ...
+
+    @overload
+    def decoy_from_Seq(self, sequence: MutableSeq) -> MutableSeq: ...
 
     def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
         """Convenience funcion. Equivalent to ``PseudoReverseRule(sequence)``
@@ -326,8 +424,6 @@ class PseudoShuffleRule:
     >>> shuf = PseudoShuffleRule("KR", nocut="P")
     >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
     KR, P, C
-    >>> shuf('QSYKPTRTHQ')
-    'YTSKQPRQHT'
     """
 
     def __init__(
@@ -353,6 +449,15 @@ class PseudoShuffleRule:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
 
+    @overload
+    def __call__(self, sequence: Seq) -> Seq: ...
+
+    @overload
+    def __call__(self, sequence: MutableSeq) -> MutableSeq: ...
+
+    @overload
+    def __call__(self, sequence: str) -> str: ...
+
     def __call__(self, sequence: SeqLike) -> SeqLike:
         """Receive a sequence and return a pseudo-shuffled decoy.
 
@@ -370,8 +475,6 @@ class PseudoShuffleRule:
         --------
         >>> from pydecoys.strategies import PseudoShuffleRule
         >>> shuf = PseudoShuffleRule("KR", nocut="P")
-        >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
-        KR, P, C
         >>> shuf('QSYKPTRTHQ')
         'YTSKQPRQHT'
         """
@@ -387,6 +490,12 @@ class PseudoShuffleRule:
         fragments = re.split(self._pattern, str(sequence))
         shuf_frags = [self._shuffle(frag) for frag in fragments]
         return "".join(shuf_frags)
+
+    @overload
+    def decoy_from_Seq(self, sequence: Seq) -> Seq: ...
+
+    @overload
+    def decoy_from_Seq(self, sequence: MutableSeq) -> MutableSeq: ...
 
     def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
         """Convenience funcion. Equivalent to ``PseudoShuffleRule(sequence)``
@@ -418,27 +527,61 @@ class PseudoShuffleRule:
 
     def _shuffle(self, frag: str) -> str:
         new = list(frag)
-        _rng.shuffle(new)
+        rand.shuffle(new)
         return "".join(new)
 
 
 # Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
-pseudoreverse_trypsin = PseudoReverseRule("KR", nocut="P")
-pseudoreverse_stricttrypsin = PseudoReverseRule("KR")
-pseudoreverse_argc = PseudoReverseRule("R", nocut="P")
-pseudoreverse_aspn = PseudoReverseRule("D", sense="N")
-pseudoreverse_chymo = PseudoReverseRule("FLWY", nocut="P")
-pseudoreverse_gluc = PseudoReverseRule("DE", nocut="P")
-pseudoreverse_lysc = PseudoReverseRule("K", nocut="P")
-pseudoreverse_lysn = PseudoReverseRule("K", sense="N")
-pseudoreverse_stricttrypsin_keepn = PseudoReverseRule("KR", keep_n=True)
+pseudoreverse_trypsin: DecoyGenerator = PseudoReverseRule("KR", nocut="P")
+"""Enzymatic specifications - ``cut='KR'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
 
-pseudoshuffle_trypsin = PseudoShuffleRule("KR", nocut="P")
-pseudoshuffle_stricttrypsin = PseudoShuffleRule("KR")
-pseudoshuffle_argc = PseudoShuffleRule("R", nocut="P")
-pseudoshuffle_aspn = PseudoShuffleRule("D", sense="N")
-pseudoshuffle_chymo = PseudoShuffleRule("FLWY", nocut="P")
-pseudoshuffle_gluc = PseudoShuffleRule("DE", nocut="P")
-pseudoshuffle_lysc = PseudoShuffleRule("K", nocut="P")
-pseudoshuffle_lysn = PseudoShuffleRule("K", sense="N")
-pseudoshuffle_stricttrypsin_keepn = PseudoShuffleRule("KR", keep_n=True)
+pseudoreverse_stricttrypsin: DecoyGenerator = PseudoReverseRule("KR")
+"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=False``."""   # noqa: E501
+
+pseudoreverse_argc: DecoyGenerator = PseudoReverseRule("R", nocut="P")
+"""Enzymatic specifications - ``cut='R'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+
+pseudoreverse_aspn: DecoyGenerator = PseudoReverseRule("D", sense="N")
+"""Enzymatic specifications - ``cut='D'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+
+pseudoreverse_chymo: DecoyGenerator = PseudoReverseRule("FLWY", nocut="P")
+"""Enzymatic specifications - ``cut='FLWY'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""  # noqa: E501
+
+pseudoreverse_gluc: DecoyGenerator = PseudoReverseRule("DE", nocut="P")
+"""Enzymatic specifications - ``cut='DE'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
+
+pseudoreverse_lysc: DecoyGenerator = PseudoReverseRule("K", nocut="P")
+"""Enzymatic specifications - ``cut='K'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+
+pseudoreverse_lysn: DecoyGenerator = PseudoReverseRule("K", sense="N")
+"""Enzymatic specifications - ``cut='K'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+
+pseudoreverse_stricttrypsin_keepn: DecoyGenerator = PseudoReverseRule("KR", keep_n=True)          # noqa: E501
+"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=True``."""    # noqa: E501
+
+pseudoshuffle_trypsin: DecoyGenerator = PseudoShuffleRule("KR", nocut="P")
+"""Enzymatic specifications - ``cut='KR'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
+
+pseudoshuffle_stricttrypsin: DecoyGenerator = PseudoShuffleRule("KR")
+"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=False``."""   # noqa: E501
+
+pseudoshuffle_argc: DecoyGenerator = PseudoShuffleRule("R", nocut="P")
+"""Enzymatic specifications - ``cut='R'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+
+pseudoshuffle_aspn: DecoyGenerator = PseudoShuffleRule("D", sense="N")
+"""Enzymatic specifications - ``cut='D'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+
+pseudoshuffle_chymo: DecoyGenerator = PseudoShuffleRule("FLWY", nocut="P")
+"""Enzymatic specifications - ``cut='FLWY'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""  # noqa: E501
+
+pseudoshuffle_gluc: DecoyGenerator = PseudoShuffleRule("DE", nocut="P")
+"""Enzymatic specifications - ``cut='DE'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
+
+pseudoshuffle_lysc: DecoyGenerator = PseudoShuffleRule("K", nocut="P")
+"""Enzymatic specifications - ``cut='K'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+
+pseudoshuffle_lysn: DecoyGenerator = PseudoShuffleRule("K", sense="N")
+"""Enzymatic specifications - ``cut='K'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+
+pseudoshuffle_stricttrypsin_keepn: DecoyGenerator = PseudoShuffleRule("KR", keep_n=True)          # noqa: E501
+"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=True``."""    # noqa: E501

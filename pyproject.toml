@@ -1,5 +1,5 @@
 [project]
-name = "Decoys"
+name = "pydecoys"
 version = "0.1.0"
 description = "Proteomics decoy utilities for Python"
 license = "GPL-3.0-or-later"
@@ -15,7 +15,7 @@ Decoys = "Decoys.__main__:main"
 
 
 [tool.poetry]
-name = "Decoys"
+name = "pydecoys"
 version = "0.1.0"
 description = "Proteomics decoy utilities for Python"
 license = "GPL-3.0-or-later"
@@ -37,6 +37,13 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^2.1.0"
+
+
+[tool.poetry.group.docs]
+optional = true
+
+
+[tool.poetry.group.docs.dependencies]
 sphinx = "^9.1.0"
 sphinx-rtd-theme = "^3.1.0"
 

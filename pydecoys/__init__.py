@@ -15,9 +15,6 @@
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
 """
-PyDecoys
-========
-
 Provides
     1. Functionality to generate decoys from proteins, including IO functions
     1. Integrated API to `Biopython`

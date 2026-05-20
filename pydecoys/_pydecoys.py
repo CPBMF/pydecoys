@@ -75,13 +75,15 @@ def from_fasta(
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
-        An optional tag that is appended to each input's id.
+        An optional tag that is appended to each input's id. Defaults to
+        `'decoy_'`.
     prefix
-        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
+        to `True`.
 
     Yields
     ------
-        A decoy version of the next SeqRecord in the file.
+    A decoy version of the next SeqRecord in the file.
     """
 
     from Bio import SeqIO
@@ -107,13 +109,15 @@ def to_fasta(
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
-        An optional tag that is appended to each input's id.
+        An optional tag that is appended to each input's id. Defaults to
+        `'decoy_'`.
     prefix
-        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
+        to `True`.
 
     Returns
     -------
-        The number of decoys written (as an integer).
+    The number of decoys written (as an integer).
     """
 
     from Bio import SeqIO
@@ -142,17 +146,19 @@ def from_SeqRecords(
     Parameters
     ----------
     sequences
-        A list (or iterator) of `SeqRecord`objects, or a single `SeqRecord`.
+        A list (or iterator) of `SeqRecord` objects, or a single `SeqRecord`.
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
-        An optional tag that is appended to each input's id.
+        An optional tag that is appended to each input's id. Defaults to
+        `'decoy_'`.
     prefix
-        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
+        to `True`.
 
     Yields
     ------
-        A decoy version of the next SeqRecord in `sequences`.
+    A decoy version of the next SeqRecord in `sequences`.
 
     Examples
     --------
@@ -190,11 +196,21 @@ def from_tuples(
 
 @t.overload
 def from_tuples(
-    sequences: t.Iterable[tuple[str, Seq | MutableSeq]],
+    sequences: t.Iterable[tuple[str, Seq]],
     strategy: str,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> t.Generator[tuple[str, Seq], None, None]:
+    ...
+
+
+@t.overload
+def from_tuples(
+    sequences: t.Iterable[tuple[str, MutableSeq]],
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True,
+) -> t.Generator[tuple[str, MutableSeq], None, None]:
     ...
 
 
@@ -218,13 +234,15 @@ def from_tuples(
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
-        An optional tag that is appended to each input's id.
+        An optional tag that is appended to each input's id. Defaults to
+        `'decoy_'`.
     prefix
-        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
+        to `True`.
 
     Yields
     ------
-        A decoy version of the next tuple in `sequences`.
+    A decoy version of the next tuple in `sequences`.
 
     Examples
     --------
@@ -271,9 +289,17 @@ def from_seqs(
 
 @t.overload
 def from_seqs(
-    sequences: t.Iterable[Seq | MutableSeq] | Seq | MutableSeq,
+    sequences: t.Iterable[Seq] | Seq,
     strategy: str,
 ) -> t.Generator[Seq, None, None]:
+    ...
+
+
+@t.overload
+def from_seqs(
+    sequences: t.Iterable[MutableSeq] | MutableSeq,
+    strategy: str,
+) -> t.Generator[MutableSeq, None, None]:
     ...
 
 
@@ -293,7 +319,7 @@ def from_seqs(
 
     Yields
     ------
-        A decoy version of the next sequence in `sequences`.
+    A decoy version of the next sequence in `sequences`.
 
     Examples
     --------
@@ -351,13 +377,15 @@ def SeqRecord_as_decoy(
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
-        An optional tag that is appended to each input's id.
+        An optional tag that is appended to each input's id. Defaults to
+        `'decoy_'`.
     prefix
-        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
+        to `True`.
 
     Returns
     -------
-        A decoy version of `sequence`.
+    A decoy version of `sequence`.
 
     Examples
     --------
@@ -395,11 +423,21 @@ def tuple_as_decoy(
 
 @t.overload
 def tuple_as_decoy(
-    sequence: tuple[str, Seq | MutableSeq],
+    sequence: tuple[str, Seq],
     strategy: str,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> tuple[str, Seq]:
+    ...
+
+
+@t.overload
+def tuple_as_decoy(
+    sequence: tuple[str, MutableSeq],
+    strategy: str,
+    decoy_tag: str = 'decoy_',
+    prefix: bool = True,
+) -> tuple[str, MutableSeq]:
     ...
 
 
@@ -419,13 +457,15 @@ def tuple_as_decoy(
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
-        An optional tag that is appended to each input's id.
+        An optional tag that is appended to each input's id. Defaults to
+        `'decoy_'`.
     prefix
-        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
+        to `True`.
 
     Returns
     -------
-        A decoy version of `sequence`.
+    A decoy version of `sequence`.
 
     Examples
     --------
@@ -460,9 +500,17 @@ def seq_as_decoy(
 
 @t.overload
 def seq_as_decoy(
-    sequence: Seq | MutableSeq,
+    sequence: Seq,
     strategy: str,
 ) -> Seq:
+    ...
+
+
+@t.overload
+def seq_as_decoy(
+    sequence: MutableSeq,
+    strategy: str,
+) -> MutableSeq:
     ...
 
 
@@ -481,7 +529,7 @@ def seq_as_decoy(
 
     Returns
     -------
-        A decoy version of `sequence`.
+    A decoy version of `sequence`.
 
     Examples
     --------

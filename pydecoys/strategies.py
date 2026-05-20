@@ -14,9 +14,45 @@
 # You should have received a copy of the GNU General Public License along with
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
-"""Module that handles generating decoy proteins from target proteins.
+"""
+strategies
+==========
 
-This module serves as a namespace for all the :obj:`DecoyGenerator` functions.
+Decoy-generation logic, as well as API to write new decoy strategies.
+
+The main API of `strategies` is the :class:`DecoyGenerator` type. This is a
+simple protocol that only implements a `__call__` function and appropriate
+type overloads. For decoy strategies that need context from the target
+database (for example, that use a Markov State Model), implement the
+:class:`ContextfulGenerator` protocol. The :class:`PseudoReverseRule` and
+:class:`PseudoShuffleRule` classes allow easy definition of new enzyme
+specifications for pseudo-reverse and pseudo-shuffle strategies via
+instantiation.
+
+Available enzymes
+-----------------
+A list of pre-instantiated pseudo-reverse and pseudo-shuffle generators
+that are available, following the name scheme `pseudoreverse_<enzyme>` and
+`pseudoshuffle_<enzyme>`.
+
+- pseudoreverse_trypsin:             cut KR, nocut P, sense C, keep_n False
+- pseudoreverse_stricttrypsin:       cut KR, nocut None, sense C, keep_n False
+- pseudoreverse_argc:                cut R, nocut P, sense C, keep_n False
+- pseudoreverse_aspn:                cut D, nocut None, sense N, keep_n False
+- pseudoreverse_chymo:               cut FLWY, nocut P, sense C, keep_n False
+- pseudoreverse_gluc:                cut DE, nocut P, sense C, keep_n False
+- pseudoreverse_lysc:                cut K, nocut P, sense C, keep_n False
+- pseudoreverse_lysn:                cut K, nocut None, sense N
+- pseudoreverse_stricttrypsin_keepn: cut KR, nocut None, sense C, keepn True
+- pseudoshuffle_trypsin:             cut KR, nocut P, sense C, keep_n False
+- pseudoshuffle_stricttrypsin:       cut KR, nocut None, sense C, keep_n False
+- pseudoshuffle_argc:                cut R, nocut P, sense C, keep_n False
+- pseudoshuffle_aspn:                cut D, nocut None, sense N, keep_n False
+- pseudoshuffle_chymo:               cut FLWY, nocut P, sense C, keep_n False
+- pseudoshuffle_gluc:                cut DE, nocut P, sense C, keep_n False
+- pseudoshuffle_lysc:                cut K, nocut P, sense C, keep_n False
+- pseudoshuffle_lysn:                cut K, nocut None, sense N
+- pseudoshuffle_stricttrypsin_keepn: cut KR, nocut None, sense C, keepn True
 """
 
 from __future__ import annotations
@@ -25,7 +61,6 @@ from functools import singledispatchmethod
 import random
 import re
 from typing import (
-    Iterable,
     Literal,
     Protocol,
     TYPE_CHECKING,
@@ -38,6 +73,7 @@ if TYPE_CHECKING:
 
 
 type SeqLike = 'str | Seq | MutableSeq'
+"""`SeqLike` objects can be indexed and spliced; `str` at runtime."""
 
 
 class DecoyGenerator(Protocol):
@@ -45,12 +81,9 @@ class DecoyGenerator(Protocol):
     strategy.
 
     Classes following this protocol should implement `__call__` as a
-    `Callable[[SeqLike], SeqLile]`. For most cases, a :obj:`SeqLike` object
-    can be treated as a `str`, including splicing. Regardless, for concistency
-    it is recommended that `__call__` be overloaded as follows:
-
-    - `Callable[[str], str]`
-    - `Callable[[Seq | MutableSeq], Seq]`
+    `Callable[[SeqLike], SeqLike]`. For most cases, a :obj:`SeqLike` object
+    can be treated as a `str`, including splicing and concatenation:
+    ``seq[1::-1]`` and ``seq1 + seq2``.
     """
 
     @overload
@@ -78,12 +111,17 @@ class ContextfulGenerator(DecoyGenerator, Protocol):
     """Protocol defining a decoy generator function that uses previously
     learned context.
     """
+
     def learn_context(
         self,
-        sequences: Iterable[SeqLike]
+        sequences: list[SeqLike]
     ) -> None:
-        """Take an Iterable of :obj:`SeqLike` to gather context prior to decoy
-        generation.
+        """Receive the target proteins set to generate the necessary context.
+
+        Parameters
+        ----------
+        sequences
+            The target dataset.
         """
         ...
 
@@ -98,17 +136,17 @@ def reverse(sequence: SeqLike) -> SeqLike:
 
 
 def reverse_keep_n(sequence: SeqLike) -> SeqLike:
-    """Return the reversed `sequence`, except N-terminal."""
+    """Return the reversed `sequence`, except N-terminal aa."""
     return sequence[0] + sequence[:0:-1]
 
 
 def reverse_keep_c(sequence: SeqLike) -> SeqLike:
-    """Return the reversed `sequence`, except C-terminal."""
+    """Return the reversed `sequence`, except C-terminal aa."""
     return sequence[-2::-1] + sequence[-1]
 
 
 def reverse_keep_term(sequence: SeqLike) -> SeqLike:
-    """Return the reversed `sequence`, except terminals."""
+    """Return the reversed `sequence`, except terminal aas."""
     return sequence[0] + sequence[-2:0:-1] + sequence[-1]
 
 
@@ -120,33 +158,53 @@ def shuffle(sequence: SeqLike) -> SeqLike:
 
 
 def shuffle_keep_n(sequence: SeqLike) -> SeqLike:
-    """Return the shuffled `sequence`, except N-terminal."""
+    """Return the shuffled `sequence`, except N-terminal aa."""
     new = list(sequence[1:])
     _rng.shuffle(new)
     return Seq(sequence[0] + "".join(new))
 
 
 def shuffle_keep_c(sequence: SeqLike) -> SeqLike:
-    """Return the shuffled `sequence`, except C-terminal."""
+    """Return the shuffled `sequence`, except C-terminal aa."""
     new = list(sequence[:-1])
     _rng.shuffle(new)
     return Seq("".join(new) + sequence[-1])
 
 
 def shuffle_keep_term(sequence: SeqLike) -> SeqLike:
-    """Return the shuffled `sequence`, except terminals."""
+    """Return the shuffled `sequence`, except terminal aas."""
     new = list(sequence[1:-1])
     _rng.shuffle(new)
     return Seq(sequence[0] + "".join(new) + sequence[-1])
 
 
 class PseudoReverseRule:
-    """A :obj:`DecoyGenerator` that applies pseudo-reverse decoy generation
-    with pre-specified enzyme specifications.
+    """Appliy pseudo-reverse decoy generation with the specified enzyme
+    properties.
 
-    A :class:`PseudoReverseRule` object is a callable object. The enzyme
-    specifications can be checked with the attributes :attr:`cut`,
-    :attr:`sense` and :attr:`nocut`.
+    Callable object. Enzyme specifications can be checked via its attributes.
+
+    Parameters
+    ----------
+    cut
+        Cleavage sites as a string.
+    sense
+        Sense cleavage (whether the enzyme cleaves the 'C' or 'N' bond of the
+        cleavage site).
+    nocut
+        Aminoacids that stop cleavage as a string, or `None`. If given, the
+        enzyme won't cut aminoacids followed by these..
+    keep_n
+        If `True`, the N-terminal aa isn't reverted.
+
+    Examples
+    --------
+    >>> from pydecoys.strategies import PseudoReverseRule
+    >>> rev = PseudoReverseRule("KR", nocut="P")
+    >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
+    KR, P, C
+    >>> rev('QSYKPTRTHQ')
+    'TPKYSQRQHT'
     """
 
     def __init__(
@@ -156,31 +214,8 @@ class PseudoReverseRule:
         nocut: str | None = None,
         keep_n: bool = False
     ) -> None:
-        """Initialize a pseudo-reverse :obj:`DecoyGenerator` with the specified
-        enzyme specifications.
-
-        Args:
-            cut: Aminoacids the enzyme cleaves at as a string.
-            sense: Sense of the enzyme (whether it cleaves the 'C' or 'N' bond
-                of the cleavage site). Defaults to 'C'.
-            nocut: Aminoacids that stop cleavage as a string, or `None`. If
-                given, the enzyme won't cut aminoacids followed by these.
-                Defaults to `None`.
-            keep_n: Whether to revert the N-terminal aa or not. Defaults to
-                `False`.
-
-        Examples:
-            To specify a pseudo-reverse generator for trypsin:
-
-            >>> from Bio.Seq import Seq
-            >>> from pydecoys import PseudoReverseRule
-            >>> rev = PseudoReverseRule("KR", nocut="P")
-            >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
-            KR, P, C
-        """
-
         if sense == 'N' and nocut is not None:
-            raise ValueError("Cannot have nocut specification with sense N")
+            raise ValueError("Cannot have nocut specification with N sense")
 
         self._cut = cut
         self._nocut = nocut
@@ -197,22 +232,26 @@ class PseudoReverseRule:
 
     @singledispatchmethod
     def __call__(self, sequence: SeqLike) -> SeqLike:
-        """Receive a :class:`Bio.Seq.Seq` and return a pseudo-reversed decoy.
+        """Receive a sequence and return a pseudo-reversed decoy.
 
-        Args:
-            sequence: A single :class:`Bio.Seq.Seq`.
+        Parameters
+        ----------
+        sequence
+            A single sequence.
 
-        Returns:
-            A pseudo-reversed version of `sequence`, according to the enzyme
-                specifications given at class instantiation.
+        Returns
+        -------
+        A pseudo-reversed version of `sequence`, according to the enzyme
+        specifications given at class instantiation.
 
-        Example:
-            >>> from Bio.Seq import Seq
-            >>> from pydecoys import PseudoReverseRule
-            >>> seq = 'QSYKPTRTHQ'
-            >>> rev = PseudoReverseRule("KR", nocut="P")
-            >>> print(rev(seq))
-            'TPKYSQRQHT'
+        Examples
+        --------
+        >>> from pydecoys.strategies import PseudoReverseRule
+        >>> rev = PseudoReverseRule("KR", nocut="P")
+        >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
+        KR, P, C
+        >>> rev('QSYKPTRTHQ')
+        'TPKYSQRQHT'
         """
         from . import _bio
         _bio.register()
@@ -231,7 +270,7 @@ class PseudoReverseRule:
 
     def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
         """Convenience funcion. Equivalent to `PseudoReverseRule(sequence)`
-        where `sequence` is a :class:`Bio.Seq.Seq`,  but avoids
+        where `sequence` is a `Seq`,  but avoids
         :class:`typing.singledispatchmethod` overhead.
         """
         from . import _bio
@@ -255,17 +294,37 @@ class PseudoReverseRule:
 
     @property
     def keep_n(self) -> bool:
-        """Whether to revert the N-terminal aa or not."""
+        """If `True`, the N-terminal aa isn't reverted."""
         return self._keep_n
 
 
 class PseudoShuffleRule:
-    """A :obj:`DecoyGenerator` that applies pseudo-shuffle decoy generation
-    with pre-specified enzyme specifications.
+    """Appliy pseudo-shuffle decoy generation with the specified enzyme
+    properties.
 
-    A :class:`PseudoShuffleRule` object is a callable object. The enzyme
-    specifications can be checked with the attributes :attr:`cut`,
-    :attr:`sense` and :attr:`nocut`.
+    Callable object. Enzyme specifications can be checked via its attributes.
+
+    Parameters
+    ----------
+    cut
+        Cleavage sites as a string.
+    sense
+        Sense cleavage (whether the enzyme cleaves the 'C' or 'N' bond of the
+        cleavage site).
+    nocut
+        Aminoacids that stop cleavage as a string, or `None`. If given, the
+        enzyme won't cut aminoacids followed by these..
+    keep_n
+        If `True`, the N-terminal aa isn't reverted.
+
+    Examples
+    --------
+    >>> from pydecoys.strategies import PseudoShuffleRule
+    >>> shuf = PseudoShuffleRule("KR", nocut="P")
+    >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
+    KR, P, C
+    >>> shuf('QSYKPTRTHQ')
+    'YTSKQPRQHT'
     """
 
     def __init__(
@@ -275,29 +334,6 @@ class PseudoShuffleRule:
         nocut: str | None = None,
         keep_n: bool = False,
     ) -> None:
-        """Initialize a pseudo-shuffle :obj:`DecoyGenerator` with the specified
-        enzyme specifications.
-
-        Args:
-            cut: Aminoacids the enzyme cleaves at as a string.
-            sense: Sense of the enzyme (whether it cleaves the 'C' or 'N' bond
-                of the cleavage site). Defaults to 'C'.
-            nocut: Aminoacids that stop cleavage as a string, or `None`. If
-                given, the enzyme won't cut aminoacids followed by these.
-                Defaults to `None`.
-            keep_n: Whether to revert the N-terminal aa or not. Defaults to
-                `False`
-
-        Examples:
-            To specify a pseudo-shuffle generator for trypsin:
-
-            >>> from Bio.Seq import Seq
-            >>> from pydecoys import PseudoShuffleRule
-            >>> shuf = PseudoShuffleRule("KR", nocut="P")
-            >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
-            KR, P, C
-        """
-
         if sense == 'N' and nocut is not None:
             raise ValueError("Cannot have nocut specification with sense N")
 
@@ -316,22 +352,26 @@ class PseudoShuffleRule:
 
     @singledispatchmethod
     def __call__(self, sequence: SeqLike) -> SeqLike:
-        """Receive a :class:`Bio.Seq.Seq` and return a pseudo-shuffled decoy.
+        """Receive a sequence and return a pseudo-shuffled decoy.
 
-        Args:
-            sequence: A single :class:`Bio.Seq.Seq`.
+        Parameters
+        ----------
+        sequence
+            A single sequence.
 
-        Returns:
-            A pseudo-reversed version of `sequence`, according to the enzyme
-                specifications given at class instantiation.
+        Returns
+        -------
+        A pseudo-shuffled version of `sequence`, according to the enzyme
+        specifications given at class instantiation.
 
-        Example:
-            >>> from Bio.Seq import Seq
-            >>> from pydecoys import PseudoShuffleRule
-            >>> shuf = 'QSYKPTRTHQ'
-            >>> shuf = PseudoShuffleRule("KR", nocut="P")
-            >>> print(shuf(seq))
-            'YTSKQPRQHT'
+        Examples
+        --------
+        >>> from pydecoys.strategies import PseudoShuffleRule
+        >>> shuf = PseudoShuffleRule("KR", nocut="P")
+        >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
+        KR, P, C
+        >>> shuf('QSYKPTRTHQ')
+        'YTSKQPRQHT'
         """
         from . import _bio
         _bio.register()
@@ -374,7 +414,7 @@ class PseudoShuffleRule:
 
     @property
     def keep_n(self) -> bool:
-        """Whether to revert the N-terminal aa or not."""
+        """If `True`, the N-terminal aa isn't reverted."""
         return self._keep_n
 
     def _shuffle(self, frag: str) -> str:

@@ -65,17 +65,22 @@ def from_fasta(
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> t.Iterable[SeqRecord]:
-    """Lazily apply a decoy generator to entries from a fasta file. This
-    function requires `Biopython`.
+    """Apply a decoy generator to entries from a fasta file. Requires
+    `Biopython`.
 
-    Args:
-        input: Path to a fasta file.
-        strategy: Lower case string specifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's id.
-        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
-            Defaults to `True`.
+    Parameters
+    ----------
+    input
+        Path to a fasta file.
+    strategy
+        Lower case string specifying the decoy strategy to be used.
+    decoy_tag
+        An optional tag that is appended to each input's id.
+    prefix
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
 
-    Yields:
+    Yields
+    ------
         A decoy version of the next SeqRecord in the file.
     """
 
@@ -92,20 +97,23 @@ def to_fasta(
     prefix: bool = True
 ) -> int:
     """Apply a decoy generator to a set of sequences and write them to a file.
-    This function requires `Biopython`.
+    Requires `Biopython`.
 
-    Args:
-        input: A list (or iterator) of :class:`Bio.SeqRecord.SeqRecord`
-            objects, a single :class:`Bio.SeqRecord.SeqRecord`, or the path to
-            a fasta file.
-        output: Filename to write to.
-        strategy: Lower case string specifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's id.
-        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
-            Defaults to `True`.
+    Parameters
+    ----------
+    input
+        A list (or iterator) of `SeqRecord` objects, a single `SeqRecord`, or
+        the path to a fasta file.
+    strategy
+        Lower case string specifying the decoy strategy to be used.
+    decoy_tag
+        An optional tag that is appended to each input's id.
+    prefix
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
 
-    Returns:
-        The number of targets written (as an integer).
+    Returns
+    -------
+        The number of decoys written (as an integer).
     """
 
     from Bio import SeqIO
@@ -128,32 +136,38 @@ def from_SeqRecords(
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> t.Generator[SeqRecord, None, None]:
-    """Lazily apply a decoy generation strategy to a set of sequences.
+    """Apply a decoy generation strategy to a set of sequences.
+    Requires `Biopython`.
 
-    Args:
-        sequences: A list (or iterator) of :class:`Bio.SeqRecord.SeqRecord`
-            objects, or a single :class:`Bio.SeqRecord.SeqRecord`.
-        strategy: Lower case string specifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's id.
-        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
-            Defaults to `True`.
+    Parameters
+    ----------
+    sequences
+        A list (or iterator) of `SeqRecord`objects, or a single `SeqRecord`.
+    strategy
+        Lower case string specifying the decoy strategy to be used.
+    decoy_tag
+        An optional tag that is appended to each input's id.
+    prefix
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
 
-    Yields:
+    Yields
+    ------
         A decoy version of the next SeqRecord in `sequences`.
 
-    Examples:
-        >>> import pydecoys
-        >>> from Bio.SeqRecord import SeqRecord
-        >>> seqs = [
-        ...     SeqRecord('DNIDYKAVYR', 'seq1'),
-        ...     SeqRecord('QSYMCTVTHP', 'seq2'),
-        ...     SeqRecord('CQWSLTEELL', 'seq3'),
-        ... ]
-        >>> for decoy in pydecoys.from_SeqRecords(seqs, 'reverse'):
-        ...     print(f'{decoy.id}: {decoy.seq}')
-        decoy_seq1: Seq('RYVAKYDIND')
-        decoy_seq2: Seq('PHTVTCMYSQ')
-        decoy_seq3: Seq('LLEETLSWQC')
+    Examples
+    --------
+    >>> import pydecoys
+    >>> from Bio.SeqRecord import SeqRecord
+    >>> seqs = [
+    ...     SeqRecord('DNIDYKAVYR', 'seq1'),
+    ...     SeqRecord('QSYMCTVTHP', 'seq2'),
+    ...     SeqRecord('CQWSLTEELL', 'seq3'),
+    ... ]
+    >>> for decoy in pydecoys.from_SeqRecords(seqs, 'reverse'):
+    ...     print(f'{decoy.id}: {decoy.seq}')
+    decoy_seq1: Seq('RYVAKYDIND')
+    decoy_seq2: Seq('PHTVTCMYSQ')
+    decoy_seq3: Seq('LLEETLSWQC')
     """
 
     from . import _bio
@@ -190,36 +204,41 @@ def from_tuples(
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> t.Generator[tuple[str, SeqLike], None, None]:
-    """Lazily apply a decoy generation strategy to a set of tuples.
+    """Apply a decoy generation strategy to a set of tuples.
 
     Differently from other functions in this module, `from_tuples` cannot
-    accept a single tuple. Be sure to always pass an iterable of tuples to it.
+    accept a single tuple. Be sure to always pass an iterable of tuples.
     If you'd like, you can use :func:`tuple_as_decoy` instead.
 
-    Args:
-        sequences: A list (or iterator) of `tuple` objects. The first item
-            should be the seqid, and the second item should be the sequence.
-        strategy: Lower case string specifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's id.
-        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
-            Defaults to `True`.
+    Parameters
+    ----------
+    sequences
+        A list (or iterator) of `tuple` objects. The first item should be the
+        seqid, and the second item should be the sequence.
+    strategy
+        Lower case string specifying the decoy strategy to be used.
+    decoy_tag
+        An optional tag that is appended to each input's id.
+    prefix
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
 
-    Yields:
+    Yields
+    ------
         A decoy version of the next tuple in `sequences`.
 
-    Examples:
-        >>> import pydecoys
-        >>> from Bio.SeqRecord import SeqRecord
-        >>> seqs = [
-        ...     ('seq1', 'DNIDYKAVYR'),
-        ...     ('seq2', 'QSYMCTVTHP'),
-        ...     ('seq3', 'CQWSLTEELL'),
-        ... ]
-        >>> for decoy in pydecoys.from_tuples(seqs, 'reverse'):
-        ...     print(f'{decoy[0]}: {decoy[1]}')
-        decoy_seq1: Seq('RYVAKYDIND')
-        decoy_seq2: Seq('PHTVTCMYSQ')
-        decoy_seq3: Seq('LLEETLSWQC')
+    Examples
+    --------
+    >>> import pydecoys
+    >>> seqs = [
+    ...     ('seq1', 'DNIDYKAVYR'),
+    ...     ('seq2', 'QSYMCTVTHP'),
+    ...     ('seq3', 'CQWSLTEELL'),
+    ... ]
+    >>> for decoy in pydecoys.from_tuples(seqs, 'reverse'):
+    ...     print(f'{decoy[0]}: {decoy[1]}')
+    decoy_seq1: Seq('RYVAKYDIND')
+    decoy_seq2: Seq('PHTVTCMYSQ')
+    decoy_seq3: Seq('LLEETLSWQC')
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -262,29 +281,33 @@ def from_seqs(
     sequences: t.Iterable[SeqLike] | SeqLike,
     strategy: str,
 ) -> t.Generator[SeqLike, None, None]:
-    """Lazily apply a decoy generation strategy to a set of sequences.
+    """Apply a decoy generation strategy to a set of sequences.
 
-    Args:
-        sequences: A list (or iterator) of :obj:`SeqLike` objects, or a single
-            :obj:`SeqLike`.
-        strategy: Lower case string specifying the decoy strategy to be used.
+    Parameters
+    ----------
+    sequences
+        A list (or iterator) of :obj:`SeqLike` objects, or a single
+        :obj:`SeqLike`.
+    strategy:
+        Lower case string specifying the decoy strategy to be used.
 
-    Yields:
+    Yields
+    ------
         A decoy version of the next sequence in `sequences`.
 
-    Examples:
-        >>> import pydecoys
-        >>> from Bio.SeqRecord import SeqRecord
-        >>> seqs = [
-        ...     'DNIDYKAVYR',
-        ...     'QSYMCTVTHP',
-        ...     'CQWSLTEELL',
-        ... ]
-        >>> for decoy in pydecoys.from_seqs(seqs, 'reverse'):
-        ...     print(decoy)
-        'RYVAKYDIND'
-        'PHTVTCMYSQ'
-        'LLEETLSWQC'
+    Examples
+    --------
+    >>> import pydecoys
+    >>> seqs = [
+    ...     'DNIDYKAVYR',
+    ...     'QSYMCTVTHP',
+    ...     'CQWSLTEELL',
+    ... ]
+    >>> for decoy in pydecoys.from_seqs(seqs, 'reverse'):
+    ...     print(decoy)
+    'RYVAKYDIND'
+    'PHTVTCMYSQ'
+    'LLEETLSWQC'
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -319,25 +342,31 @@ def SeqRecord_as_decoy(
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> SeqRecord:
-    """Apply a decoy generation strategy to a given sequence.
+    """Get a decoy from a given `SeqRecord`.
 
-    Args:
-        sequence: A single :class:`Bio.SeqRecord.SeqRecord`.
-        strategy: Lower case string specifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's id.
-        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
-            Defaults to `True`.
+    Parameters
+    ----------
+    sequence
+        A single `SeqRecord`.
+    strategy
+        Lower case string specifying the decoy strategy to be used.
+    decoy_tag
+        An optional tag that is appended to each input's id.
+    prefix
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
 
-    Returns:
+    Returns
+    -------
         A decoy version of `sequence`.
 
-    Examples:
-        >>> from Bio.SeqRecord import SeqRecord
-        >>> from pydecoys import from_target
-        >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
-        >>> decoy = from_target(seq, 'reverse')
-        >>> print(f'{decoy.id}: {decoy.seq}')
-        decoy_seq1: Seq('RYVAKYDIND')
+    Examples
+    --------
+    >>> import pydecoys
+    >>> from Bio.SeqRecord import SeqRecord
+    >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
+    >>> decoy = pydecoys.SeqRecord_as_decoy(seq, 'reverse')
+    >>> print(f'{decoy.id}: {decoy.seq}')
+    decoy_seq1: Seq('RYVAKYDIND')
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -380,27 +409,32 @@ def tuple_as_decoy(
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
 ) -> tuple[str, SeqLike]:
-    """Apply a decoy generation strategy to a given sequence.
+    """Get a decoy from a given `tuple`.
 
-    Args:
-        sequence: A single `tuple`. The first item should be the seqid, and
-            the second item should be the sequence.
-        strategy: Lower case string specifying the decoy strategy to be used.
-        decoy_tag: An optional tag that is to be appended to each input's id.
-        prefix: If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
-            Defaults to `True`.
+    Parameters
+    ----------
+    sequence
+        A single `tuple`. The first item should be the seqid, and the second
+        item should be the sequence.
+    strategy
+        Lower case string specifying the decoy strategy to be used.
+    decoy_tag
+        An optional tag that is appended to each input's id.
+    prefix
+        If `True`, `decoy_tag` is prefixed, otherwise it's suffixed.
 
-    Returns:
+    Returns
+    -------
         A decoy version of `sequence`.
 
-    Examples:
-        >>> import pydecoys
-        >>> from Bio.SeqRecord import SeqRecord
-        >>> from pydecoys import from_target
-        >>> seq = ('seq1', 'DNIDYKAVYR')
-        >>> decoy = pydecoys.tuple_as_decoy(seq, 'reverse')
-        >>> print(f'{decoy[0]}: {decoy[1]}')
-        decoy_seq1: 'RYVAKYDIND'
+    Examples
+    --------
+    >>> import pydecoys
+    >>> from pydecoys import from_target
+    >>> seq = ('seq1', 'DNIDYKAVYR')
+    >>> decoy = pydecoys.tuple_as_decoy(seq, 'reverse')
+    >>> print(f'{decoy[0]}: {decoy[1]}')
+    decoy_seq1: 'RYVAKYDIND'
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -436,23 +470,24 @@ def seq_as_decoy(
     sequence: SeqLike,
     strategy: str,
 ) -> SeqLike:
-    """Apply a decoy generation strategy to a given sequence.
+    """Get a decoy from a given :obj:`SeqLike`.
 
-    Args:
-        sequence: A single :obj:`SeqLike`.
-        strategy: Lower case string specifying the decoy strategy to be used.
+    Parameters
+    ----------
+    sequence
+        A single :obj:`SeqLike`.
+    strategy
+        Lower case string specifying the decoy strategy to be used.
 
-    Returns:
+    Returns
+    -------
         A decoy version of `sequence`.
 
-    Examples:
-        >>> import pydecoys
-        >>> from Bio.SeqRecord import SeqRecord
-        >>> from pydecoys import from_target
-        >>> seq = ('seq1', 'DNIDYKAVYR')
-        >>> decoy = pydecoys.tuple_as_decoy(seq, 'reverse')
-        >>> print(f'{decoy[0]}: {decoy[1]}')
-        decoy_seq1: 'RYVAKYDIND'
+    Examples
+    --------
+    >>> import pydecoys
+    >>> pydecoys.seq_as_decoy('DNIDYKAVYR', 'reverse')
+    'RYVAKYDIND'
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -463,25 +498,26 @@ def register(
     strategy: str,
     decoy_generator_fn: strategies.DecoyGenerator
 ) -> None:
-    """Register a new decoy strategy that can be used with :func:`generate`.
+    """Register a new decoy strategy.
 
-    Args:
-        strategy: Lower case string identifying the decoy strategy. Must not be
-            already defined.
-        decoy_generator_fn: A function that should take a :class:`Bio.Seq.Seq`
-            object and return its decoy version.
+    Parameters
+    ----------
+    strategy
+        Lower case string identifying the decoy strategy. Must not be already
+        defined.
+    decoy_generator_fn
+        A function following the :class:`strategies.DecoyGenerator` protocol.
 
-    Examples:
-        Given a :func:`random_seq` function that takes a Seq and returns a new,
-        unrelated Seq:
+    Examples
+    --------
+    Given a `random_seq` function that takes a sequence and returns a new,
+    unrelated sequence of same size:
 
-        >>> from Bio.SeqRecord import SeqRecord
-        >>> from pydecoys import register, generate
-        >>> register('randomseq', random_seq)
-        >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
-        >>> decoy = from_target(seq, 'randomseq')
-        >>> print(f'{decoy.id}: {decoy.seq}')
-        decoy_seq1: Seq('LLEETLSWQC')
+    >>> import pydecoys
+    >>> pydecoys.register('randomseq', random_seq)
+    >>> seq = 'DNIDYKAVYR'
+    >>> pydecoys.seq_as_decoy(seq, 'randomseq')
+    'LLEETLSWQC'
     """
 
     if not isinstance(strategy, str):

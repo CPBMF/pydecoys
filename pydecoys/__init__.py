@@ -14,58 +14,75 @@
 # You should have received a copy of the GNU General Public License along with
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
-"""Module for handling decoy generation from target protein sequences.
+"""
+PyDecoys
+========
 
-This module exposes a series of functions to generate decoys from different
-record representations, as well as related API. The IO functions require
-`Biopython` to be installed.
+Provides
+    1. Functionality to generate decoys from proteins, including IO functions
+    1. Integrated API to `Biopython`
+    1. Easy implementation of custom decoy strategies within the API
+    1. A CLI app to easily generate a decoy fasta file from a target fasta file
 
-- (fn) :func:`from_fasta`
-- (fn) :func:`to_fasta`
-- (fn) :func:`from_SeqRecords`
-- (fn) :func:`from_seqs`
-- (fn) :func:`from_tuples`
-- (fn) :func:`SeqRecord_as_decoy`
-- (fn) :func:`seq_as_decoy`
-- (fn) :func:`tuple_as_decoy`
-- (fn) :func:`register`
-- (Protocol) :class:`DecoyGenerator`
-- (TypeAlias) :obj:`SeqLike`
-- (submodule) :mod:`DecoyStrategy`
+Available functionality
+-----------------------
+:func:`from_fasta`
+    Return a decoy generator from a target fasta (requires `Biopython`)
+:func:`to_fasta`
+    Write a decoy fasta from a target protein set or fasta (requires `Biopython`)
+:func:`from_SeqRecords`
+    Return a decoy generator from a target set of `SeqRecord` (requires `Biopython`)
+:func:`from_seqs`
+    Return a decoy generator from a target set of :obj:`SeqLike`
+:func:`from_tuples`
+    Return a decoy generator from a target set of `tuple`
+:func:`SeqRecord_as_decoy`
+    Return a decoy `SeqRecord` from a given `SeqRecord` (requires `Biopython`)
+:func:`seq_as_decoy`
+    Return a decoy :obj:`SeqLike` from a given :obj:`SeqLike`
+:func:`tuple_as_decoy`
+    Return a decoy `tuple` from a given `tuple`
+:func:`register`
+    Register a custom decoy strategy on the API
+:obj:`SeqLike`
+    Custom type ``(str | Seq | MutableSeq)``
+:mod:`strategies`
+    Functions and API for decoy generation strategies
 
-Avaliable Decoy Strategies:
-    Each decoy strategy is specified by a lowercase string. The
-    :class:`DecoyGenerator` fns used for each strategy are available under
-    :mod:`strategies`. New strategies can be created by following the
-    :class:`DecoyGenerator` protocol or by instantiating
-    :class:`PseudoReverseRule` or :class:`PseudoShuffleRule`.
+Avaliable decoy strategies
+--------------------------
+Each decoy strategy is specified by a lowercase string. The
+:class:`strategies.DecoyGenerator` fns used for each strategy are available
+under :mod:`strategies`. New strategies can be created by following the
+:class:`strategies.DecoyGenerator` protocol or by instantiating
+:class:`strategies.PseudoReverseRule` or :class:`strategies.PseudoShuffleRule`.
 
-    - reverse:                     Reverse protein
-    - reverse-keepn:               Reverse protein, except N-terminal aa
-    - reverse-keepc:               Reverse protein, except C-terminal aa
-    - reverse-keepterm:            Reserse protein, except terminal aas
-    - shuffle:                     Shuffle protein
-    - shuffle-keepn:               Shuffle protein, except N-terminal aa
-    - shuffle-keepc:               Shuffle protein, except C-terminal aa
-    - shuffle-keepterm:            Shuffle protein, except terminal aas
-    - pseudoreverse-trypsin:       Pseudo-reverse trypsin fragments
-    - pseudoreverse-stricttrypsin: Pseudo-reverse strict trypsin fragments
-    - pseudoreverse-argc:          Pseudo-reverse ArgC fragments
-    - pseudoreverse-aspn:          Pseudo-reverse AspN fragments
-    - pseudoreverse-chymo:         Pseudo-reverse chymotrypsin fragments
-    - pseudoreverse-gluc:          Pseudo-reverse GluC fragments
-    - pseudoreverse-lysc:          Pseudo-reverse LysC fragments
-    - pseudoreverse-lysn:          Pseudo-reverse LysN fragments
-    - pseudoreverse-stricttrypsin-keepn: Pseudo-reverse strict trypsin fragments, except N-terminal aa
-    - pseudoshuffle-trypsin:       Pseudo-shuffle trypsin fragments
-    - pseudoshuffle-stricttrypsin: Pseudo-shuffle strict trypsin fragments
-    - pseudoshuffle-argc:          Pseudo-shuffle ArgC fragments
-    - pseudoshuffle-aspn:          Pseudo-shuffle AspN fragments
-    - pseudoshuffle-chymo:         Pseudo-shuffle chymotrypsin fragments
-    - pseudoshuffle-gluc:          Pseudo-shuffle GluC fragments
-    - pseudoshuffle-lysc:          Pseudo-shuffle LysC fragments
-    - pseudoshuffle-lysn:          Pseudo-shuffle LysN fragments
-    - pseudoshuffle-stricttrypsin-keepn: Pseudo-shuffle strict trypsin fragments, except N-terminal aa
+- reverse:                     Reverse protein
+- reverse-keepn:               Reverse protein, except N-terminal aa
+- reverse-keepc:               Reverse protein, except C-terminal aa
+- reverse-keepterm:            Reserse protein, except terminal aas
+- shuffle:                     Shuffle protein
+- shuffle-keepn:               Shuffle protein, except N-terminal aa
+- shuffle-keepc:               Shuffle protein, except C-terminal aa
+- shuffle-keepterm:            Shuffle protein, except terminal aas
+- pseudoreverse-trypsin:       Pseudo-reverse trypsin fragments
+- pseudoreverse-stricttrypsin: Pseudo-reverse strict trypsin fragments
+- pseudoreverse-argc:          Pseudo-reverse ArgC fragments
+- pseudoreverse-aspn:          Pseudo-reverse AspN fragments
+- pseudoreverse-chymo:         Pseudo-reverse chymotrypsin fragments
+- pseudoreverse-gluc:          Pseudo-reverse GluC fragments
+- pseudoreverse-lysc:          Pseudo-reverse LysC fragments
+- pseudoreverse-lysn:          Pseudo-reverse LysN fragments
+- pseudoreverse-stricttrypsin-keepn: Pseudo-reverse strict trypsin fragments, except N-terminal aa
+- pseudoshuffle-trypsin:       Pseudo-shuffle trypsin fragments
+- pseudoshuffle-stricttrypsin: Pseudo-shuffle strict trypsin fragments
+- pseudoshuffle-argc:          Pseudo-shuffle ArgC fragments
+- pseudoshuffle-aspn:          Pseudo-shuffle AspN fragments
+- pseudoshuffle-chymo:         Pseudo-shuffle chymotrypsin fragments
+- pseudoshuffle-gluc:          Pseudo-shuffle GluC fragments
+- pseudoshuffle-lysc:          Pseudo-shuffle LysC fragments
+- pseudoshuffle-lysn:          Pseudo-shuffle LysN fragments
+- pseudoshuffle-stricttrypsin-keepn: Pseudo-shuffle strict trypsin fragments, except N-terminal aa
 """  # noqa: E501
 
 
@@ -82,14 +99,12 @@ __all__ = [
     'seq_as_decoy',
     'tuple_as_decoy',
     'register',
-    'SeqLike',
     'strategies',
 ]
 
 
 from . import strategies
-from .strategies import SeqLike
-from ._decoys import (
+from ._pydecoys import (
     from_fasta,
     to_fasta,
     from_SeqRecords,

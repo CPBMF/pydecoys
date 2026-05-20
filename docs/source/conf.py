@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path('..', '..').resolve()))
 
 
-project = 'Decoys'
+project = 'pydecoys'
 copyright = '2026, Bruno Maestri Abrianos Becker'
 author = 'Bruno Maestri Abrianos Becker'
 release = '0.1.0'
@@ -24,10 +24,13 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
+
+add_module_names = False
 
 
 # -- Options for HTML output -------------------------------------------------

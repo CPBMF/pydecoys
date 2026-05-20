@@ -25,7 +25,7 @@ def main() -> None:
     import argparse
 
     from . import __version__
-    from ._decoys import _decoy_strategy
+    from ._pydecoys import _decoy_strategy
 
     parser = argparse.ArgumentParser(
         prog="pydecoys",

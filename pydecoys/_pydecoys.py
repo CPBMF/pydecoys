@@ -1,3 +1,4 @@
+# Copyright (C) 2026 CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil
 # Copyright (C) 2026 Bruno Maestri A Becker
 #
 # This file is part of PyDecoys.

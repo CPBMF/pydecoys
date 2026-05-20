@@ -57,22 +57,28 @@ def str_to_Seq(sequence: str) -> Seq:
 # Biopython and reference the dispatch types when needed.
 #
 # Rebinding the name makes it lose its previous __doc__, so we also have
-# to fix the docs as well.
+# to fix them.
 def register():
-    @PseudoReverseRule.__call__.register  # type: ignore
-    def reverse_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
+    def reverse_decoy_from_Seq(
+        self,
+        sequence: Seq | MutableSeq
+    ) -> Seq | MutableSeq:
         fragments = re.split(self._pattern, str(sequence))
         rev_frags = [frag[::-1] for frag in fragments]
-        return Seq("".join(rev_frags))
+        cls = type(sequence)
+        return cls("".join(rev_frags))
 
     reverse_decoy_from_Seq.__doc__ = PseudoReverseRule.decoy_from_Seq.__doc__
-    PseudoReverseRule.decoy_from_Seq = reverse_decoy_from_Seq
+    PseudoReverseRule.decoy_from_Seq = reverse_decoy_from_Seq  # type: ignore
 
-    @PseudoShuffleRule.__call__.register  # type: ignore
-    def shuffle_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
+    def shuffle_decoy_from_Seq(
+        self,
+        sequence: Seq | MutableSeq
+    ) -> Seq | MutableSeq:
         fragments = re.split(self._pattern, str(sequence))
         shuf_frags = [self._shuffle(frag) for frag in fragments]
-        return Seq("".join(shuf_frags))
+        cls = type(sequence)
+        return cls("".join(shuf_frags))
 
     shuffle_decoy_from_Seq.__doc__ = PseudoShuffleRule.decoy_from_Seq.__doc__
-    PseudoShuffleRule.decoy_from_Seq = shuffle_decoy_from_Seq
+    PseudoShuffleRule.decoy_from_Seq = shuffle_decoy_from_Seq  # type: ignore

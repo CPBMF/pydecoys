@@ -154,28 +154,35 @@ def shuffle(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`."""
     new = list(sequence)
     _rng.shuffle(new)
-    return Seq("".join(new))
+    return _cls_cast(sequence, "".join(new))
 
 
 def shuffle_keep_n(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except N-terminal aa."""
     new = list(sequence[1:])
     _rng.shuffle(new)
-    return Seq(sequence[0] + "".join(new))
+    return _cls_cast(sequence, sequence[0] + "".join(new))
 
 
 def shuffle_keep_c(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except C-terminal aa."""
     new = list(sequence[:-1])
     _rng.shuffle(new)
-    return Seq("".join(new) + sequence[-1])
+    return _cls_cast(sequence, "".join(new) + sequence[-1])
 
 
 def shuffle_keep_term(sequence: SeqLike) -> SeqLike:
     """Return the shuffled `sequence`, except terminal aas."""
     new = list(sequence[1:-1])
     _rng.shuffle(new)
-    return Seq(sequence[0] + "".join(new) + sequence[-1])
+    return _cls_cast(sequence, sequence[0] + "".join(new) + sequence[-1])
+
+
+# Hackish solution, but it allows the code to always return the correct type
+# without importing Biopython or deferring to another module
+def _cls_cast(obj: SeqLike, sequence: str) -> SeqLike:
+    cls = type(obj)
+    return cls(sequence)
 
 
 class PseudoReverseRule:
@@ -193,7 +200,7 @@ class PseudoReverseRule:
         cleavage site).
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
-        enzyme won't cut aminoacids followed by these..
+        enzyme won't cut aminoacids followed by these.
     keep_n
         If `True`, the N-terminal aa isn't reverted.
 
@@ -253,25 +260,21 @@ class PseudoReverseRule:
         >>> rev('QSYKPTRTHQ')
         'TPKYSQRQHT'
         """
-        from . import _bio
-        _bio.register()
-        return self.__call__(sequence)
+        fragments = re.split(self._pattern, str(sequence))
+        rev_frags = [frag[::-1] for frag in fragments]
+        return _cls_cast(sequence, "".join(rev_frags))
 
-    @__call__.register
     def decoy_from_str(self, sequence: str) -> str:
-        """Convenience funcion. Equivalent to `PseudoReverseRule(sequence)`
-        where `sequence` is a `str`, but avoids
-        :class:`typing.singledispatchmethod` overhead.
+        """Convenience funcion. Equivalent to ``PseudoReverseRule(sequence)``
+        where `sequence` is a `str`.
         """
         fragments = re.split(self._pattern, str(sequence))
-
         rev_frags = [frag[::-1] for frag in fragments]
         return "".join(rev_frags)
 
-    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
-        """Convenience funcion. Equivalent to `PseudoReverseRule(sequence)`
-        where `sequence` is a `Seq`,  but avoids
-        :class:`typing.singledispatchmethod` overhead.
+    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
+        """Convenience funcion. Equivalent to ``PseudoReverseRule(sequence)``
+        where `sequence` is a `Seq` or `MutableSeq`.
         """
         from . import _bio
         _bio.register()
@@ -313,7 +316,7 @@ class PseudoShuffleRule:
         cleavage site).
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
-        enzyme won't cut aminoacids followed by these..
+        enzyme won't cut aminoacids followed by these.
     keep_n
         If `True`, the N-terminal aa isn't reverted.
 
@@ -350,7 +353,6 @@ class PseudoShuffleRule:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
 
-    @singledispatchmethod
     def __call__(self, sequence: SeqLike) -> SeqLike:
         """Receive a sequence and return a pseudo-shuffled decoy.
 
@@ -373,25 +375,22 @@ class PseudoShuffleRule:
         >>> shuf('QSYKPTRTHQ')
         'YTSKQPRQHT'
         """
-        from . import _bio
-        _bio.register()
-        return self.__call__(sequence)
-
-    @__call__.register
-    def decoy_from_str(self, sequence: str) -> str:
-        """Convenience funcion. Equivalent to `PseudoShuffleRule(sequence)`
-        where `sequence` is a `str`,  but avoids
-        :class:`typing.singledispatchmethod` overhead.
-        """
         fragments = re.split(self._pattern, str(sequence))
 
         shuf_frags = [self._shuffle(frag) for frag in fragments]
+        return _cls_cast(sequence, "".join(shuf_frags))
+
+    def decoy_from_str(self, sequence: str) -> str:
+        """Convenience funcion. Equivalent to ``PseudoShuffleRule(sequence)``
+        where `sequence` is a `str`.
+        """
+        fragments = re.split(self._pattern, str(sequence))
+        shuf_frags = [self._shuffle(frag) for frag in fragments]
         return "".join(shuf_frags)
 
-    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq:
-        """Convenience funcion. Equivalent to `PseudoShuffleRule(sequence)`
-        where `sequence` is a :class:`Bio.Seq.Seq`,  but avoids
-        :class:`typing.singledispatchmethod` overhead.
+    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
+        """Convenience funcion. Equivalent to ``PseudoShuffleRule(sequence)``
+        where `sequence` is a `Seq` or `MutableSeq`.
         """
         from . import _bio
         _bio.register()

@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 
+import io
 import os
 import typing as t
 
@@ -28,6 +29,9 @@ if t.TYPE_CHECKING:
 
 from . import strategies
 from .strategies import SeqLike
+
+
+type _PathOrIO = str | os.PathLike[str] | t.TextIO
 
 
 _decoy_strategy: dict[str, strategies.DecoyGenerator] = {
@@ -61,7 +65,7 @@ _decoy_strategy: dict[str, strategies.DecoyGenerator] = {
 
 
 def from_fasta(
-    input: str | os.PathLike[str],
+    input: _PathOrIO,
     strategy: str,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
@@ -72,7 +76,7 @@ def from_fasta(
     Parameters
     ----------
     input
-        Path to a fasta file.
+        Path or handle to a fasta file.
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
@@ -93,8 +97,8 @@ def from_fasta(
 
 
 def to_fasta(
-    input: str | os.PathLike[str] | t.Iterable[SeqRecord] | SeqRecord,
-    output: str | os.PathLike[str],
+    input: _PathOrIO | t.Iterable[SeqRecord] | SeqRecord,
+    output: _PathOrIO,
     strategy: str,
     decoy_tag: str = 'decoy_',
     prefix: bool = True
@@ -106,7 +110,9 @@ def to_fasta(
     ----------
     input
         A list (or iterator) of `SeqRecord` objects, a single `SeqRecord`, or
-        the path to a fasta file.
+        the path or handle to a fasta file.
+    output
+        Path or handle to a fasta file.
     strategy
         Lower case string specifying the decoy strategy to be used.
     decoy_tag
@@ -119,19 +125,30 @@ def to_fasta(
     Returns
     -------
     The number of decoys written (as an integer).
+
+    Notes
+    -----
+    While `_PathOrIO` is defined as
+    ``str | os.PathLike[str] | typing.TextIO``, the runtime `isinstance` check
+    is done against ``io.TextIOBase``.
     """
 
     from Bio import SeqIO
     from Bio.SeqRecord import SeqRecord
 
-    if isinstance(input, str | os.PathLike):
+    if isinstance(input, str | os.PathLike | io.TextIOBase):
         sequences = from_fasta(input, 'fasta')
     elif isinstance(input, SeqRecord):
         sequences = [input]
     else:
         sequences = input
 
-    decoys = from_SeqRecords(sequences, strategy, decoy_tag, prefix)
+    decoys = from_SeqRecords(
+        sequences,  # type: ignore
+        strategy,
+        decoy_tag,
+        prefix
+    )
     return SeqIO.write(decoys, output, 'fasta')
 
 

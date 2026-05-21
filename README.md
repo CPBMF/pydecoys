@@ -195,13 +195,15 @@ it. If possible, please provide a code snippet.
 
 ## Authorship and affiliations
 
-This software was developed by Bruno Maestri A Becker[^1] as part of a research project
-under the supervision of Professor Cristiano Valim Bizarro, PhD[^2], at Centro de
+This software was developed by Bruno Maestri A Becker as part of a research project
+under the supervision of Professor Cristiano Valim Bizarro, PhD, at Centro de
 Pesquisas em Biologia Molecular e Funcional (CPBMF) and Instituto Nacional de Ciência e
 Tecnologia em Tuberculose (INCT-TB), Pontifícia Universidade Católica do Rio Grande do
 Sul (PUCRS), Porto Alegre, Brazil.
 
-[^1]: ![Static Badge](https://img.shields.io/badge/ORCID-iD-grey?logo=orcid&color=green&link=https%3A%2F%2Forcid.org%2F0009-0002-2338-5997)
-[^2]: ![Static Badge](https://img.shields.io/badge/ORCID-iD-grey?logo=orcid&color=green&link=https%3A%2F%2Forcid.org%2F0000-0002-2609-8996)
+ORCID™ iDs
+- [![ORCID][iD]](https://orcid.org/0009-0002-2338-5997) `Bruno Maestri A Becker`
+- [![ORCID][iD]](https://orcid.org/0000-0002-2609-8996) `Cristiano Valim Bizarro`
 
 [Biopython]: https://github.com/biopython/biopython
+[iD]: https://img.shields.io/badge/ORCID-iD-%23A6CE39?logo=orcid

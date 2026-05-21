@@ -1,8 +1,5 @@
-API Reference
+CLI Reference
 =============
 
 .. toctree::
     :maxdepth: 2
-
-    pydecoys
-    strategies

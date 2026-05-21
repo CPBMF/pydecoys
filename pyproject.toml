@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 
 
 [project.scripts]
-Decoys = "Decoys.__main__:main"
+pydecoys = "pydecoys.__main__:main"
 
 
 [tool.poetry]

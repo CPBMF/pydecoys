@@ -47,10 +47,9 @@ def main() -> None:
         help='input file (default: `stdin`)'
     )
     parser.add_argument(
-        'output',
+        '-o', '--output',
         type=argparse.FileType('w'),
         default='-',
-        nargs='?',
         help='output file (default: `stdout`)'
     )
     parser.add_argument(

@@ -571,7 +571,7 @@ def seq_as_decoy(
     """
 
     decoy_generator = _validate_strategy(strategy)
-    return decoy_generator(sequence[1])
+    return decoy_generator(sequence)
 
 
 def register(

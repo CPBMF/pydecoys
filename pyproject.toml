@@ -37,6 +37,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^2.1.0"
+flake8 = "^7.3.0"
 
 
 [tool.poetry.group.docs]

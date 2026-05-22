@@ -55,33 +55,33 @@ under :mod:`strategies`. New strategies can be created by following the
 :class:`strategies.DecoyGenerator` protocol or by instantiating
 :class:`strategies.PseudoReverseRule` or :class:`strategies.PseudoShuffleRule`.
 
-- reverse:                     Reverse protein
-- reverse-keepn:               Reverse protein, except N-terminal aa
-- reverse-keepc:               Reverse protein, except C-terminal aa
-- reverse-keepterm:            Reserse protein, except terminal aas
-- shuffle:                     Shuffle protein
-- shuffle-keepn:               Shuffle protein, except N-terminal aa
-- shuffle-keepc:               Shuffle protein, except C-terminal aa
-- shuffle-keepterm:            Shuffle protein, except terminal aas
-- pseudoreverse-trypsin:       Pseudo-reverse trypsin fragments
-- pseudoreverse-stricttrypsin: Pseudo-reverse strict trypsin fragments
-- pseudoreverse-argc:          Pseudo-reverse ArgC fragments
-- pseudoreverse-aspn:          Pseudo-reverse AspN fragments
-- pseudoreverse-chymo:         Pseudo-reverse chymotrypsin fragments
-- pseudoreverse-gluc:          Pseudo-reverse GluC fragments
-- pseudoreverse-lysc:          Pseudo-reverse LysC fragments
-- pseudoreverse-lysn:          Pseudo-reverse LysN fragments
-- pseudoreverse-stricttrypsin-keepn: Pseudo-reverse strict trypsin fragments, except N-terminal aa
-- pseudoshuffle-trypsin:       Pseudo-shuffle trypsin fragments
-- pseudoshuffle-stricttrypsin: Pseudo-shuffle strict trypsin fragments
-- pseudoshuffle-argc:          Pseudo-shuffle ArgC fragments
-- pseudoshuffle-aspn:          Pseudo-shuffle AspN fragments
-- pseudoshuffle-chymo:         Pseudo-shuffle chymotrypsin fragments
-- pseudoshuffle-gluc:          Pseudo-shuffle GluC fragments
-- pseudoshuffle-lysc:          Pseudo-shuffle LysC fragments
-- pseudoshuffle-lysn:          Pseudo-shuffle LysN fragments
-- pseudoshuffle-stricttrypsin-keepn: Pseudo-shuffle strict trypsin fragments, except N-terminal aa
-"""  # noqa: E501
+- reverse:                  Reverse protein
+- reverse-keepn:            Reverse protein, except N-terminal aa
+- reverse-keepc:            Reverse protein, except C-terminal aa
+- reverse-keepterm:         Reserse protein, except terminal aas
+- shuffle:                  Shuffle protein
+- shuffle-keepn:            Shuffle protein, except N-terminal aa
+- shuffle-keepc:            Shuffle protein, except C-terminal aa
+- shuffle-keepterm:         Shuffle protein, except terminal aas
+- reversepep-trypsin:       Pseudo-reverse trypsin fragments
+- reversepep-stricttrypsin: Pseudo-reverse strict trypsin fragments
+- reversepep-argc:          Pseudo-reverse ArgC fragments
+- reversepep-aspn:          Pseudo-reverse AspN fragments
+- reversepep-chymo:         Pseudo-reverse chymotrypsin fragments
+- reversepep-gluc:          Pseudo-reverse GluC fragments
+- reversepep-lysc:          Pseudo-reverse LysC fragments
+- reversepep-lysn:          Pseudo-reverse LysN fragments
+- reversepep-stricttrypsin-keepn: Pseudo-reverse strict trypsin fragments, except N-terminal aa
+- shufflepep-trypsin:       Pseudo-shuffle trypsin fragments
+- shufflepep-stricttrypsin: Pseudo-shuffle strict trypsin fragments
+- shufflepep-argc:          Pseudo-shuffle ArgC fragments
+- shufflepep-aspn:          Pseudo-shuffle AspN fragments
+- shufflepep-chymo:         Pseudo-shuffle chymotrypsin fragments
+- shufflepep-gluc:          Pseudo-shuffle GluC fragments
+- shufflepep-lysc:          Pseudo-shuffle LysC fragments
+- shufflepep-lysn:          Pseudo-shuffle LysN fragments
+- shufflepep-stricttrypsin-keepn: Pseudo-shuffle strict trypsin fragments, except N-terminal aa
+"""  # noqa: W505, E501
 
 
 __version_info__ = (0, 1, 0)

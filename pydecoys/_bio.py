@@ -26,7 +26,7 @@ from typing import Iterable
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq, MutableSeq
 
-from .strategies import PseudoReverseRule, PseudoShuffleRule
+from .strategies import ReversePep, ShufflePep
 
 
 def SeqRecord_to_tuple(record: SeqRecord) -> tuple[str, str]:
@@ -34,17 +34,10 @@ def SeqRecord_to_tuple(record: SeqRecord) -> tuple[str, str]:
 
 
 def tuple_to_SeqRecord(record: tuple[str, str]) -> SeqRecord:
-    return SeqRecord(
-        Seq(record[1]),
-        record[0],
-        name="",
-        description=""
-    )
+    return SeqRecord(Seq(record[1]), record[0], name="", description="")
 
 
-def iter_SeqRecord(
-    seq: Iterable[SeqRecord] | SeqRecord
-) -> Iterable[SeqRecord]:
+def iter_SeqRecord(seq: Iterable[SeqRecord] | SeqRecord) -> Iterable[SeqRecord]:
     if isinstance(seq, SeqRecord):
         return [seq]
     return seq
@@ -60,26 +53,20 @@ def str_to_Seq(sequence: str) -> Seq:
 # Rebinding the name makes it lose its previous __doc__, so we also have
 # to fix them.
 def register():
-    def reverse_decoy_from_Seq(
-        self,
-        sequence: Seq | MutableSeq
-    ) -> Seq | MutableSeq:
+    def reverse_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
         fragments = re.split(self._pattern, str(sequence))
         rev_frags = [frag[::-1] for frag in fragments]
         cls = type(sequence)
         return cls("".join(rev_frags))
 
-    reverse_decoy_from_Seq.__doc__ = PseudoReverseRule.decoy_from_Seq.__doc__
-    PseudoReverseRule.decoy_from_Seq = reverse_decoy_from_Seq  # type: ignore
+    reverse_decoy_from_Seq.__doc__ = ReversePep.decoy_from_Seq.__doc__
+    ReversePep.decoy_from_Seq = reverse_decoy_from_Seq  # type: ignore
 
-    def shuffle_decoy_from_Seq(
-        self,
-        sequence: Seq | MutableSeq
-    ) -> Seq | MutableSeq:
+    def shuffle_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
         fragments = re.split(self._pattern, str(sequence))
         shuf_frags = [self._shuffle(frag) for frag in fragments]
         cls = type(sequence)
         return cls("".join(shuf_frags))
 
-    shuffle_decoy_from_Seq.__doc__ = PseudoShuffleRule.decoy_from_Seq.__doc__
-    PseudoShuffleRule.decoy_from_Seq = shuffle_decoy_from_Seq  # type: ignore
+    shuffle_decoy_from_Seq.__doc__ = ShufflePep.decoy_from_Seq.__doc__
+    ShufflePep.decoy_from_Seq = shuffle_decoy_from_Seq  # type: ignore

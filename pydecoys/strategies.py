@@ -29,8 +29,8 @@ instantiation.
 Available enzymes
 -----------------
 Pre-initialized pseudo-reversers and pseudo-shufflers covering most proteases
-are available, following the name scheme `pseudoreverse_<enzyme>` and
-`pseudoshuffle_<enzyme>`.
+are available, following the name scheme `reversepep_<enzyme>` and
+`shufflepep_<enzyme>`.
 """
 
 from __future__ import annotations
@@ -274,11 +274,17 @@ def _cls_cast(obj: SeqLike, sequence: str) -> SeqLike:
     return cls(sequence)
 
 
-class PseudoReverseRule:
+class ReversePep:
     """Appliy pseudo-reverse decoy generation with the specified enzyme
     properties.
 
-    Callable object. Enzyme specifications can be checked via its attributes.
+    Pseudo-reverse (or reverse peptide) means that the enzymatic peptides will
+    be reversed, except for the cleavage site. For trypsin:
+
+    - `QSYKPTRTHQ -> QSYKPTR.THQ -> TPKYSQRQHT`
+
+    This better preserves actual peptide amount and sizes from the targets to
+    the decoys.
 
     Parameters
     ----------
@@ -295,8 +301,7 @@ class PseudoReverseRule:
 
     Examples
     --------
-    >>> from pydecoys.strategies import PseudoReverseRule
-    >>> rev = PseudoReverseRule("KR", nocut="P")
+    >>> rev = ReversePep("KR", nocut="P")
     >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
     KR, P, C
     """
@@ -308,9 +313,6 @@ class PseudoReverseRule:
         nocut: str | None = None,
         keep_n: bool = False
     ) -> None:
-        if sense == 'N' and nocut is not None:
-            raise ValueError("Cannot have nocut specification with N sense")
-
         self._cut = cut
         self._nocut = nocut
         # Without type hints this is cast to a str
@@ -319,7 +321,7 @@ class PseudoReverseRule:
 
         pattern = rf"([{cut}])"
         if self._keep_n:
-            pattern = f"(^.|[{cut}])"
+            pattern = rf"(^.|[{cut}])"
         if nocut is not None:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
@@ -348,18 +350,20 @@ class PseudoReverseRule:
 
         Examples
         --------
-        >>> from pydecoys.strategies import PseudoReverseRule
-        >>> rev = PseudoReverseRule("KR", nocut="P")
+        >>> rev = ReversePep("KR", nocut="P")
         >>> rev('QSYKPTRTHQ')
         'TPKYSQRQHT'
+        >>> rev = ReversePep("K", sense="N")
+        >>> rev('QSYKPTRTHQ')
+        'YSQKQHTRTP'
         """
         fragments = re.split(self._pattern, str(sequence))
         rev_frags = [frag[::-1] for frag in fragments]
         return _cls_cast(sequence, "".join(rev_frags))
 
     def decoy_from_str(self, sequence: str) -> str:
-        """Convenience funcion. Equivalent to ``PseudoReverseRule(sequence)``
-        where `sequence` is a `str`.
+        """Convenience funcion. Equivalent to ``ReversePep(sequence)`` where
+        `sequence` is a `str`.
         """
         fragments = re.split(self._pattern, str(sequence))
         rev_frags = [frag[::-1] for frag in fragments]
@@ -372,8 +376,8 @@ class PseudoReverseRule:
     def decoy_from_Seq(self, sequence: MutableSeq) -> MutableSeq: ...
 
     def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
-        """Convenience funcion. Equivalent to ``PseudoReverseRule(sequence)``
-        where `sequence` is a `Seq` or `MutableSeq`.
+        """Convenience funcion. Equivalent to ``ReversePep(sequence)`` where
+        `sequence` is a `Seq` or `MutableSeq`.
         """
         from . import _bio
         _bio.register()
@@ -400,11 +404,17 @@ class PseudoReverseRule:
         return self._keep_n
 
 
-class PseudoShuffleRule:
+class ShufflePep:
     """Appliy pseudo-shuffle decoy generation with the specified enzyme
     properties.
 
-    Callable object. Enzyme specifications can be checked via its attributes.
+    Pseudo-shuffle (or shuffle peptide) means that the enzymatic peptides will
+    be shuffled, except for the cleavage site. For trypsin:
+
+    - `QSYKPTRTHQ -> QSYKPTR.THQ -> YTSKQPRQHT`
+
+    This better preserves actual peptide amount and sizes from the targets to
+    the decoys.
 
     Parameters
     ----------
@@ -421,8 +431,7 @@ class PseudoShuffleRule:
 
     Examples
     --------
-    >>> from pydecoys.strategies import PseudoShuffleRule
-    >>> shuf = PseudoShuffleRule("KR", nocut="P")
+    >>> shuf = ShufflePep("KR", nocut="P")
     >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
     KR, P, C
     """
@@ -445,7 +454,7 @@ class PseudoShuffleRule:
 
         pattern = rf"([{cut}])"
         if self._keep_n:
-            pattern = f"(^.|[{cut}])"
+            pattern = rf"(^.|[{cut}])"
         if nocut is not None:
             pattern += rf"(?!{nocut})"
         self._pattern = re.compile(pattern)
@@ -474,10 +483,12 @@ class PseudoShuffleRule:
 
         Examples
         --------
-        >>> from pydecoys.strategies import PseudoShuffleRule
-        >>> shuf = PseudoShuffleRule("KR", nocut="P")
+        >>> shuf = ShufflePep("KR", nocut="P")
         >>> shuf('QSYKPTRTHQ')
         'YTSKQPRQHT'
+        >>> shuf = ShufflePep("K", sense="N")
+        >>> shuf('QSYKPTRTHQ')
+        'QYSKTHRPTQ'
         """
         fragments = re.split(self._pattern, str(sequence))
 
@@ -485,8 +496,8 @@ class PseudoShuffleRule:
         return _cls_cast(sequence, "".join(shuf_frags))
 
     def decoy_from_str(self, sequence: str) -> str:
-        """Convenience funcion. Equivalent to ``PseudoShuffleRule(sequence)``
-        where `sequence` is a `str`.
+        """Convenience funcion. Equivalent to ``ShufflePep(sequence)`` where
+        `sequence` is a `str`.
         """
         fragments = re.split(self._pattern, str(sequence))
         shuf_frags = [self._shuffle(frag) for frag in fragments]
@@ -499,8 +510,8 @@ class PseudoShuffleRule:
     def decoy_from_Seq(self, sequence: MutableSeq) -> MutableSeq: ...
 
     def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
-        """Convenience funcion. Equivalent to ``PseudoShuffleRule(sequence)``
-        where `sequence` is a `Seq` or `MutableSeq`.
+        """Convenience funcion. Equivalent to ``ShufflePep(sequence)`` where
+        `sequence` is a `Seq` or `MutableSeq`.
         """
         from . import _bio
         _bio.register()
@@ -533,56 +544,56 @@ class PseudoShuffleRule:
 
 
 # Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
-pseudoreverse_trypsin: DecoyGenerator = PseudoReverseRule("KR", nocut="P")
-"""Enzymatic specifications - ``cut='KR'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
+reversepep_trypsin: DecoyGenerator = ReversePep("KR", nocut="P")
+"""Specifications - ``cut='KR'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoreverse_stricttrypsin: DecoyGenerator = PseudoReverseRule("KR")
-"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=False``."""   # noqa: E501
+reversepep_stricttrypsin: DecoyGenerator = ReversePep("KR")
+"""Specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=False``."""   # noqa: W505, E501
 
-pseudoreverse_argc: DecoyGenerator = PseudoReverseRule("R", nocut="P")
-"""Enzymatic specifications - ``cut='R'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+reversepep_argc: DecoyGenerator = ReversePep("R", nocut="P")
+"""Specifications - ``cut='R'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: W505, E501
 
-pseudoreverse_aspn: DecoyGenerator = PseudoReverseRule("D", sense="N")
-"""Enzymatic specifications - ``cut='D'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+reversepep_aspn: DecoyGenerator = ReversePep("D", sense="N")
+"""Specifications - ``cut='D'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoreverse_chymo: DecoyGenerator = PseudoReverseRule("FLWY", nocut="P")
-"""Enzymatic specifications - ``cut='FLWY'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""  # noqa: E501
+reversepep_chymo: DecoyGenerator = ReversePep("FLWY", nocut="P")
+"""Specifications - ``cut='FLWY'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""  # noqa: W505, E501
 
-pseudoreverse_gluc: DecoyGenerator = PseudoReverseRule("DE", nocut="P")
-"""Enzymatic specifications - ``cut='DE'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
+reversepep_gluc: DecoyGenerator = ReversePep("DE", nocut="P")
+"""Specifications - ``cut='DE'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoreverse_lysc: DecoyGenerator = PseudoReverseRule("K", nocut="P")
-"""Enzymatic specifications - ``cut='K'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+reversepep_lysc: DecoyGenerator = ReversePep("K", nocut="P")
+"""Specifications - ``cut='K'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: W505, E501
 
-pseudoreverse_lysn: DecoyGenerator = PseudoReverseRule("K", sense="N")
-"""Enzymatic specifications - ``cut='K'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+reversepep_lysn: DecoyGenerator = ReversePep("K", sense="N")
+"""Specifications - ``cut='K'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoreverse_stricttrypsin_keepn: DecoyGenerator = PseudoReverseRule("KR", keep_n=True)          # noqa: E501
-"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=True``."""    # noqa: E501
+reversepep_stricttrypsin_keepn: DecoyGenerator = ReversePep("KR", keep_n=True)
+"""Specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=True``."""    # noqa: W505, E501
 
-pseudoshuffle_trypsin: DecoyGenerator = PseudoShuffleRule("KR", nocut="P")
-"""Enzymatic specifications - ``cut='KR'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
+shufflepep_trypsin: DecoyGenerator = ShufflePep("KR", nocut="P")
+"""Specifications - ``cut='KR'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoshuffle_stricttrypsin: DecoyGenerator = PseudoShuffleRule("KR")
-"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=False``."""   # noqa: E501
+shufflepep_stricttrypsin: DecoyGenerator = ShufflePep("KR")
+"""Specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=False``."""   # noqa: W505, E501
 
-pseudoshuffle_argc: DecoyGenerator = PseudoShuffleRule("R", nocut="P")
-"""Enzymatic specifications - ``cut='R'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+shufflepep_argc: DecoyGenerator = ShufflePep("R", nocut="P")
+"""Specifications - ``cut='R'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: W505, E501
 
-pseudoshuffle_aspn: DecoyGenerator = PseudoShuffleRule("D", sense="N")
-"""Enzymatic specifications - ``cut='D'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+shufflepep_aspn: DecoyGenerator = ShufflePep("D", sense="N")
+"""Specifications - ``cut='D'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoshuffle_chymo: DecoyGenerator = PseudoShuffleRule("FLWY", nocut="P")
-"""Enzymatic specifications - ``cut='FLWY'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""  # noqa: E501
+shufflepep_chymo: DecoyGenerator = ShufflePep("FLWY", nocut="P")
+"""Specifications - ``cut='FLWY'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""  # noqa: W505, E501
 
-pseudoshuffle_gluc: DecoyGenerator = PseudoShuffleRule("DE", nocut="P")
-"""Enzymatic specifications - ``cut='DE'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: E501
+shufflepep_gluc: DecoyGenerator = ShufflePep("DE", nocut="P")
+"""Specifications - ``cut='DE'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoshuffle_lysc: DecoyGenerator = PseudoShuffleRule("K", nocut="P")
-"""Enzymatic specifications - ``cut='K'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: E501
+shufflepep_lysc: DecoyGenerator = ShufflePep("K", nocut="P")
+"""Specifications - ``cut='K'``, ``nocut='P'``, ``sense='C'``; ``keep_n=False``."""     # noqa: W505, E501
 
-pseudoshuffle_lysn: DecoyGenerator = PseudoShuffleRule("K", sense="N")
-"""Enzymatic specifications - ``cut='K'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: E501
+shufflepep_lysn: DecoyGenerator = ShufflePep("K", sense="N")
+"""Specifications - ``cut='K'``, ``nocut=None``, ``sense='N'``; ``keep_n=False``."""    # noqa: W505, E501
 
-pseudoshuffle_stricttrypsin_keepn: DecoyGenerator = PseudoShuffleRule("KR", keep_n=True)          # noqa: E501
-"""Enzymatic specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=True``."""    # noqa: E501
+shufflepep_stricttrypsin_keepn: DecoyGenerator = ShufflePep("KR", keep_n=True)
+"""Specifications - ``cut='KR'``, ``nocut=None``, ``sense='C'``; ``keep_n=True``."""    # noqa: W505, E501

@@ -44,24 +44,24 @@ _decoy_strategy: dict[str, strategies.DecoyGenerator] = {
     "shuffle-keepn": strategies.shuffle_keep_n,
     "shuffle-keepc": strategies.shuffle_keep_c,
     "shuffle-keepterm": strategies.shuffle_keep_term,
-    "pseudoreverse-trypsin": strategies.pseudoreverse_trypsin,
-    "pseudoreverse-stricttrypsin": strategies.pseudoreverse_stricttrypsin,
-    "pseudoreverse-argc": strategies.pseudoreverse_argc,
-    "pseudoreverse-aspn": strategies.pseudoreverse_aspn,
-    "pseudoreverse-chymo": strategies.pseudoreverse_chymo,
-    "pseudoreverse-gluc": strategies.pseudoreverse_gluc,
-    "pseudoreverse-lysc": strategies.pseudoreverse_lysc,
-    "pseudoreverse-lysn": strategies.pseudoreverse_lysn,
-    "pseudoreverse-stricttrypsin-keepn": strategies.pseudoreverse_stricttrypsin_keepn,  # noqa: E501
-    "pseudoshuffle-trypsin": strategies.pseudoshuffle_trypsin,
-    "pseudoshuffle-stricttrypsin": strategies.pseudoshuffle_stricttrypsin,
-    "pseudoshuffle-argc": strategies.pseudoshuffle_argc,
-    "pseudoshuffle-aspn": strategies.pseudoshuffle_aspn,
-    "pseudoshuffle-chymo": strategies.pseudoshuffle_chymo,
-    "pseudoshuffle-gluc": strategies.pseudoshuffle_gluc,
-    "pseudoshuffle-lysc": strategies.pseudoshuffle_lysc,
-    "pseudoshuffle-lysn": strategies.pseudoshuffle_lysn,
-    "pseudoshuffle-stricttrypsin-keepn": strategies.pseudoshuffle_stricttrypsin_keepn,  # noqa: E501
+    "reversepep-trypsin": strategies.reversepep_trypsin,
+    "reversepep-stricttrypsin": strategies.reversepep_stricttrypsin,
+    "reversepep-argc": strategies.reversepep_argc,
+    "reversepep-aspn": strategies.reversepep_aspn,
+    "reversepep-chymo": strategies.reversepep_chymo,
+    "reversepep-gluc": strategies.reversepep_gluc,
+    "reversepep-lysc": strategies.reversepep_lysc,
+    "reversepep-lysn": strategies.reversepep_lysn,
+    "reversepep-stricttrypsin-keepn": strategies.reversepep_stricttrypsin_keepn,  # noqa: E501
+    "shufflepep-trypsin": strategies.shufflepep_trypsin,
+    "shufflepep-stricttrypsin": strategies.shufflepep_stricttrypsin,
+    "shufflepep-argc": strategies.shufflepep_argc,
+    "shufflepep-aspn": strategies.shufflepep_aspn,
+    "shufflepep-chymo": strategies.shufflepep_chymo,
+    "shufflepep-gluc": strategies.shufflepep_gluc,
+    "shufflepep-lysc": strategies.shufflepep_lysc,
+    "shufflepep-lysn": strategies.shufflepep_lysn,
+    "shufflepep-stricttrypsin-keepn": strategies.shufflepep_stricttrypsin_keepn,  # noqa: E501
 }
 
 
@@ -163,12 +163,7 @@ def to_fasta(
     else:
         sequences = input
 
-    decoys = from_SeqRecords(
-        sequences,  # type: ignore
-        strategy,
-        decoy_tag,
-        prefix
-    )
+    decoys = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
     return SeqIO.write(decoys, output, format='fasta')
 
 
@@ -201,14 +196,13 @@ def from_SeqRecords(
 
     Examples
     --------
-    >>> import pydecoys
     >>> from Bio.SeqRecord import SeqRecord
     >>> seqs = [
     ...     SeqRecord('DNIDYKAVYR', 'seq1'),
     ...     SeqRecord('QSYMCTVTHP', 'seq2'),
     ...     SeqRecord('CQWSLTEELL', 'seq3'),
     ... ]
-    >>> for decoy in pydecoys.from_SeqRecords(seqs, 'reverse'):
+    >>> for decoy in from_SeqRecords(seqs, 'reverse'):
     ...     print(f'{decoy.id}: {decoy.seq}')
     decoy_seq1: Seq('RYVAKYDIND')
     decoy_seq2: Seq('PHTVTCMYSQ')
@@ -286,13 +280,12 @@ def from_tuples(
 
     Examples
     --------
-    >>> import pydecoys
     >>> seqs = [
     ...     ('seq1', 'DNIDYKAVYR'),
     ...     ('seq2', 'QSYMCTVTHP'),
     ...     ('seq3', 'CQWSLTEELL'),
     ... ]
-    >>> for decoy in pydecoys.from_tuples(seqs, 'reverse'):
+    >>> for decoy in from_tuples(seqs, 'reverse'):
     ...     print(f'{decoy[0]}: {decoy[1]}')
     decoy_seq1: Seq('RYVAKYDIND')
     decoy_seq2: Seq('PHTVTCMYSQ')
@@ -364,13 +357,12 @@ def from_seqs(
 
     Examples
     --------
-    >>> import pydecoys
     >>> seqs = [
     ...     'DNIDYKAVYR',
     ...     'QSYMCTVTHP',
     ...     'CQWSLTEELL',
     ... ]
-    >>> for decoy in pydecoys.from_seqs(seqs, 'reverse'):
+    >>> for decoy in from_seqs(seqs, 'reverse'):
     ...     print(decoy)
     'RYVAKYDIND'
     'PHTVTCMYSQ'
@@ -431,10 +423,9 @@ def SeqRecord_as_decoy(
 
     Examples
     --------
-    >>> import pydecoys
     >>> from Bio.SeqRecord import SeqRecord
     >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
-    >>> decoy = pydecoys.SeqRecord_as_decoy(seq, 'reverse')
+    >>> decoy = SeqRecord_as_decoy(seq, 'reverse')
     >>> print(f'{decoy.id}: {decoy.seq}')
     decoy_seq1: Seq('RYVAKYDIND')
     """
@@ -512,9 +503,8 @@ def tuple_as_decoy(
 
     Examples
     --------
-    >>> import pydecoys
     >>> seq = ('seq1', 'DNIDYKAVYR')
-    >>> decoy = pydecoys.tuple_as_decoy(seq, 'reverse')
+    >>> decoy = tuple_as_decoy(seq, 'reverse')
     >>> print(f'{decoy[0]}: {decoy[1]}')
     decoy_seq1: 'RYVAKYDIND'
     """
@@ -576,8 +566,7 @@ def seq_as_decoy(
 
     Examples
     --------
-    >>> import pydecoys
-    >>> pydecoys.seq_as_decoy('DNIDYKAVYR', 'reverse')
+    >>> seq_as_decoy('DNIDYKAVYR', 'reverse')
     'RYVAKYDIND'
     """
 
@@ -604,10 +593,9 @@ def register(
     Given a `random_seq` function that takes a sequence and returns a new,
     unrelated sequence of same size:
 
-    >>> import pydecoys
-    >>> pydecoys.register('randomseq', random_seq)
+    >>> register('randomseq', random_seq)
     >>> seq = 'DNIDYKAVYR'
-    >>> pydecoys.seq_as_decoy(seq, 'randomseq')
+    >>> seq_as_decoy(seq, 'randomseq')
     'LLEETLSWQC'
     """
 

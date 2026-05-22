@@ -617,9 +617,9 @@ def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
         return strategy
 
     if not isinstance(strategy, str):
-        raise TypeError("Need a string for the decoy strategy (lower case)")
+        raise TypeError("Need a string or callable for the decoy strategy (lower case)")
     if not strategy:
-        raise ValueError("Strategy required (lower case string)")
+        raise ValueError("Strategy required (lower case string or callable)")
     if not strategy.islower():
         raise ValueError(f"Strategy string '{strategy}' should be lower case")
 

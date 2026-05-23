@@ -17,9 +17,7 @@
 
 """CLI entrypoint for PyDecoys."""
 
-from Bio import SeqIO
-
-from . import from_SeqRecords
+from . import to_fasta
 
 
 def main() -> None:
@@ -58,12 +56,43 @@ def main() -> None:
         default='reverse',
         help='decoy generation strategy (default: \'%(default)s\')'
     )
+    parser.add_argument(
+        '-t', '--decoy-tag',
+        default='decoy_',
+        help='decoy tag identifier (default: \'%(default)s\')'
+    )
+
+    prefix = parser.add_mutually_exclusive_group()
+    prefix.add_argument(
+        '--prefix',
+        action='store_true',
+        dest='prefix',
+        help='add `decoy_tag` as prefix (default)'
+    )
+    prefix.add_argument(
+        '--suffix',
+        action='store_false',
+        dest='prefix',
+        help='add `decoy_tag` as suffix'
+    )
+    parser.set_defaults(prefix=True)
+
+    parser.add_argument(
+        '--concat',
+        action='store_true',
+        help='if specified, output fasta will have both target and decoy entries'
+    )
 
     args = parser.parse_args()
 
-    targets = SeqIO.parse(args.input, 'fasta')
-    decoys = from_SeqRecords(targets, args.strategy)
-    SeqIO.write(decoys, args.output, 'fasta')
+    to_fasta(
+        args.input,
+        args.output,
+        args.strategy,
+        args.decoy_tag,
+        args.prefix,
+        args.concat
+    )
 
 
 if __name__ == '__main__':

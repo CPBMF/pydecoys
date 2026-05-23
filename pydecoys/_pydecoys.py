@@ -113,7 +113,8 @@ def to_fasta(
     output: _PathOrIO,
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
-    prefix: bool = True
+    prefix: bool = True,
+    concat: bool = False
 ) -> int:
     """Apply a decoy generator to a set of sequences and write them to a file.
     Requires `Biopython`.
@@ -134,10 +135,13 @@ def to_fasta(
     prefix
         If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
         to `True`.
+    concat
+        If `True`, output fasta will have both target and decoy entries. All
+        targets will be first, then all decoys. Defaults to `False`.'
 
     Returns
     -------
-    The number of decoys written (as an integer).
+    The number of entries written (as an integer).
 
     Notes
     -----
@@ -149,23 +153,32 @@ def to_fasta(
     ``count = pydecoys.to_fasta(targets, output, strategy)`` where `targets`
     is an ``Iterable[SeqRecord]`` is equivalent to:
 
-    >>> from Bio import SeqIO
     >>> decoys = pydecoys.from_SeqRecords(targets, strategy)
     >>> count = SeqIO.write(decoys, output, format='fasta')
+
+    If `True`, the `concat` flag will cause all sequences to be loaded
+    into a list prior to decoy generation to avoid parsing sequences twice.
     """
 
     from Bio import SeqIO
     from Bio.SeqRecord import SeqRecord
 
     if isinstance(input, str | os.PathLike | io.TextIOBase):
-        sequences = from_fasta(input, 'fasta')
+        sequences = SeqIO.parse(input, 'fasta')
     elif isinstance(input, SeqRecord):
         sequences = [input]
     else:
         sequences = input
 
-    decoys = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
-    return SeqIO.write(decoys, output, format='fasta')
+    if concat:
+        from itertools import chain
+        sequences = list(sequences)
+        decoys = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
+        write = chain(sequences, decoys)
+    else:
+        write = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
+
+    return SeqIO.write(write, output, format='fasta')  # type: ignore
 
 
 def from_SeqRecords(

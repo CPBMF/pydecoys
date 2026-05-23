@@ -1,31 +1,16 @@
+.. _cli:
+
 CLI Reference
 =============
 
-Getting started
----------------
-Running `pydecoys` is simple:
+Dependencies
+------------
+- Requires Python 3.12 or superior.
+- Requires Biopython. This should be automatically installed.
 
-.. code-block:: sh
 
-    # To generate a reversed decoy set from a given `targets.fasta`
-    pydecoys targets.fasta -o rev.fasta
-
-    # Change the strategy with the `-s/--strategy` flag
-    pydecoys targets.fasta -o shuf.fasta -s shuffle
-
-    # The input defaults to stdin
-    cat database_1.fasta database_2.fasta | pydecoys -o rev_1_2.fasta
-
-    # And the output, to stdout
-    pydecoys targets.fasta | grep some_seq
-
-.. note::
-    See the full list of available strategies at :ref:`available-strategies`.
-
-List of options
----------------
-The full list of available options:
-
+CLI options
+-----------
 `input`
 ^^^^^^^
 input file (default: `stdin`)
@@ -36,7 +21,19 @@ output filename (default: `stdout`)
 
 `-s/--strategy`
 ^^^^^^^^^^^^^^^
-decoy generation strategy (default: `reverse`)
+decoy generation strategy (default: `'reverse'`)
+
+`--decoy-tag`
+^^^^^^^^^^^^^
+decoy tag identifier (default: `'decoy_'`)
+
+`--prefix | --suffix`
+^^^^^^^^^^^^^^^^^^^^^
+add `decoy_tag` as prefix (default) or suffix
+
+`--concat`
+^^^^^^^^^^
+if specified, output fasta will have both target and decoy entries
 
 `-h/--help`
 ^^^^^^^^^^^

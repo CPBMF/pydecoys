@@ -43,6 +43,7 @@ from .core import (
     ShufflePep,
     RAND,
     seq_cast,
+    AMINOACIDS,
 )
 
 
@@ -57,4 +58,5 @@ __all__ = [
     'ShufflePep',
     'RAND',
     'seq_cast',
+    'AMINOACIDS',
 ]

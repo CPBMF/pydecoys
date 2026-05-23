@@ -38,12 +38,14 @@ The most used proteases are available:
 
 - Trypsin
 - Strict trypsin
-- ArgC
-- AspN
-- GluC
-- LysC
-- LysN
+- Arg-C
+- Asp-N
+- Glu-C
+- Lys-C
+- Lys-N
 - Chymotrypsin
+- Pepsin-A
+- CNBr
 
 A full tutorial on how to set new proteases and decoy strategies can be found at the
 documentation.

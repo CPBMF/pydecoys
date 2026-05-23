@@ -29,6 +29,7 @@ if t.TYPE_CHECKING:
 
 from . import strategies
 from .strategies import SeqLike
+from . import _builtins
 
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
@@ -36,32 +37,32 @@ type _Strategy = str | strategies.DecoyGenerator
 
 
 _decoy_strategy: dict[str, strategies.DecoyGenerator] = {
-    "reverse": strategies.reverse,
-    "reverse-keepn": strategies.reverse_keep_n,
-    "reverse-keepc": strategies.reverse_keep_c,
-    "reverse-keepterm": strategies.reverse_keep_term,
-    "shuffle": strategies.shuffle,
-    "shuffle-keepn": strategies.shuffle_keep_n,
-    "shuffle-keepc": strategies.shuffle_keep_c,
-    "shuffle-keepterm": strategies.shuffle_keep_term,
-    "reversepep-trypsin": strategies.reversepep_trypsin,
-    "reversepep-stricttrypsin": strategies.reversepep_stricttrypsin,
-    "reversepep-argc": strategies.reversepep_argc,
-    "reversepep-aspn": strategies.reversepep_aspn,
-    "reversepep-chymo": strategies.reversepep_chymo,
-    "reversepep-gluc": strategies.reversepep_gluc,
-    "reversepep-lysc": strategies.reversepep_lysc,
-    "reversepep-lysn": strategies.reversepep_lysn,
-    "reversepep-stricttrypsin-keepn": strategies.reversepep_stricttrypsin_keepn,  # noqa: E501
-    "shufflepep-trypsin": strategies.shufflepep_trypsin,
-    "shufflepep-stricttrypsin": strategies.shufflepep_stricttrypsin,
-    "shufflepep-argc": strategies.shufflepep_argc,
-    "shufflepep-aspn": strategies.shufflepep_aspn,
-    "shufflepep-chymo": strategies.shufflepep_chymo,
-    "shufflepep-gluc": strategies.shufflepep_gluc,
-    "shufflepep-lysc": strategies.shufflepep_lysc,
-    "shufflepep-lysn": strategies.shufflepep_lysn,
-    "shufflepep-stricttrypsin-keepn": strategies.shufflepep_stricttrypsin_keepn,  # noqa: E501
+    "reverse": _builtins.reverse,
+    "reverse-keepn": _builtins.reverse_keep_n,
+    "reverse-keepc": _builtins.reverse_keep_c,
+    "reverse-keepterm": _builtins.reverse_keep_term,
+    "shuffle": _builtins.shuffle,
+    "shuffle-keepn": _builtins.shuffle_keep_n,
+    "shuffle-keepc": _builtins.shuffle_keep_c,
+    "shuffle-keepterm": _builtins.shuffle_keep_term,
+    "reversepep-trypsin": _builtins.reversepep_trypsin,
+    "reversepep-stricttrypsin": _builtins.reversepep_stricttrypsin,
+    "reversepep-argc": _builtins.reversepep_argc,
+    "reversepep-aspn": _builtins.reversepep_aspn,
+    "reversepep-chymo": _builtins.reversepep_chymo,
+    "reversepep-gluc": _builtins.reversepep_gluc,
+    "reversepep-lysc": _builtins.reversepep_lysc,
+    "reversepep-lysn": _builtins.reversepep_lysn,
+    "reversepep-stricttrypsin-keepn": _builtins.reversepep_stricttrypsin_keepn,  # noqa: E501
+    "shufflepep-trypsin": _builtins.shufflepep_trypsin,
+    "shufflepep-stricttrypsin": _builtins.shufflepep_stricttrypsin,
+    "shufflepep-argc": _builtins.shufflepep_argc,
+    "shufflepep-aspn": _builtins.shufflepep_aspn,
+    "shufflepep-chymo": _builtins.shufflepep_chymo,
+    "shufflepep-gluc": _builtins.shufflepep_gluc,
+    "shufflepep-lysc": _builtins.shufflepep_lysc,
+    "shufflepep-lysn": _builtins.shufflepep_lysn,
+    "shufflepep-stricttrypsin-keepn": _builtins.shufflepep_stricttrypsin_keepn,  # noqa: E501
 }
 
 

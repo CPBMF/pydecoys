@@ -50,7 +50,7 @@ def main() -> None:
         '-o', '--output',
         type=argparse.FileType('w'),
         default='-',
-        help='output file (default: `stdout`)'
+        help='output filename (default: `stdout`)'
     )
     parser.add_argument(
         '-s', '--strategy',

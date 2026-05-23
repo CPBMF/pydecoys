@@ -36,11 +36,6 @@ if TYPE_CHECKING:
     from Bio.Seq import Seq, MutableSeq
 
 
-# So shuffled decoys are always reproducible
-RAND = random.Random(10)
-"""Random number generator for stochastic decoy strategies."""
-
-
 type SeqLike = 'str | Seq | MutableSeq'
 """`SeqLike` objects can be indexed and spliced; `str` at runtime."""
 
@@ -49,6 +44,15 @@ type Seq_ = 'Seq'
 
 type MutableSeq_ = 'MutableSeq'
 """`MutableSeq` type that doesn't require Biopython; `str` at runtime."""
+
+
+# So shuffled decoys are always reproducible
+RAND = random.Random(10)
+"""Random number generator for stochastic decoy strategies."""
+
+
+AMINOACIDS = 'QWERTYIPASDFGHKLCVNM'
+"""Standard 20 aminoacids single-letter codes, majuscule."""
 
 
 class DecoyGenerator(Protocol):

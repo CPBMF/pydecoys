@@ -1,7 +1,14 @@
-PyDecoys
+pydecoys
 ========
 
-.. automodule:: pydecoys
+.. currentmodule:: pydecoys
+
+Provides:
+
+   #. A CLI app to easily generate a decoy fasta file from a target fasta file
+   #. A comprehensive Python API with IO, Generator and single data functions
+   #. Easy implementation of custom decoy strategies
+   #. Full integration with Biopython
 
 .. note::
    Some functionalities of PyDecoys require Biopython. Those functionalities
@@ -35,11 +42,6 @@ Functions that return a single decoy sequence from a single target sequence:
 .. autofunction:: SeqRecord_as_decoy
 .. autofunction:: seq_as_decoy
 .. autofunction:: tuple_as_decoy
-
-.. note::
-   Those functions do not give context to
-   :py:class:`strategies.ContextfulGenerator` objects. Context should be loaded
-   beforehad.
 
 Utils:
 

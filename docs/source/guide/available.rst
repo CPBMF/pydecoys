@@ -11,11 +11,14 @@ str key             Description
 reverse             Reverse the aminoacid order of the target protein
 shuffle             Shuffle the target protein aminoacids
 reversepep-<enzyme> Reverse the aminoacid order of the enzymatic fragments, except the cleavage sites
-shuffle-<enzyme>    Shuffle the aminoacids of the enzymatic fragments, except the cleavage sites
+shufflepep-<enzyme> Shuffle the aminoacids of the enzymatic fragments, except the cleavage sites
 =================== =================================================================================
 
 Terminal-aa options
 -------------------
+If you want to preserve terminal aminoacids from the target protein, you can
+choose one of the following:
+
 ========== =================================
 str key    Description
 ========== =================================
@@ -26,6 +29,8 @@ str key    Description
 
 Enzymes
 -------
+For enzyme-specific strategies, the followin enzymes are available:
+
 ============== ============= ==== ===== =====
 Enzyme         str key       cut  nocut sense
 ============== ============= ==== ===== =====

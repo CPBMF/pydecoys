@@ -24,6 +24,7 @@ from collections.abc import Sequence
 import random
 import re
 from typing import (
+    Final,
     Literal,
     Protocol,
     overload,
@@ -47,11 +48,10 @@ type MutableSeq_ = 'MutableSeq'
 
 
 # So shuffled decoys are always reproducible
-RAND = random.Random(10)
+RAND: Final = random.Random(10)
 """Random number generator for stochastic decoy strategies."""
 
-
-AMINOACIDS = 'QWERTYIPASDFGHKLCVNM'
+AMINOACIDS: Final = 'QWERTYIPASDFGHKLCVNM'
 """Standard 20 aminoacids single-letter codes, majuscule."""
 
 
@@ -112,12 +112,12 @@ class ContextfulGenerator(DecoyGenerator, Protocol):
 class EnzymeSpecificGenerator(ABC):
     """Abstract base class for enzymatic aware decoy generation.
 
-    This class creates a compiled regex pattern at instantiation that matches
+    This class creates a compiled regex pattern at instantiation that captures
     peptides that shouldn't be altered (cleavage sites, and maybe N- and
     C-termini if specified at class instantiation). The pattern can be accessed
     through ``self._pattern``.
 
-    This class also save the enzymatic specifications as get-only parameters.
+    This class also save the enzymatic specifications as get-only attributes.
 
     Parameters
     ----------

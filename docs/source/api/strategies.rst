@@ -1,15 +1,34 @@
-strategies
-==========
+pydecoys.strategies
+===================
 
 .. currentmodule:: pydecoys.strategies
 
 .. automodule:: pydecoys.strategies
 
-.. autotype:: SeqLike
-.. autotype:: Seq_
-.. autotype:: MutableSeq_
+.. type:: SeqLike
 
-.. autodata:: RAND
+   ``(str | Seq | MutableSeq)``
+
+   `SeqLike` objects can be indexed and spliced; `str` at runtime.
+
+.. type:: Seq_
+
+   ``Seq``
+
+   `Seq` type that doesn't require Biopython; `str` at runtime.
+
+.. type:: MutableSeq_
+
+   ``MutableSeq``
+
+   `MutableSeq` type that doesn't require Biopython; `str` at runtime.
+
+.. note:: None of those types need `Biopython` installed.
+
+.. data:: RAND
+   :type: typing.Final[random.Random]
+
+   Random number generator for stochastic decoy strategies.
 
    This RNG has a fixed seed to guarantee reproducibility and repeatability
    of decoy databases and thus any experiments using them. Custom stochastic
@@ -23,9 +42,11 @@ strategies
       than once in a target dataset, a stochastic method will inflate the decoy
       dataset size.
 
-.. autodata:: AMINOACIDS
+.. data:: AMINOACIDS
+   :type: typing.Final[str]
+   :value: 'QWERTYIPASDFGHKLCVNM'
 
-Neither of those types need `Biopython` installed.
+   Standard 20 aminoacids single-letter codes, majuscule.
 
 .. autoclass:: DecoyGenerator
    :show-inheritance:

@@ -16,46 +16,41 @@
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
 """
-Provides
+Provides:
 
-1. A CLI app to easily generate a decoy fasta file from a target fasta file
-1. A varied set of decoy generation strategies
-1. A comprehensive Python API
-1. Easy implementation of custom decoy strategies
-1. Full integration with Biopython
+    #. A CLI app to easily generate a decoy fasta file from a target fasta file
+    #. A comprehensive Python API with IO, Generator and single data functions
+    #. Easy implementation of custom decoy strategies
+    #. Full integration with Biopython
 
 Available functionality
 -----------------------
-:func:`from_fasta`
+:py:func:`from_fasta`
     Return a decoy generator from a target fasta (requires `Biopython`)
-:func:`to_fasta`
+:py:func:`to_fasta`
     Write a decoy fasta from a target protein set or fasta (requires `Biopython`)
-:func:`from_SeqRecords`
+:py:func:`from_SeqRecords`
     Return a decoy generator from a target set of `SeqRecord` (requires `Biopython`)
-:func:`from_seqs`
+:py:func:`from_seqs`
     Return a decoy generator from a target set of :obj:`SeqLike`
-:func:`from_tuples`
+:py:func:`from_tuples`
     Return a decoy generator from a target set of `tuple`
-:func:`SeqRecord_as_decoy`
+:py:func:`SeqRecord_as_decoy`
     Return a decoy `SeqRecord` from a given `SeqRecord` (requires `Biopython`)
-:func:`seq_as_decoy`
+:py:func:`seq_as_decoy`
     Return a decoy :obj:`SeqLike` from a given :obj:`SeqLike`
-:func:`tuple_as_decoy`
+:py:func:`tuple_as_decoy`
     Return a decoy `tuple` from a given `tuple`
-:func:`register`
+:py:func:`register`
     Register a custom decoy strategy on the API
-:obj:`SeqLike`
-    Custom type ``(str | Seq | MutableSeq)``
-:mod:`strategies`
+:py:mod:`pydecoys.strategies`
     API for custom decoy generation strategies
 
 Avaliable decoy strategies
 --------------------------
-Each decoy strategy is specified by a lowercase string. The
-:class:`strategies.DecoyGenerator` fns used for each strategy are available
-under :mod:`strategies`. New strategies can be created by following the
-:class:`strategies.DecoyGenerator` protocol or by instantiating
-:class:`strategies.PseudoReverseRule` or :class:`strategies.PseudoShuffleRule`.
+Each decoy strategy is specified by a lowercase string. New strategies can be
+created by following the :py:class:`strategies.DecoyGenerator` protocol or the
+rest of the :py:mod:`pydecoys.strategies` API.
 
 - reverse:                   Reverse protein
 - reverse-keepn:             Reverse protein, except N-terminal aa
@@ -70,7 +65,8 @@ under :mod:`strategies`. New strategies can be created by following the
 - shufflepep-[enzyme]:       Pseudo-shuffle enzymatic fragments
 - shufflepep-[enzyme]-keepn: Pseudo-shuffle enzymatic fragments, except N-terminal aa
 
-You can check the full list of proteases and how to add more at the documentation.
+You can check the full list of proteases and how to add more at the
+documentation.
 """  # noqa: W505, E501
 
 from importlib.metadata import version

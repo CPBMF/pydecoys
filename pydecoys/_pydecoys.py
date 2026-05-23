@@ -146,8 +146,8 @@ def to_fasta(
     Notes
     -----
     While `_PathOrIO` is defined as
-    ``str | os.PathLike[str] | typing.TextIO``, the runtime `isinstance` check
-    is done against ``io.TextIOBase``.
+    ``str | os.PathLike[str] | typing.TextIO``, the runtime ``isinstance``
+    check is done against ``io.TextIOBase``.
 
     This function calls :func:`from_SeqRecords` internally, so
     ``count = pydecoys.to_fasta(targets, output, strategy)`` where `targets`
@@ -442,6 +442,11 @@ def SeqRecord_as_decoy(
     >>> decoy = SeqRecord_as_decoy(seq, 'reverse')
     >>> print(f'{decoy.id}: {decoy.seq}')
     decoy_seq1: Seq('RYVAKYDIND')
+
+    Notes
+    -----
+    This function won't give context to
+    :py:class:`pydecoys.ContextfulGerenator` objects.
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -521,6 +526,11 @@ def tuple_as_decoy(
     >>> decoy = tuple_as_decoy(seq, 'reverse')
     >>> print(f'{decoy[0]}: {decoy[1]}')
     decoy_seq1: 'RYVAKYDIND'
+
+    Notes
+    -----
+    This function won't give context to
+    :py:class:`pydecoys.ContextfulGerenator` objects.
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -582,6 +592,11 @@ def seq_as_decoy(
     --------
     >>> seq_as_decoy('DNIDYKAVYR', 'reverse')
     'RYVAKYDIND'
+
+    Notes
+    -----
+    This function won't give context to
+    :py:class:`pydecoys.ContextfulGerenator` objects.
     """
 
     decoy_generator = _validate_strategy(strategy)

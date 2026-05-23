@@ -5,6 +5,7 @@ Guide
     :maxdepth: 2
 
     starting
-    available
+    cli
     pydecoys
     strategies
+    available

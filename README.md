@@ -19,20 +19,18 @@ PyDecoys aims to facilitate this decoy generation step in a way that's easily
 integratable to existing Proteomics workflows. It provides:
 
 1. A CLI app to easily generate a decoy fasta file from a target fasta file
-1. A varied set of decoy generation strategies
-1. A comprehensive Python API
+1. A comprehensive Python API with IO, Generator and single data functions
 1. Easy implementation of custom decoy strategies
 1. Full integration with [Biopython]
 
 ### Decoy strategies available
 
-Some implemented strategies include:
+The following are the implemented strategies:
 
 - Reverse proteins
 - Shuffle proteins
 - Rerverse enzymatic peptides
 - Shuffle enzymatic peptides
-- And others...
 
 The most used proteases are available:
 

@@ -17,11 +17,12 @@
 
 """
 Provides
-    1. A CLI app to easily generate a decoy fasta file from a target fasta file
-    1. A varied set of decoy generation strategies
-    1. A comprehensive Python API
-    1. Easy implementation of custom decoy strategies
-    1. Full integration with Biopython
+
+1. A CLI app to easily generate a decoy fasta file from a target fasta file
+1. A varied set of decoy generation strategies
+1. A comprehensive Python API
+1. Easy implementation of custom decoy strategies
+1. Full integration with Biopython
 
 Available functionality
 -----------------------
@@ -64,10 +65,10 @@ under :mod:`strategies`. New strategies can be created by following the
 - shuffle-keepn:             Shuffle protein, except N-terminal aa
 - shuffle-keepc:             Shuffle protein, except C-terminal aa
 - shuffle-keepterm:          Shuffle protein, except terminal aas
-- reversepep-<enzyme>:       Pseudo-reverse enzymatic fragments
-- reversepep-<enzyme>-keepn: Pseudo-reverse enzymatic fragments, except N-terminal aa
-- shufflepep-<enzyme>:       Pseudo-shuffle enzymatic fragments
-- shufflepep-<enzyme>-keepn: Pseudo-shuffle enzymatic fragments, except N-terminal aa
+- reversepep-[enzyme]:       Pseudo-reverse enzymatic fragments
+- reversepep-[enzyme]-keepn: Pseudo-reverse enzymatic fragments, except N-terminal aa
+- shufflepep-[enzyme]:       Pseudo-shuffle enzymatic fragments
+- shufflepep-[enzyme]-keepn: Pseudo-shuffle enzymatic fragments, except N-terminal aa
 
 You can check the full list of proteases and how to add more at the documentation.
 """  # noqa: W505, E501

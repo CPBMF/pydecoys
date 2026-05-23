@@ -47,8 +47,8 @@ The most used proteases are available:
 - Pepsin-A
 - CNBr
 
-A full tutorial on how to set new proteases and decoy strategies can be found at the
-documentation.
+A full tutorial on how to set new proteases and decoy strategies can be found
+at the documentation.
 
 ## Getting started
 
@@ -64,24 +64,49 @@ If you only care about the CLI, PyDecoys can be easily installed, upgraded or
 uninstalled via `pipx`:
 
 ```sh
+# Install current version
 pipx install pydecoys
+
+# Upgrade to latest version
 pipx upgrade pydecoys
+
+# Uninstall
 pipx uninstall pydecoys
+```
+
+`pipx` should automatically install PyDecoys and make it globally available on
+PATH. You can confirm it's available by running ``pydecoys -v``. In case it
+isn't, run:
+
+```sh
+pipx ensurepath
+```
+
+This will ensure all `pipx` scripts are available. The `pipx` app itself can be
+installed via `pip`:
+
+```sh
+pip install --user pipx
 ```
 
 For API usage, you can use `pip` or other package managers:
 
 ```sh
+# Install
 pip install pydecoys
+
+# Upgrade
 pip install --upgrade pydecoys
+
+# Uninstall
 pip uninstall pydecoys
 ```
 
 #### Installing without Biopython
 
-PyDecoys can be used without [Biopython]: `pip install pydecoys --no-deps`. If you
-change your mind later, simply run `pip install biopython`. In case you use other
-package managers, [Biopython]'s dependency group is `biopython`.
+PyDecoys can be used without [Biopython]: ``pip install pydecoys --no-deps``.
+If you change your mind later, simply run ``pip install biopython``. In case
+you use other package managers, [Biopython]'s dependency group is `biopython`.
 
 Note that IO functions and the CLI app **aren't available without Biopython**.
 
@@ -103,8 +128,8 @@ You can change the decoy strategy with the `-s/--strategy` flag:
 pydecoys targets.fasta -o shuf.fasta -s shuffle
 ```
 
-The `input` defaults to `stdin`, so you can redirect the output of another command to
-`pydecoys`.
+The `input` defaults to `stdin`, so you can redirect the output of another
+command to `pydecoys`.
 
 ```sh
 cat database_1.fasta database_2.fasta | pydecoys -o rev_1_2.fasta
@@ -121,7 +146,8 @@ version. A full list of CLI flags can be found at the documentation.
 
 ### Application programming interface (API)
 
-PyDecoys has a comprehensive API for integration in Python proteomics workflows.
+PyDecoys has a comprehensive API for integration in Python proteomics
+workflows.
 
 ```py
 import pydecoys
@@ -148,17 +174,17 @@ For convenience, you can directly pass a path or file handle to `to_fasta`:
 pydecoys.to_fasta('path/to/targets.fasta', 'path/to/decoys.fasta', strategy='reverse')
 ```
 
-Alongside IO functions, there also are some generator functions for decoy generation.
-To get decoys from [Biopython] `SeqRecord` objects:
+Alongside IO functions, there also are some generator functions for decoy
+generation. To get decoys from [Biopython] `SeqRecord` objects:
 
 ```py
 targets: list[SeqRecord]
 decoys = pydecoys.from_SeqRecords(targets, strategy='reverse')
 ```
 
-You can also opt-out of [Biopython] and either use a `tuple[str, str]` iterable where
-the first item is the seqid and the second item is the aa sequence, or just a `str`
-iterable:
+You can also opt-out of [Biopython] and either use a `tuple[str, str]` iterable
+where the first item is the seqid and the second item is the aa sequence, or
+just a `str` iterable:
 
 ```py
 # With tuples...
@@ -168,8 +194,8 @@ decoys = pydecoys.from_tuples(tuple_targets, strategy='reverse')
 decoys = pydecoys.from_seqs(str_targets, strategy='reverse')
 ```
 
-Both functions **can** use [Biopython] `Seq` or `MutableSeq` objects as aa sequence
-representations, but they don't need [Biopython] as a dependency.
+Both functions **can** use [Biopython] `Seq` or `MutableSeq` objects as aa
+sequence representations, but they don't need [Biopython] as a dependency.
 
 Finally, creating a new strategy can be as simple as writing a function:
 
@@ -185,8 +211,8 @@ pydecoys.register('custom-decoys', custom_decoys)
 decoys = pydecoys.from_fasta('path/to/targets.fasta', 'custom-decoys')
 ```
 
-For more options and examples, as well as a guide on the `strategies` module, refer to
-the documentation.
+For more options and examples, as well as a guide on the `strategies` module,
+refer to the documentation.
 
 ## Reporting issues
 
@@ -197,13 +223,13 @@ it. If possible, please provide a code snippet.
 
 ## Authorship and affiliations
 
-This software was developed by Bruno Maestri A Becker as part of a research project
-under the supervision of Professor Cristiano Valim Bizarro, PhD, at Centro de
-Pesquisas em Biologia Molecular e Funcional (CPBMF) and Instituto Nacional de Ciência e
-Tecnologia em Tuberculose (INCT-TB), Pontifícia Universidade Católica do Rio Grande do
-Sul (PUCRS), Porto Alegre, Brazil.
+This software was developed by Bruno Maestri A Becker as part of a research
+project under the supervision of Professor Cristiano Valim Bizarro, PhD, at
+Centro de Pesquisas em Biologia Molecular e Funcional (CPBMF) and Instituto
+Nacional de Ciência e Tecnologia em Tuberculose (INCT-TB), Pontifícia
+Universidade Católica do Rio Grande do Sul (PUCRS), Porto Alegre, Brazil.
 
-ORCID™ iDs
+ORCID™ iDs:
 - [![ORCID][iD]](https://orcid.org/0009-0002-2338-5997) `Bruno Maestri A Becker`
 - [![ORCID][iD]](https://orcid.org/0000-0002-2609-8996) `Cristiano Valim Bizarro`
 

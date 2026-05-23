@@ -5,6 +5,10 @@ strategies
 
 .. automodule:: pydecoys.strategies
 
+.. autotype:: SeqLike
+.. autotype:: Seq_
+.. autotype:: MutableSeq_
+
 .. autodata:: RAND
 
    This RNG has a fixed seed to guarantee reproducibility and repeatability
@@ -19,9 +23,9 @@ strategies
       than once in a target dataset, a stochastic method will inflate the decoy
       dataset size.
 
-.. autotype:: SeqLike
-.. autotype:: Seq_
-.. autotype:: MutableSeq_
+.. autodata:: AMINOACIDS
+
+Neither of those types need `Biopython` installed.
 
 .. autoclass:: DecoyGenerator
    :show-inheritance:
@@ -35,10 +39,11 @@ strategies
    .. note::
       Functions that don't pass the targets to a ContextfulGenerator are
       documented as such.
-   
+
    .. note::
       PyDecoys doesn't discriminate between ContextfulGenerators that have been
-      already given context or not.
+      already given context or not. You should implement this yourself if you
+      want this behavior.
 
 .. autoclass:: EnzymeSpecificGenerator
    :show-inheritance:
@@ -60,7 +65,7 @@ strategies
    immutable.
 
    Internally, they use a regex pattern to identify aminoacids that shouldn't be
-   (cleavage sites and maybe terminal aminoacids). Since the regex pattern is
-   constructed and compiled at initialization, changing either property would
+   altered (cleavage sites and maybe terminal aminoacids). Since the regex pattern
+   is constructed and compiled at initialization, changing either property would
    just cause a mismatch between the visible specifications and the actual
    behavior.

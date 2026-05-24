@@ -89,8 +89,8 @@ __all__ = [
 ]
 
 
-from . import strategies
-from ._pydecoys import (
+from pydecoys import strategies
+from pydecoys._pydecoys import (
     from_fasta,
     to_fasta,
     from_SeqRecords,

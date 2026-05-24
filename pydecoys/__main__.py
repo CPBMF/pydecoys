@@ -17,7 +17,7 @@
 
 """CLI entrypoint for PyDecoys."""
 
-from . import to_fasta
+from pydecoys import to_fasta
 
 
 def main() -> None:

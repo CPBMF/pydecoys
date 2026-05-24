@@ -26,7 +26,7 @@ from typing import Iterable
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq, MutableSeq
 
-from .strategies import ReversePep, ShufflePep
+from pydecoys.strategies import ReversePep, ShufflePep
 
 
 def SeqRecord_to_tuple(record: SeqRecord) -> tuple[str, str]:

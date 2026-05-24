@@ -32,7 +32,7 @@ from :class:`EnzymeSpecificGenerator`.
 """
 
 
-from .core import (
+from pydecoys.strategies.core import (
     SeqLike,
     Seq_,
     MutableSeq_,

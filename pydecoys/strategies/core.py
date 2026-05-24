@@ -138,19 +138,52 @@ class EnzymeSpecificGenerator(ABC):
         sense: Literal['N', 'C'] = 'C',
         keep_term: Literal['N', 'C', 'both', None] = None,
     ) -> None:
+        # A lot of type-guarding...
+        if not isinstance(cut, str):
+            raise TypeError("Cut aminoacids must be string")
+        if not cut:
+            raise ValueError("Need string for cut aminoacids")
+        for aa in cut:
+            if aa not in AMINOACIDS:
+                raise ValueError(
+                    f"Not an standard aminoacid single-letter code: '{aa}'"
+                )
+
+        if not isinstance(nocut, str | None):
+            raise TypeError("No-cut aminoacids must be string or None")
+        if nocut is not None:
+            if not nocut:
+                raise ValueError("Need string no-cut aminoacids (or None)")
+            for aa in nocut:
+                if aa not in AMINOACIDS:
+                    raise ValueError(
+                        f"Not an standard aminoacid single-letter code: '{aa}'"
+                    )
+
+        if not isinstance(sense, str) or sense not in 'NC':
+            raise TypeError("Cleavage sense must be 'N' or 'C'")
+
+        match keep_term:
+            case 'N':
+                pattern = rf"(^.|[{cut}])"
+            case 'C':
+                pattern = rf"([{cut}]|.$)"
+            case 'both':
+                pattern = rf"(^.|[{cut}]|.$)"
+            case None:
+                pattern = rf"([{cut}])"
+            case _:
+                raise TypeError(
+                    f"Kept termini must be 'N', 'C', 'both' or None, not '{keep_term}'"
+                )
+
+        if nocut is not None:
+            pattern += rf"(?!{nocut})"
+
         self.__cut = cut
         self.__nocut = nocut
         self.__sense: Literal['N', 'C'] = sense
         self.__keep_term: Literal['N', 'C', 'both', None] = keep_term
-
-        match self.__keep_term:
-            case 'N': pattern = rf"(^.|[{self.__cut}])"
-            case 'C': pattern = rf"([{self.__cut}]|.$)"
-            case 'both': pattern = rf"(^.|[{self.__cut}]|.$)"
-            case None: pattern = rf"([{self.__cut}])"
-
-        if self.__nocut is not None:
-            pattern += rf"(?!{self.__nocut})"
 
         self._pattern = re.compile(pattern)
 
@@ -226,9 +259,26 @@ class ReversePep(EnzymeSpecificGenerator):
 
     Examples
     --------
-    >>> rev = ReversePep("KR", nocut="P")
-    >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
-    KR, P, C
+    >>> rev = ReversePep("R", sense="N")
+    >>> print(rev.cut, rev.nocut, rev.sense, rev.keep_term, sep=', ')
+    R, None, N, None
+    >>> rev = ReversePep("KR", nocut="P", keep_term="both")
+    >>> print(rev.cut, rev.nocut, rev.sense, rev.keep_term, sep=', ')
+    KR, P, C, both
+
+    Cut argument cannot be an empty string:
+
+    >>> rev = ReversePep("")
+    Traceback (most recent call last):
+        ...
+    ValueError: Need string for cut aminoacids
+
+    Aminoacids must be one of the 20 standard aminoacid single-letter codes:
+
+    >>> rev = ReversePep("KR", nocut="B")
+    Traceback (most recent call last):
+        ...
+    ValueError: Not an standard aminoacid single-letter code: 'B'
     """
 
     @overload
@@ -259,9 +309,9 @@ class ReversePep(EnzymeSpecificGenerator):
         >>> rev = ReversePep("KR", nocut="P")
         >>> rev('QSYKPTRTHQ')
         'TPKYSQRQHT'
-        >>> rev = ReversePep("K", sense="N")
+        >>> rev = ReversePep("K", sense="N", keep_term="N")
         >>> rev('QSYKPTRTHQ')
-        'YSQKQHTRTP'
+        'QYSKQHTRTP'
         """
         fragments = re.split(self._pattern, str(sequence))
         rev_frags = [frag[::-1] for frag in fragments]
@@ -317,9 +367,26 @@ class ShufflePep(EnzymeSpecificGenerator):
 
     Examples
     --------
-    >>> shuf = ShufflePep("KR", nocut="P")
-    >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
-    KR, P, C
+    >>> shuf = ShufflePep("R", sense="N")
+    >>> print(shuf.cut, shuf.nocut, shuf.sense, shuf.keep_term, sep=', ')
+    R, None, N, None
+    >>> shuf = ShufflePep("KR", nocut="P", keep_term="both")
+    >>> print(shuf.cut, shuf.nocut, shuf.sense, shuf.keep_term, sep=', ')
+    KR, P, C, both
+
+    Cut argument cannot be an empty string:
+
+    >>> shuf = ShufflePep("")
+    Traceback (most recent call last):
+        ...
+    ValueError: Need string for cut aminoacids
+
+    Aminoacids must be one of the 20 standard aminoacid single-letter codes:
+
+    >>> shuf = ShufflePep("KR", nocut="B")
+    Traceback (most recent call last):
+        ...
+    ValueError: Not an standard aminoacid single-letter code: 'B'
     """
 
     @overload
@@ -350,9 +417,9 @@ class ShufflePep(EnzymeSpecificGenerator):
         >>> shuf = ShufflePep("KR", nocut="P")
         >>> shuf('QSYKPTRTHQ')
         'YTSKQPRQHT'
-        >>> shuf = ShufflePep("K", sense="N")
+        >>> shuf = ShufflePep("K", sense="N", keep_term="N")
         >>> shuf('QSYKPTRTHQ')
-        'QYSKTHRPTQ'
+        'QSYKTHQPTR'
         """
         fragments = re.split(self._pattern, str(sequence))
 
@@ -397,11 +464,14 @@ def seq_cast(obj: SeqLike, sequence: str) -> SeqLike:
 
     Examples
     --------
-    >>> from Bio.Seq import Seq
+    >>> from Bio.Seq import Seq, MutableSeq
     >>> str_seq = 'QSYKPTRTHQ'
     >>> bio_seq = Seq('YTSKQPRQHT')
     >>> seq_cast(bio_seq, str_seq)
     Seq('QSYKPTRTHQ')
+    >>> bio_seq = MutableSeq('YTSKQPRQHT')
+    >>> seq_cast(bio_seq, str_seq)
+    MutableSeq('QSYKPTRTHQ')
     """
     cls = type(obj)
     return cls(sequence)

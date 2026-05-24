@@ -27,9 +27,9 @@ if t.TYPE_CHECKING:
     from Bio.Seq import Seq, MutableSeq
     from Bio.SeqRecord import SeqRecord
 
-from . import strategies
-from .strategies import SeqLike
-from . import _builtins
+from pydecoys import strategies
+from pydecoys.strategies import SeqLike
+from pydecoys import _builtins
 
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
@@ -99,8 +99,8 @@ def from_fasta(
     ``pydecoys.from_fasta(input, strategy)`` is equivalent to:
 
     >>> from Bio import SeqIO
-    >>> targets = SeqIO.parse(input, format='fasta')
-    >>> decoys = pydecoys.from_SeqRecords(targets, strategy)
+    >>> targets = SeqIO.parse(input, format='fasta')  # doctest: +SKIP
+    >>> decoys = from_SeqRecords(targets, strategy)   # doctest: +SKIP
     """
 
     from Bio import SeqIO
@@ -153,8 +153,8 @@ def to_fasta(
     ``count = pydecoys.to_fasta(targets, output, strategy)`` where `targets`
     is an ``Iterable[SeqRecord]`` is equivalent to:
 
-    >>> decoys = pydecoys.from_SeqRecords(targets, strategy)
-    >>> count = SeqIO.write(decoys, output, format='fasta')
+    >>> decoys = from_SeqRecords(targets, strategy)          # doctest: +SKIP
+    >>> count = SeqIO.write(decoys, output, format='fasta')  # doctest: +SKIP
 
     If `True`, the `concat` flag will cause all sequences to be loaded
     into a list prior to decoy generation to avoid parsing sequences twice.
@@ -211,19 +211,20 @@ def from_SeqRecords(
     Examples
     --------
     >>> from Bio.SeqRecord import SeqRecord
+    >>> from Bio.Seq import Seq
     >>> seqs = [
-    ...     SeqRecord('DNIDYKAVYR', 'seq1'),
-    ...     SeqRecord('QSYMCTVTHP', 'seq2'),
-    ...     SeqRecord('CQWSLTEELL', 'seq3'),
+    ...     SeqRecord(Seq('DNIDYKAVYR'), 'seq1'),
+    ...     SeqRecord(Seq('QSYMCTVTHP'), 'seq2'),
+    ...     SeqRecord(Seq('CQWSLTEELL'), 'seq3'),
     ... ]
     >>> for decoy in from_SeqRecords(seqs, 'reverse'):
     ...     print(f'{decoy.id}: {decoy.seq}')
-    decoy_seq1: Seq('RYVAKYDIND')
-    decoy_seq2: Seq('PHTVTCMYSQ')
-    decoy_seq3: Seq('LLEETLSWQC')
+    decoy_seq1: RYVAKYDIND
+    decoy_seq2: PHTVTCMYSQ
+    decoy_seq3: LLEETLSWQC
     """
 
-    from . import _bio
+    from pydecoys import _bio
     sequences = _bio.iter_SeqRecord(sequences)
     tuples = (_bio.SeqRecord_to_tuple(record) for record in sequences)
     decoys = from_tuples(tuples, strategy, decoy_tag, prefix)
@@ -301,9 +302,30 @@ def from_tuples(
     ... ]
     >>> for decoy in from_tuples(seqs, 'reverse'):
     ...     print(f'{decoy[0]}: {decoy[1]}')
-    decoy_seq1: Seq('RYVAKYDIND')
-    decoy_seq2: Seq('PHTVTCMYSQ')
-    decoy_seq3: Seq('LLEETLSWQC')
+    decoy_seq1: RYVAKYDIND
+    decoy_seq2: PHTVTCMYSQ
+    decoy_seq3: LLEETLSWQC
+
+    Type is preserved:
+
+    >>> from Bio.Seq import Seq
+    >>> seqs = [
+    ...     ('seq1', Seq('DNIDYKAVYR')),
+    ...     ('seq2', Seq('QSYMCTVTHP')),
+    ...     ('seq3', Seq('CQWSLTEELL')),
+    ... ]
+    >>> for decoy in from_tuples(seqs, 'reverse'):
+    ...     print(isinstance(decoy[1], Seq))
+    True
+    True
+    True
+
+    The `sequence` can be a single value:
+
+    >>> from types import GeneratorType
+    >>> decoy = from_seqs('DNIDYKAVYR', 'reverse')
+    >>> isinstance(decoy, GeneratorType)  # Still returns a Generator
+    True
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -378,9 +400,30 @@ def from_seqs(
     ... ]
     >>> for decoy in from_seqs(seqs, 'reverse'):
     ...     print(decoy)
-    'RYVAKYDIND'
-    'PHTVTCMYSQ'
-    'LLEETLSWQC'
+    RYVAKYDIND
+    PHTVTCMYSQ
+    LLEETLSWQC
+
+    Type is preserved:
+
+    >>> from Bio.Seq import Seq
+    >>> seqs = [
+    ...     Seq('DNIDYKAVYR'),
+    ...     Seq('QSYMCTVTHP'),
+    ...     Seq('CQWSLTEELL'),
+    ... ]
+    >>> for decoy in from_seqs(seqs, 'reverse'):
+    ...     print(isinstance(decoy, Seq))
+    True
+    True
+    True
+
+    The `sequence` can be a single value:
+
+    >>> from types import GeneratorType
+    >>> decoy = from_seqs('DNIDYKAVYR', 'reverse')
+    >>> isinstance(decoy, GeneratorType)  # Still returns a Generator
+    True
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -438,16 +481,18 @@ def SeqRecord_as_decoy(
     Examples
     --------
     >>> from Bio.SeqRecord import SeqRecord
-    >>> seq = SeqRecord('DNIDYKAVYR', 'seq1')
+    >>> from Bio.Seq import Seq
+    >>> seq = SeqRecord(Seq('DNIDYKAVYR'), 'seq1')
     >>> decoy = SeqRecord_as_decoy(seq, 'reverse')
     >>> print(f'{decoy.id}: {decoy.seq}')
-    decoy_seq1: Seq('RYVAKYDIND')
+    decoy_seq1: RYVAKYDIND
 
     Notes
     -----
     This function won't give context to
     :py:class:`pydecoys.ContextfulGerenator` objects.
     """
+    from Bio.SeqRecord import SeqRecord
 
     decoy_generator = _validate_strategy(strategy)
 
@@ -525,7 +570,15 @@ def tuple_as_decoy(
     >>> seq = ('seq1', 'DNIDYKAVYR')
     >>> decoy = tuple_as_decoy(seq, 'reverse')
     >>> print(f'{decoy[0]}: {decoy[1]}')
-    decoy_seq1: 'RYVAKYDIND'
+    decoy_seq1: RYVAKYDIND
+
+    The type is preserved:
+
+    >>> from Bio.Seq import Seq
+    >>> seq = ('seq1', Seq('DNIDYKAVYR'))
+    >>> decoy = tuple_as_decoy(seq, 'reverse')
+    >>> type(decoy[1])
+    <class 'Bio.Seq.Seq'>
 
     Notes
     -----
@@ -593,6 +646,12 @@ def seq_as_decoy(
     >>> seq_as_decoy('DNIDYKAVYR', 'reverse')
     'RYVAKYDIND'
 
+    The type is preserved:
+
+    >>> from Bio.Seq import Seq
+    >>> seq_as_decoy(Seq('DNIDYKAVYR'), 'reverse')
+    Seq('RYVAKYDIND')
+
     Notes
     -----
     This function won't give context to
@@ -622,10 +681,29 @@ def register(
     Given a `random_seq` function that takes a sequence and returns a new,
     unrelated sequence of same size:
 
+    >>> def random_seq(sequence): ...
     >>> register('randomseq', random_seq)
     >>> seq = 'DNIDYKAVYR'
-    >>> seq_as_decoy(seq, 'randomseq')
+    >>> seq_as_decoy(seq, 'randomseq')  # doctest: +SKIP
     'LLEETLSWQC'
+
+    The strategy key must be a lowercase string:
+
+    >>> register(5, random_seq)
+    Traceback (most recent call last):
+        ...
+    TypeError: Need a string for the decoy strategy (lower case)
+    >>> register('RANDOMSEQ', random_seq)
+    Traceback (most recent call last):
+        ...
+    ValueError: Strategy key 'RANDOMSEQ' should be lower case
+
+    It must not be already defined:
+
+    >>> register('randomseq', random_seq)
+    Traceback (most recent call last):
+        ...
+    ValueError: Strategy key 'randomseq' already defined
     """
 
     if not isinstance(strategy_key, str):
@@ -636,7 +714,7 @@ def register(
         raise ValueError(f"Strategy key '{strategy_key}' should be lower case")
 
     if strategy_key in _decoy_strategy:
-        raise ValueError(f"Strategy '{strategy_key}' already exists")
+        raise ValueError(f"Strategy key '{strategy_key}' already defined")
 
     _decoy_strategy[strategy_key] = strategy_fn
 

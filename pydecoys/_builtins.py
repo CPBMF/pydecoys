@@ -24,7 +24,7 @@ from typing import Literal, overload, TYPE_CHECKING
 if TYPE_CHECKING:
     from Bio.Seq import Seq, MutableSeq
 
-from . import strategies as s
+from pydecoys import strategies as s
 
 # This file has a lot of overloads, but sphinx autodoc doesn't seem to catch
 # the overloads if I move them to a .pyi file.

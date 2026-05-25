@@ -23,8 +23,8 @@ from pydecoys import to_fasta
 def main() -> None:
     import argparse
 
-    from . import __version__
-    from ._pydecoys import _decoy_strategy
+    from pydecoys import __version__
+    from pydecoys._builtins import decoy_strategy
 
     parser = argparse.ArgumentParser(
         prog="pydecoys",
@@ -52,7 +52,7 @@ def main() -> None:
     )
     parser.add_argument(
         '-s', '--strategy',
-        choices=_decoy_strategy.keys(),
+        choices=decoy_strategy.keys(),
         default='reverse',
         help='decoy generation strategy (default: \'%(default)s\')'
     )

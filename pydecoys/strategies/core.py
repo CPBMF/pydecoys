@@ -160,7 +160,10 @@ class EnzymeSpecificGenerator(ABC):
                         f"Not an standard aminoacid single-letter code: '{aa}'"
                     )
 
-        if not isinstance(sense, str) or sense not in 'NC':
+        if nocut is not None and (shared := set(cut) & set(nocut)):
+            raise ValueError(f"Shared cut and nocut aminoacids: {"".join(shared)}")
+
+        if not isinstance(sense, str) or not sense or sense not in 'NC':
             raise TypeError("Cleavage sense must be 'N' or 'C'")
 
         match keep_term:

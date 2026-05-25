@@ -48,52 +48,52 @@ def reverse(sequence: s.SeqLike) -> s.SeqLike:
 
 
 @overload
-def reverse_keep_n(sequence: Seq) -> Seq: ...
+def reverse_keepn(sequence: Seq) -> Seq: ...
 
 
 @overload
-def reverse_keep_n(sequence: MutableSeq) -> MutableSeq: ...
+def reverse_keepn(sequence: MutableSeq) -> MutableSeq: ...
 
 
 @overload
-def reverse_keep_n(sequence: str) -> str: ...
+def reverse_keepn(sequence: str) -> str: ...
 
 
-def reverse_keep_n(sequence: s.SeqLike) -> s.SeqLike:
+def reverse_keepn(sequence: s.SeqLike) -> s.SeqLike:
     """Return the reversed `sequence`, except N-terminal aa."""
     return sequence[0] + sequence[:0:-1]
 
 
 @overload
-def reverse_keep_c(sequence: Seq) -> Seq: ...
+def reverse_keepc(sequence: Seq) -> Seq: ...
 
 
 @overload
-def reverse_keep_c(sequence: MutableSeq) -> MutableSeq: ...
+def reverse_keepc(sequence: MutableSeq) -> MutableSeq: ...
 
 
 @overload
-def reverse_keep_c(sequence: str) -> str: ...
+def reverse_keepc(sequence: str) -> str: ...
 
 
-def reverse_keep_c(sequence: s.SeqLike) -> s.SeqLike:
+def reverse_keepc(sequence: s.SeqLike) -> s.SeqLike:
     """Return the reversed `sequence`, except C-terminal aa."""
     return sequence[-2::-1] + sequence[-1]
 
 
 @overload
-def reverse_keep_term(sequence: Seq) -> Seq: ...
+def reverse_keepterm(sequence: Seq) -> Seq: ...
 
 
 @overload
-def reverse_keep_term(sequence: MutableSeq) -> MutableSeq: ...
+def reverse_keepterm(sequence: MutableSeq) -> MutableSeq: ...
 
 
 @overload
-def reverse_keep_term(sequence: str) -> str: ...
+def reverse_keepterm(sequence: str) -> str: ...
 
 
-def reverse_keep_term(sequence: s.SeqLike) -> s.SeqLike:
+def reverse_keepterm(sequence: s.SeqLike) -> s.SeqLike:
     """Return the reversed `sequence`, except terminal aas."""
     return sequence[0] + sequence[-2:0:-1] + sequence[-1]
 
@@ -118,18 +118,18 @@ def shuffle(sequence: s.SeqLike) -> s.SeqLike:
 
 
 @overload
-def shuffle_keep_n(sequence: Seq) -> Seq: ...
+def shuffle_keepn(sequence: Seq) -> Seq: ...
 
 
 @overload
-def shuffle_keep_n(sequence: MutableSeq) -> MutableSeq: ...
+def shuffle_keepn(sequence: MutableSeq) -> MutableSeq: ...
 
 
 @overload
-def shuffle_keep_n(sequence: str) -> str: ...
+def shuffle_keepn(sequence: str) -> str: ...
 
 
-def shuffle_keep_n(sequence: s.SeqLike) -> s.SeqLike:
+def shuffle_keepn(sequence: s.SeqLike) -> s.SeqLike:
     """Return the shuffled `sequence`, except N-terminal aa."""
     new = list(sequence[1:])
     s.RAND.shuffle(new)
@@ -137,18 +137,18 @@ def shuffle_keep_n(sequence: s.SeqLike) -> s.SeqLike:
 
 
 @overload
-def shuffle_keep_c(sequence: Seq) -> Seq: ...
+def shuffle_keepc(sequence: Seq) -> Seq: ...
 
 
 @overload
-def shuffle_keep_c(sequence: MutableSeq) -> MutableSeq: ...
+def shuffle_keepc(sequence: MutableSeq) -> MutableSeq: ...
 
 
 @overload
-def shuffle_keep_c(sequence: str) -> str: ...
+def shuffle_keepc(sequence: str) -> str: ...
 
 
-def shuffle_keep_c(sequence: s.SeqLike) -> s.SeqLike:
+def shuffle_keepc(sequence: s.SeqLike) -> s.SeqLike:
     """Return the shuffled `sequence`, except C-terminal aa."""
     new = list(sequence[:-1])
     s.RAND.shuffle(new)
@@ -156,18 +156,18 @@ def shuffle_keep_c(sequence: s.SeqLike) -> s.SeqLike:
 
 
 @overload
-def shuffle_keep_term(sequence: Seq) -> Seq: ...
+def shuffle_keepterm(sequence: Seq) -> Seq: ...
 
 
 @overload
-def shuffle_keep_term(sequence: MutableSeq) -> MutableSeq: ...
+def shuffle_keepterm(sequence: MutableSeq) -> MutableSeq: ...
 
 
 @overload
-def shuffle_keep_term(sequence: str) -> str: ...
+def shuffle_keepterm(sequence: str) -> str: ...
 
 
-def shuffle_keep_term(sequence: s.SeqLike) -> s.SeqLike:
+def shuffle_keepterm(sequence: s.SeqLike) -> s.SeqLike:
     """Return the shuffled `sequence`, except terminal aas."""
     new = list(sequence[1:-1])
     s.RAND.shuffle(new)
@@ -221,3 +221,33 @@ shufflepep_lysn = _with_enzyme(s.ShufflePep, _LYS_N)
 shufflepep_pepsina = _with_enzyme(s.ShufflePep, _PEPSIN_A)
 shufflepep_cnbr = _with_enzyme(s.ShufflePep, _CNBR)
 shufflepep_stricttrypsin_keepn = _with_enzyme(s.ShufflePep, _STRICT_TRYPSIN, 'N')
+
+
+decoy_strategy: dict[str, s.DecoyGenerator] = {
+    "reverse": reverse,
+    "reverse-keepn": reverse_keepn,
+    "reverse-keepc": reverse_keepc,
+    "reverse-keepterm": reverse_keepterm,
+    "shuffle": shuffle,
+    "shuffle-keepn": shuffle_keepn,
+    "shuffle-keepc": shuffle_keepc,
+    "shuffle-keepterm": shuffle_keepterm,
+    "reversepep-trypsin": reversepep_trypsin,
+    "reversepep-stricttrypsin": reversepep_stricttrypsin,
+    "reversepep-argc": reversepep_argc,
+    "reversepep-aspn": reversepep_aspn,
+    "reversepep-chymo": reversepep_chymo,
+    "reversepep-gluc": reversepep_gluc,
+    "reversepep-lysc": reversepep_lysc,
+    "reversepep-lysn": reversepep_lysn,
+    "reversepep-stricttrypsin-keepn": reversepep_stricttrypsin_keepn,  # noqa: E501
+    "shufflepep-trypsin": shufflepep_trypsin,
+    "shufflepep-stricttrypsin": shufflepep_stricttrypsin,
+    "shufflepep-argc": shufflepep_argc,
+    "shufflepep-aspn": shufflepep_aspn,
+    "shufflepep-chymo": shufflepep_chymo,
+    "shufflepep-gluc": shufflepep_gluc,
+    "shufflepep-lysc": shufflepep_lysc,
+    "shufflepep-lysn": shufflepep_lysn,
+    "shufflepep-stricttrypsin-keepn": shufflepep_stricttrypsin_keepn,  # noqa: E501
+}

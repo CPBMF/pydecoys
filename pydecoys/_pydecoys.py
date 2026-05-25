@@ -29,41 +29,11 @@ if t.TYPE_CHECKING:
 
 from pydecoys import strategies
 from pydecoys.strategies import SeqLike
-from pydecoys import _builtins
+from pydecoys._builtins import decoy_strategy
 
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
 type _Strategy = str | strategies.DecoyGenerator
-
-
-_decoy_strategy: dict[str, strategies.DecoyGenerator] = {
-    "reverse": _builtins.reverse,
-    "reverse-keepn": _builtins.reverse_keep_n,
-    "reverse-keepc": _builtins.reverse_keep_c,
-    "reverse-keepterm": _builtins.reverse_keep_term,
-    "shuffle": _builtins.shuffle,
-    "shuffle-keepn": _builtins.shuffle_keep_n,
-    "shuffle-keepc": _builtins.shuffle_keep_c,
-    "shuffle-keepterm": _builtins.shuffle_keep_term,
-    "reversepep-trypsin": _builtins.reversepep_trypsin,
-    "reversepep-stricttrypsin": _builtins.reversepep_stricttrypsin,
-    "reversepep-argc": _builtins.reversepep_argc,
-    "reversepep-aspn": _builtins.reversepep_aspn,
-    "reversepep-chymo": _builtins.reversepep_chymo,
-    "reversepep-gluc": _builtins.reversepep_gluc,
-    "reversepep-lysc": _builtins.reversepep_lysc,
-    "reversepep-lysn": _builtins.reversepep_lysn,
-    "reversepep-stricttrypsin-keepn": _builtins.reversepep_stricttrypsin_keepn,  # noqa: E501
-    "shufflepep-trypsin": _builtins.shufflepep_trypsin,
-    "shufflepep-stricttrypsin": _builtins.shufflepep_stricttrypsin,
-    "shufflepep-argc": _builtins.shufflepep_argc,
-    "shufflepep-aspn": _builtins.shufflepep_aspn,
-    "shufflepep-chymo": _builtins.shufflepep_chymo,
-    "shufflepep-gluc": _builtins.shufflepep_gluc,
-    "shufflepep-lysc": _builtins.shufflepep_lysc,
-    "shufflepep-lysn": _builtins.shufflepep_lysn,
-    "shufflepep-stricttrypsin-keepn": _builtins.shufflepep_stricttrypsin_keepn,  # noqa: E501
-}
 
 
 def from_fasta(
@@ -713,10 +683,10 @@ def register(
     if not strategy_key.islower():
         raise ValueError(f"Strategy key '{strategy_key}' should be lower case")
 
-    if strategy_key in _decoy_strategy:
+    if strategy_key in decoy_strategy:
         raise ValueError(f"Strategy key '{strategy_key}' already defined")
 
-    _decoy_strategy[strategy_key] = strategy_fn
+    decoy_strategy[strategy_key] = strategy_fn
 
 
 def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
@@ -730,7 +700,7 @@ def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
     if not strategy.islower():
         raise ValueError(f"Strategy string '{strategy}' should be lower case")
 
-    decoy_generator = _decoy_strategy.get(strategy)
+    decoy_generator = decoy_strategy.get(strategy)
 
     if decoy_generator is None:
         raise ValueError(f"Unknown strategy: '{strategy}'")

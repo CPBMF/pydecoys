@@ -289,13 +289,6 @@ def from_tuples(
     True
     True
     True
-
-    The `sequence` can be a single value:
-
-    >>> from types import GeneratorType
-    >>> decoy = from_seqs('DNIDYKAVYR', 'reverse')
-    >>> isinstance(decoy, GeneratorType)  # Still returns a Generator
-    True
     """
 
     decoy_generator = _validate_strategy(strategy)

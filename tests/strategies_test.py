@@ -16,7 +16,7 @@
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
 import itertools
-from typing import overload, override
+from typing import override
 
 import pytest
 
@@ -24,17 +24,8 @@ from pydecoys import strategies as s
 
 
 class DummyEnzymeSpecificGenerator(s.EnzymeSpecificGenerator):
-    @overload
-    def __call__(self, sequence: s.Seq_) -> s.Seq_: ...
-
-    @overload
-    def __call__(self, sequence: s.MutableSeq_) -> s.MutableSeq_: ...
-
-    @overload
-    def __call__(self, sequence: str) -> str: ...
-
     @override
-    def __call__(self, sequence: s.SeqLike) -> s.SeqLike:
+    def __call__[T: s.SeqLike](self, sequence: T) -> T:
         raise NotImplementedError
 
 
@@ -42,7 +33,6 @@ class TestEnzymeSpecificGenerator:
     GOOD_CUT = ['K', 'R', 'F', 'KR', 'FY', 'FWL']
     GOOD_NOCUT = ['D', 'E', 'M', 'DE', 'MA', 'MGH', None]
     GOOD_SENSE = ['N', 'C']
-    GOOD_TERM = GOOD_SENSE + ['both', None]
 
     SHARED_CUT = ['K', 'Y', 'KY', 'KRY']
     SHARED_NOCUT = ['K', 'Y', 'KY', 'KRY']
@@ -84,18 +74,12 @@ class TestEnzymeSpecificGenerator:
         with pytest.raises(TypeError):
             DummyEnzymeSpecificGenerator("KR", sense=sense)
 
-    @pytest.mark.parametrize('term', ['n', 'B', '', 4])
-    def test_bad_term(self, term):
-        with pytest.raises(TypeError):
-            DummyEnzymeSpecificGenerator("KR", keep_term=term)
-
     @pytest.mark.parametrize(
-        ['cut', 'nocut', 'sense', 'term'],
-        itertools.product(GOOD_CUT, GOOD_NOCUT, GOOD_SENSE, GOOD_TERM)
+        ['cut', 'nocut', 'sense'],
+        itertools.product(GOOD_CUT, GOOD_NOCUT, GOOD_SENSE)
     )
-    def test_good_init(self, cut, nocut, sense, term):
-        gen = DummyEnzymeSpecificGenerator(cut, nocut, sense, term)
+    def test_good_init(self, cut, nocut, sense):
+        gen = DummyEnzymeSpecificGenerator(cut, nocut, sense)
         assert gen.cut == cut
         assert gen.nocut == nocut
         assert gen.sense == sense
-        assert gen.keep_term == term

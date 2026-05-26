@@ -6,32 +6,26 @@ Creating custom strategies
 The :py:mod:`pydecoys.strategies` module exposes the API used for decoy
 strategies.
 
-The basic protocol all strategies must follow is
-:py:class:`strategies.DecoyGenerator`. This protocol is just a callable class
-with some overloads:
+The basic type signature all strategies must follow is
+:py:type:`strategies.DecoyGenerator`. This is as simple type alias:
 
 .. code-block:: python
     :linenos:
 
-    class DecoyGenerator(Protocol):
-        @overload
-        def __call__(self, sequence: Seq) -> Seq: ...
+    from typing import Callable
 
-        @overload
-        def __call__(self, sequence:  MutableSeq) -> MutableSeq: ...
+    type SeqLike = 'str | Seq | MutableSeq'
+    type DecoyGenerator[T: SeqLike] = Callable[[T], T]
 
-        @overload
-        def __call__(self, sequence: str) -> str: ...
-
-        def __call__(self, sequence: SeqLike) -> SeqLike:
-            pass
+Note that, although ``SeqLike`` is a Union type of `str`, `Seq` and
+`MutableSeq`, it doesn't actually require Biopython to be installed.
 
 Creating a simple strategy
 --------------------------
 
 To illustrate how to create custom strategies, let's create a naïve randomizer
 that takes a target protein and returns a fully random decoy protein of same
-size:
+length:
 
 .. code-block:: python
     :linenos:
@@ -40,7 +34,8 @@ size:
     # reproducibility
     from pydecoys.strategies import RAND
 
-    # PyDecoys also has a str containing all 20 aminoacid letter-codes
+    # PyDecoys also has a str containing all 20 standard aminoacid
+    # single-letter codes
     from pydecoys.strategies import AMINOACIDS
 
     def random(sequence: str) -> str:
@@ -50,8 +45,7 @@ size:
 
 This will work perfectly already, and for most usecases it'll be enough.
 However, it might fire static type checkers: ``random`` doesn't yet implement
-the correct overloads. PyDecoys :py:class:`strategies.DecoyGenerator` protocol
-has three overloads for ``__call__``.
+the correct type signature whe saw earlier.
 
 Our implementation also isn't interfaceable with Biopython, which means it
 might break or at least return a ``str`` when it should return ``Seq`` or
@@ -62,64 +56,17 @@ Fixing these problems is easy:
 .. code-block:: python
     :linenos:
 
-    from typing import overload
-
-    from Bio.Seq import Seq, MutableSeq
     from pydecoys.strategies import RAND, AMINOACIDS, SeqLike, seq_cast
 
-    @overload
-    def random(sequence: Seq) -> Seq: ...
-
-    @overload
-    def random(sequence: MutableSeq) -> MutableSeq: ...
-
-    @overload
-    def random (sequence: str) -> str: ...
-
-    def random(sequence: SeqLike) -> SeqLike:
+    def random[T: SeqLike](sequence: T) -> T:
         length = len(sequence)
         new = RAND.choices(AMINOACIDS, k=length)
         # `seq_cast` handles casting the return value to `sequence`'s type
         return seq_cast(sequence, "".join(new))
 
-But now we introduced `Biopython` as a dependency!
-
-While :py:type:`strategies.SeqLike` and :py:type:`strategies.seq_cast` work
-without `Biopython` installed, we're still using ``Seq`` and ``MutableSeq``. To
-solve that, PyDecoys introduces two alias that are ``str`` at runtime, and
-don't require `Biopython`:
-
-.. code-block:: python
-    :linenos:
-
-    from typing import overload
-
-    from pydecoys.strategies import (
-        RAND,
-        AMINOACIDS,
-        SeqLike,
-        seq_cast,
-        Seq_,
-        MutableSeq_
-    )
-
-    @overload
-    def random(sequence: Seq_) -> Seq_: ...
-
-    @overload
-    def random(sequence: MutableSeq_) -> MutableSeq_: ...
-
-    @overload
-    def random (sequence: str) -> str: ...
-
-    def random(sequence: SeqLike) -> SeqLike:
-        length = len(sequence)
-        new = RAND.choices(AMINOACIDS, k=length)
-        return seq_cast(sequence, "".join(new))
-
-Now the function is perfectly typed without ever needing `Biopython` as a
-dependency! Better yet, if it does receive `Biopython` objects, it'll handle
-them correctly.
+Note that :py:type:`strategies.SeqLike` and :py:type:`strategies.seq_cast` work
+without `Biopython` installed. Although this function correctly interfaces with
+`Biopython`, it doesn't need `Biopython` to work!
 
 Strategies with state
 ---------------------
@@ -135,25 +82,21 @@ PyDecoys has a specific protocol for that:
 targets receives a :py:class:`strategies.ContextfulGenerator` as strategy, it
 passes all the set database to it beforehand.
 
-It's a :py:class:`strategies.DecoyGenerator`, so we'll need to override its
+We need a :py:type:`strategies.DecoyGenerator`, so we'll override its
 ``__call__`` method. We also need to override the
-:py:meth:`strategies.ContextfulGenerator.learn_context` method. This is
+:py:meth:`strategies.ContextfulGenerator.learn_context` method, since this is
 the method our implementation will use to gather its state.
 
 .. code-block:: python
     :linenos:
 
-    # Boilerplate imports
-    from collections.abc import Sequence
-    from typing import overload
+    from typing import Iterable
 
     from pydecoys.strategies import (
         RAND,
         AMINOACIDS,
         SeqLike,
         seq_cast,
-        Seq_,
-        MutableSeq_
     )
 
     # Since `ContextfulGenerator` is a protocol, no need to inherit it
@@ -162,8 +105,12 @@ the method our implementation will use to gather its state.
             # We just define a list of 0's
             self._weights = [0] * 20
 
-        def learn_context(self, sequences: Sequence[SeqLike]) -> None:
+        def learn_context(self, sequences: Iterable[SeqLike]) -> None:
             # We'll use the whole dataset to populate weights
+
+            # Just ensure weights is blank before populating them
+            self._weights = [0] * 20
+
             for seq in sequences:
                 for aa in seq:
                     # The position of each weight must overlap with its aminoacid
@@ -171,58 +118,23 @@ the method our implementation will use to gather its state.
                     pos = AMINOACIDS.find(aa)
                     self._weights[pos] += 1
 
-        # Boilerplate overloads
-        @overload
-        def __call__(self, sequence: Seq_) -> Seq_:
-
-        @overload
-        def __call__(self, sequence: MutableSeq_) -> MutableSeq_:
-
-        @overload
-        def __call__(self, sequence: str) -> str:
-
-        def __call__(self, sequence: SeqLike) -> SeqLike:
+        def __call__[T: SeqLike](self, sequence: T) -> T:
             length = len(sequence)
             new = RAND.choices(AMINOACIDS, weights=self._weights, k=length)
             return seq_cast(sequence, "".join(new))
 
 This gets us a working decoy strategy that correctly implements weights before
 running! When calling :py:mod:`pydecoys` IO or Iterable functions, it'll
-automatically pass the database to the instance. One problem only: if we use
-the same instance again with one of those functions, it'll learn context again.
+automatically pass the database to the instance.
 
-To deal with that, we can use a simple boolean tag:
-
-.. code-block:: python
-    :linenos:
-
-    # imports...
-
-    class SmartRandomizer:
-        def __init__(self):
-            self._weights = [0] * 20
-            # Add a flag
-            self._context = False
-
-        def learn_context(self, sequences: Sequence[SeqLike]) -> None:
-            # Just a simple guard
-            if self._context:
-                return
-
-            for seq in sequences:
-                for aa in seq:
-                    pos = AMINOACIDS.find(aa)
-                    self._weights[pos] += 1
-
-            # We need to set it afterwards
-            self._context = True
-
-        # __call__...
-
-All set! Now it's ready to be used or registered through :py:func:`register`!
+.. note::
+    If we use the same instance again with one of those functions, it'll learn
+    context again. If you don't wish this to happen, you should implement this
+    behavior.
 
 New enzymes for ReversePep and ShufflePep
 -----------------------------------------
+
 The :py:class:`strategies.ReversePep` and :py:class:`strategies.ShufflePep`
 allow you to set new enzyme specifications for `reversepep` and `shufflepep`
 strategies. Setting new enzymes is an easy instantiation. Let's set
@@ -240,71 +152,41 @@ high-specificity chymotrypsin for each:
 That's it. The ``reversepep_chymohs`` and ``shufflepep_chymohs`` are decoy
 generators that reverse or shuffle high-specificity chymotrypsin fragments!
 
-If you wish to keep some terminal aminoacids as well, that's simple:
-
-.. code-block:: python
-    :linenos:
-
-    # imports...
-
-    reversepep_chymohs_keepn = \
-        ReversePep('FWY', nocut='P', sense='C', keep_term='N')
-
-    reversepep_chymohs_keepc = \
-        ReversePep('FWY', nocut='P', sense='C', keep_term='C')
-
-    reversepep_chymohs_keepterm = \
-        ReversePep('FWY', nocut='P', sense='C', keep_term='both')
-
 Note that you still need to register those instances to use them via a ``str``
 key.
 
 Enzyme-specific strategies
 --------------------------
+
 You might want to set your own enzyme-specific strategy. Luckily, there's an
 ABC for that: :py:class:`strategies.EnzymeSpecificGenerator`. This class sets
 up the :py:meth:`strategies.EnzymeSpecificGenerator.__init__` method we used
 earlier to add the new enzyme. It also sets
 :py:attr:`strategies.EnzymeSpecificGenerator.cut`,
-:py:attr:`strategies.EnzymeSpecificGenerator.nocut`,
-:py:attr:`strategies.EnzymeSpecificGenerator.sense` and
-:py:attr:`strategies.EnzymeSpecificGenerator.keep_term` get-only properties!
+:py:attr:`strategies.EnzymeSpecificGenerator.nocut` and
+:py:attr:`strategies.EnzymeSpecificGenerator.sense` get-only properties!
 
-Most importantly, it sets a ``_pattern`` attribute that matches the cleavage
-sites and maybe the terminal aminoacids (based on the specifications at
-instantiation). This pattern is already compiled and wrapped into a capture
-group.
+Most importantly, it sets a regex ``_pattern`` attribute that matches the
+cleavage sites of the specified enzyme. This pattern is already compiled and
+wrapped into a capture group.
 
 Let's redo the naïve randomizer, but this time let's randomize peptides:
 
 .. code-block:: python
     :linenos:
 
-    # Boilerplate imports
     from collections.abc import Sequence
-    from typing import overload
 
     from pydecoys.strategies import (
         RAND,
         AMINOACIDS,
         SeqLike,
         seq_cast,
-        Seq_,
-        MutableSeq_,
         EnzymeSpecificGenerator
     )
 
     class RandomizePep(EnzymeSpecificGenerator):
-        @overload
-        def __call__(self, sequence: Seq_) -> Seq_:
-
-        @overload
-        def __call__(self, sequence: MutableSeq_) -> MutableSeq_:
-
-        @overload
-        def __call__(self, sequence: str) -> str:
-
-        def __call__(self, sequence: SeqLike) -> SeqLike:
+        def __call__[T: SeqLike](self, sequence: T) -> T:
             # re module requires `str`
             sequence = str(sequence)
 
@@ -336,3 +218,26 @@ Let's redo the naïve randomizer, but this time let's randomize peptides:
 
     # We can now create pep randomizers:
     randompep_trypsin = RandomPep('KR', nocut='P', sense='C')
+
+Keeping N- and C-termini
+------------------------
+
+You might also want to keep the N-, C- or both termini from the target protein
+in the decoy. To accomplish that, use one of the following decorators:
+:py:func:`strategies.keepns`, :py:func:`strategies.keepsc` and
+:py:func:`strategies.keepsterm`. This will return a new callable
+that preserves the terminal aminoacids.
+
+:py:class:`strategies.ContextfulGenerator` objects will preserve their
+functionality, but will discard the aminoacid that shouldn't be altered from
+each sequence when learning context.
+
+.. code-block:: python
+    :linenos:
+
+    from pydecoys.strategies import keepsn
+
+    # The `sequence` value is passed directly without the aminoacid that
+    # should be preserved. The aa is reinserted after the wrapped function
+    # returns.
+    random_keepn = keepsn(random)

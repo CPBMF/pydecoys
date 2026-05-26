@@ -17,12 +17,7 @@
 
 """Internal logic for implemented strategies."""
 
-from __future__ import annotations
-
-from typing import Literal, overload, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from Bio.Seq import Seq, MutableSeq
+from typing import Literal, cast
 
 from pydecoys import strategies as s
 
@@ -30,148 +25,40 @@ from pydecoys import strategies as s
 # the overloads if I move them to a .pyi file.
 
 
-@overload
-def reverse(sequence: Seq) -> Seq: ...
-
-
-@overload
-def reverse(sequence: MutableSeq) -> MutableSeq: ...
-
-
-@overload
-def reverse(sequence: str) -> str: ...
-
-
-def reverse(sequence: s.SeqLike) -> s.SeqLike:
+def reverse[T: s.SeqLike](sequence: T) -> T:
     """Return the reversed `sequence`."""
-    return sequence[::-1]
+    return cast(T, sequence[::-1])
 
 
-@overload
-def reverse_keepn(sequence: Seq) -> Seq: ...
+reverse_keepn = s.keepsn(reverse)
+"""Return the reversed `sequence`, except N-terminal aa."""
 
 
-@overload
-def reverse_keepn(sequence: MutableSeq) -> MutableSeq: ...
+reverse_keepc = s.keepsc(reverse)
+"""Return the reversed `sequence`, except C-terminal aa."""
 
 
-@overload
-def reverse_keepn(sequence: str) -> str: ...
+reverse_keepterm = s.keepsterm(reverse)
+"""Return the reversed `sequence`, except terminal aas."""
 
 
-def reverse_keepn(sequence: s.SeqLike) -> s.SeqLike:
-    """Return the reversed `sequence`, except N-terminal aa."""
-    return sequence[0] + sequence[:0:-1]
-
-
-@overload
-def reverse_keepc(sequence: Seq) -> Seq: ...
-
-
-@overload
-def reverse_keepc(sequence: MutableSeq) -> MutableSeq: ...
-
-
-@overload
-def reverse_keepc(sequence: str) -> str: ...
-
-
-def reverse_keepc(sequence: s.SeqLike) -> s.SeqLike:
-    """Return the reversed `sequence`, except C-terminal aa."""
-    return sequence[-2::-1] + sequence[-1]
-
-
-@overload
-def reverse_keepterm(sequence: Seq) -> Seq: ...
-
-
-@overload
-def reverse_keepterm(sequence: MutableSeq) -> MutableSeq: ...
-
-
-@overload
-def reverse_keepterm(sequence: str) -> str: ...
-
-
-def reverse_keepterm(sequence: s.SeqLike) -> s.SeqLike:
-    """Return the reversed `sequence`, except terminal aas."""
-    return sequence[0] + sequence[-2:0:-1] + sequence[-1]
-
-
-@overload
-def shuffle(sequence: Seq) -> Seq: ...
-
-
-@overload
-def shuffle(sequence: MutableSeq) -> MutableSeq: ...
-
-
-@overload
-def shuffle(sequence: str) -> str: ...
-
-
-def shuffle(sequence: s.SeqLike) -> s.SeqLike:
+def shuffle[T: s.SeqLike](sequence: T) -> T:
     """Return the shuffled `sequence`."""
     new = list(sequence)
     s.RAND.shuffle(new)
     return s.seq_cast(sequence, "".join(new))
 
 
-@overload
-def shuffle_keepn(sequence: Seq) -> Seq: ...
+shuffle_keepn = s.keepsn(shuffle)
+"""Return the shuffled `sequence`, except N-terminal aa."""
 
 
-@overload
-def shuffle_keepn(sequence: MutableSeq) -> MutableSeq: ...
+shuffle_keepc = s.keepsc(shuffle)
+"""Return the shuffled `sequence`, except N-terminal aa."""
 
 
-@overload
-def shuffle_keepn(sequence: str) -> str: ...
-
-
-def shuffle_keepn(sequence: s.SeqLike) -> s.SeqLike:
-    """Return the shuffled `sequence`, except N-terminal aa."""
-    new = list(sequence[1:])
-    s.RAND.shuffle(new)
-    return s.seq_cast(sequence, sequence[0] + "".join(new))
-
-
-@overload
-def shuffle_keepc(sequence: Seq) -> Seq: ...
-
-
-@overload
-def shuffle_keepc(sequence: MutableSeq) -> MutableSeq: ...
-
-
-@overload
-def shuffle_keepc(sequence: str) -> str: ...
-
-
-def shuffle_keepc(sequence: s.SeqLike) -> s.SeqLike:
-    """Return the shuffled `sequence`, except C-terminal aa."""
-    new = list(sequence[:-1])
-    s.RAND.shuffle(new)
-    return s.seq_cast(sequence, "".join(new) + sequence[-1])
-
-
-@overload
-def shuffle_keepterm(sequence: Seq) -> Seq: ...
-
-
-@overload
-def shuffle_keepterm(sequence: MutableSeq) -> MutableSeq: ...
-
-
-@overload
-def shuffle_keepterm(sequence: str) -> str: ...
-
-
-def shuffle_keepterm(sequence: s.SeqLike) -> s.SeqLike:
-    """Return the shuffled `sequence`, except terminal aas."""
-    new = list(sequence[1:-1])
-    s.RAND.shuffle(new)
-    return s.seq_cast(sequence, sequence[0] + "".join(new) + sequence[-1])
+shuffle_keepterm = s.keepsterm(shuffle)
+"""Return the shuffled `sequence`, except terminal aas."""
 
 
 # Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
@@ -193,9 +80,8 @@ _CNBR: _Enzyme = ('M', None, 'C')
 def _with_enzyme[T: s.EnzymeSpecificGenerator](
     generator: type[T],
     enzyme: _Enzyme,
-    keep_term: Literal['N', 'C', 'both', None] = None,
 ) -> T:
-    return generator(enzyme[0], enzyme[1], enzyme[2], keep_term)
+    return generator(enzyme[0], enzyme[1], enzyme[2])
 
 
 reversepep_trypsin = _with_enzyme(s.ReversePep, _TRYPSIN)
@@ -208,7 +94,10 @@ reversepep_lysc = _with_enzyme(s.ReversePep, _LYS_C)
 reversepep_lysn = _with_enzyme(s.ReversePep, _LYS_N)
 reversepep_pepsina = _with_enzyme(s.ReversePep, _PEPSIN_A)
 reversepep_cnbr = _with_enzyme(s.ReversePep, _CNBR)
-reversepep_stricttrypsin_keepn = _with_enzyme(s.ReversePep, _STRICT_TRYPSIN, 'N')
+
+# Keep-n versions
+reversepep_stricttrypsin_keepn = \
+    s.keepsn(_with_enzyme(s.ReversePep, _STRICT_TRYPSIN))
 
 shufflepep_trypsin = _with_enzyme(s.ShufflePep, _TRYPSIN)
 shufflepep_stricttrypsin = _with_enzyme(s.ShufflePep, _STRICT_TRYPSIN)
@@ -220,7 +109,10 @@ shufflepep_lysc = _with_enzyme(s.ShufflePep, _LYS_C)
 shufflepep_lysn = _with_enzyme(s.ShufflePep, _LYS_N)
 shufflepep_pepsina = _with_enzyme(s.ShufflePep, _PEPSIN_A)
 shufflepep_cnbr = _with_enzyme(s.ShufflePep, _CNBR)
-shufflepep_stricttrypsin_keepn = _with_enzyme(s.ShufflePep, _STRICT_TRYPSIN, 'N')
+
+# Keep-n versions
+shufflepep_stricttrypsin_keepn = \
+    s.keepsn(_with_enzyme(s.ShufflePep, _STRICT_TRYPSIN))
 
 
 decoy_strategy: dict[str, s.DecoyGenerator] = {

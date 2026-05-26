@@ -20,14 +20,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 import random
 import re
 from typing import (
+    Callable,
     Final,
+    Iterable,
     Literal,
     Protocol,
-    overload,
     TYPE_CHECKING,
     override,
     runtime_checkable,
@@ -40,12 +40,12 @@ if TYPE_CHECKING:
 type SeqLike = 'str | Seq | MutableSeq'
 """`SeqLike` objects can be indexed and spliced; `str` at runtime."""
 
-type Seq_ = 'Seq'
-"""`Seq` type that doesn't require Biopython; `str` at runtime."""
+type DecoyGenerator[T: SeqLike] = Callable[[T], T]
+"""TypeAlias specifying the signature for decoy strategies.
 
-type MutableSeq_ = 'MutableSeq'
-"""`MutableSeq` type that doesn't require Biopython; `str` at runtime."""
-
+A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
+:obj:`SeqLike`.
+"""
 
 # So shuffled decoys are always reproducible
 RAND: Final = random.Random(10)
@@ -55,47 +55,13 @@ AMINOACIDS: Final = 'QWERTYIPASDFGHKLCVNM'
 """Standard 20 aminoacids single-letter codes, majuscule."""
 
 
-class DecoyGenerator(Protocol):
-    """Protocol defining a decoy generator function that applies a decoy
-    strategy.
-
-    Classes following this protocol should implement `__call__` as a
-    `Callable[[SeqLike], SeqLike]`. For most cases, a :obj:`SeqLike` object
-    can be treated as a `str`, including splicing and concatenation:
-    ``seq[1::-1]`` and ``seq1 + seq2``.
-    """
-
-    @overload
-    def __call__(self, sequence: Seq) -> Seq:
-        ...
-
-    @overload
-    def __call__(self, sequence:  MutableSeq) -> MutableSeq:
-        ...
-
-    @overload
-    def __call__(self, sequence: str) -> str:
-        ...
-
-    def __call__(self, sequence: SeqLike) -> SeqLike:
-        """Generate a decoy version of a given sequence.
-
-        Args:
-            sequence: A target sequence.
-
-        Returns:
-            The decoy version of `sequence`.
-        """
-        ...
-
-
 @runtime_checkable
-class ContextfulGenerator(DecoyGenerator, Protocol):
+class ContextfulGenerator(Protocol):
     """Protocol defining a decoy generator function that uses previously
     learned context.
     """
 
-    def learn_context(self, sequences: Sequence[SeqLike]) -> None:
+    def learn_context(self, sequences: Iterable[SeqLike]) -> None:
         """Receive the target proteins set to generate the necessary context.
 
         Parameters
@@ -105,14 +71,26 @@ class ContextfulGenerator(DecoyGenerator, Protocol):
         """
         ...
 
+    def __call__[T: SeqLike](self, sequence: T) -> T:
+        """Receive a sequence and return a decoy based on previous context.
+
+        Parameters
+        ----------
+        sequence
+            A single sequence.
+
+        Returns
+        -------
+        A decoy version of `sequence`.
+        """
+        ...
+
 
 class EnzymeSpecificGenerator(ABC):
     """Abstract base class for enzymatic aware decoy generation.
 
     This class creates a compiled regex pattern at instantiation that captures
-    peptides that shouldn't be altered (cleavage sites, and maybe N- and
-    C-termini if specified at class instantiation). The pattern can be accessed
-    through ``self._pattern``.
+    cleavage sites. The pattern can be accessed through ``self._pattern``.
 
     This class also save the enzymatic specifications as get-only attributes.
 
@@ -125,15 +103,12 @@ class EnzymeSpecificGenerator(ABC):
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
         enzyme won't cut aminoacids with a C-terminal followed by these.
-    keep_term
-        Terminal aminoacids that should be kept.
     """
     def __init__(
         self,
         cut: str,
         nocut: str | None = None,
         sense: Literal['N', 'C'] = 'C',
-        keep_term: Literal['N', 'C', 'both', None] = None,
     ) -> None:
         # A lot of type-guarding...
         if not isinstance(cut, str):
@@ -163,19 +138,7 @@ class EnzymeSpecificGenerator(ABC):
         if not isinstance(sense, str) or not sense or sense not in 'NC':
             raise TypeError("Cleavage sense must be 'N' or 'C'")
 
-        match keep_term:
-            case 'N':
-                pattern = rf"(^.|[{cut}])"
-            case 'C':
-                pattern = rf"([{cut}]|.$)"
-            case 'both':
-                pattern = rf"(^.|[{cut}]|.$)"
-            case None:
-                pattern = rf"([{cut}])"
-            case _:
-                raise TypeError(
-                    f"Kept termini must be 'N', 'C', 'both' or None, not '{keep_term}'"
-                )
+        pattern = rf"([{cut}])"
 
         if nocut is not None:
             pattern += rf"(?!{nocut})"
@@ -183,21 +146,11 @@ class EnzymeSpecificGenerator(ABC):
         self.__cut = cut
         self.__nocut = nocut
         self.__sense: Literal['N', 'C'] = sense
-        self.__keep_term: Literal['N', 'C', 'both', None] = keep_term
 
         self._pattern = re.compile(pattern)
 
-    @overload
-    def __call__(self, sequence: Seq) -> Seq: ...
-
-    @overload
-    def __call__(self, sequence: MutableSeq) -> MutableSeq: ...
-
-    @overload
-    def __call__(self, sequence: str) -> str: ...
-
     @abstractmethod
-    def __call__(self, sequence: SeqLike) -> SeqLike:
+    def __call__[T: SeqLike](self, sequence: T) -> T:
         """Receive a sequence and return a decoy based on enzymatic peptides.
 
         Parameters
@@ -207,8 +160,8 @@ class EnzymeSpecificGenerator(ABC):
 
         Returns
         -------
-        A version of `sequence`, according to the enzyme specifications given
-        at class instantiation.
+        A decoy version of `sequence`, according to the enzyme specifications
+        given at class instantiation.
         """
         pass
 
@@ -226,11 +179,6 @@ class EnzymeSpecificGenerator(ABC):
     def nocut(self) -> str | None:
         """Aminoacids that stop cleavage as a string."""
         return self.__nocut
-
-    @property
-    def keep_term(self) -> Literal['N', 'C', 'both', None]:
-        """Terminal aminoacids that should be kept."""
-        return self.__keep_term
 
 
 class ReversePep(EnzymeSpecificGenerator):
@@ -260,11 +208,11 @@ class ReversePep(EnzymeSpecificGenerator):
     Examples
     --------
     >>> rev = ReversePep("R", sense="N")
-    >>> print(rev.cut, rev.nocut, rev.sense, rev.keep_term, sep=', ')
-    R, None, N, None
-    >>> rev = ReversePep("KR", nocut="P", keep_term="both")
-    >>> print(rev.cut, rev.nocut, rev.sense, rev.keep_term, sep=', ')
-    KR, P, C, both
+    >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
+    R, None, N
+    >>> rev = ReversePep("KR", nocut="P")
+    >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
+    KR, P, C
 
     Cut argument cannot be an empty string:
 
@@ -281,17 +229,8 @@ class ReversePep(EnzymeSpecificGenerator):
     ValueError: Not an standard aminoacid single-letter code: 'B'
     """
 
-    @overload
-    def __call__(self, sequence: Seq) -> Seq: ...
-
-    @overload
-    def __call__(self, sequence: MutableSeq) -> MutableSeq: ...
-
-    @overload
-    def __call__(self, sequence: str) -> str: ...
-
     @override
-    def __call__(self, sequence: SeqLike) -> SeqLike:
+    def __call__[T: SeqLike](self, sequence: T) -> T:
         """Receive a sequence and return a pseudo-reversed decoy.
 
         Parameters
@@ -309,9 +248,9 @@ class ReversePep(EnzymeSpecificGenerator):
         >>> rev = ReversePep("KR", nocut="P")
         >>> rev('QSYKPTRTHQ')
         'TPKYSQRQHT'
-        >>> rev = ReversePep("K", sense="N", keep_term="N")
+        >>> rev = ReversePep("K", sense="N")
         >>> rev('QSYKPTRTHQ')
-        'QYSKQHTRTP'
+        'YSQKQHTRTP'
         """
         fragments = re.split(self._pattern, str(sequence))
         rev_frags = [frag[::-1] for frag in fragments]
@@ -325,13 +264,7 @@ class ReversePep(EnzymeSpecificGenerator):
         rev_frags = [frag[::-1] for frag in fragments]
         return "".join(rev_frags)
 
-    @overload
-    def decoy_from_Seq(self, sequence: Seq) -> Seq: ...
-
-    @overload
-    def decoy_from_Seq(self, sequence: MutableSeq) -> MutableSeq: ...
-
-    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
+    def decoy_from_Seq[T: Seq | MutableSeq](self, sequence: T) -> T:
         """Convenience funcion. Equivalent to ``ReversePep(sequence)`` where
         `sequence` is a `Seq` or `MutableSeq`.
         """
@@ -368,11 +301,11 @@ class ShufflePep(EnzymeSpecificGenerator):
     Examples
     --------
     >>> shuf = ShufflePep("R", sense="N")
-    >>> print(shuf.cut, shuf.nocut, shuf.sense, shuf.keep_term, sep=', ')
-    R, None, N, None
-    >>> shuf = ShufflePep("KR", nocut="P", keep_term="both")
-    >>> print(shuf.cut, shuf.nocut, shuf.sense, shuf.keep_term, sep=', ')
-    KR, P, C, both
+    >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
+    R, None, N
+    >>> shuf = ShufflePep("KR", nocut="P")
+    >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
+    KR, P, C
 
     Cut argument cannot be an empty string:
 
@@ -389,17 +322,8 @@ class ShufflePep(EnzymeSpecificGenerator):
     ValueError: Not an standard aminoacid single-letter code: 'B'
     """
 
-    @overload
-    def __call__(self, sequence: Seq) -> Seq: ...
-
-    @overload
-    def __call__(self, sequence: MutableSeq) -> MutableSeq: ...
-
-    @overload
-    def __call__(self, sequence: str) -> str: ...
-
     @override
-    def __call__(self, sequence: SeqLike) -> SeqLike:
+    def __call__[T: SeqLike](self, sequence: T) -> T:
         """Receive a sequence and return a pseudo-shuffled decoy.
 
         Parameters
@@ -417,9 +341,9 @@ class ShufflePep(EnzymeSpecificGenerator):
         >>> shuf = ShufflePep("KR", nocut="P")
         >>> shuf('QSYKPTRTHQ')
         'YTSKQPRQHT'
-        >>> shuf = ShufflePep("K", sense="N", keep_term="N")
+        >>> shuf = ShufflePep("K", sense="N")
         >>> shuf('QSYKPTRTHQ')
-        'QSYKTHQPTR'
+        'QYSKTHRPTQ'
         """
         fragments = re.split(self._pattern, str(sequence))
 
@@ -434,13 +358,7 @@ class ShufflePep(EnzymeSpecificGenerator):
         shuf_frags = [self._shuffle(frag) for frag in fragments]
         return "".join(shuf_frags)
 
-    @overload
-    def decoy_from_Seq(self, sequence: Seq) -> Seq: ...
-
-    @overload
-    def decoy_from_Seq(self, sequence: MutableSeq) -> MutableSeq: ...
-
-    def decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
+    def decoy_from_Seq[T: Seq | MutableSeq](self, sequence: T) -> T:
         """Convenience funcion. Equivalent to ``ShufflePep(sequence)`` where
         `sequence` is a `Seq` or `MutableSeq`.
         """
@@ -456,7 +374,7 @@ class ShufflePep(EnzymeSpecificGenerator):
 
 # Hackish solution, but it allows the code to always return the correct type
 # without importing Biopython or deferring to another module
-def seq_cast(obj: SeqLike, sequence: str) -> SeqLike:
+def seq_cast[T: SeqLike](obj: T, sequence: str) -> T:
     """Convenience function. Transforms a `sequence` str into the correct
     :obj:`SeqLike` representation (through `obj`).
 

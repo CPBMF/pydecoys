@@ -17,9 +17,9 @@
 
 """Decoy-generation logic, as well as API to write new decoy strategies.
 
-The main API of `strategies` is the :class:`DecoyGenerator` type. This is a
-simple protocol that only implements a `__call__` function and appropriate
-type overloads.
+The main API of `strategies` is the :obj:`DecoyGenerator` type. This is a
+simple type alias that takes a type ``T: str | Seq | MutableSeq`` and returns a
+type ``T``.
 
 For decoy strategies that need context from the target database (for example,
 that use a Markov State Model), implement the :class:`ContextfulGenerator`
@@ -34,8 +34,6 @@ from :class:`EnzymeSpecificGenerator`.
 
 from pydecoys.strategies.core import (
     SeqLike,
-    Seq_,
-    MutableSeq_,
     DecoyGenerator,
     ContextfulGenerator,
     EnzymeSpecificGenerator,
@@ -47,10 +45,15 @@ from pydecoys.strategies.core import (
 )
 
 
+from pydecoys.strategies.factories import (
+    keepsn,
+    keepsc,
+    keepsterm,
+)
+
+
 __all__ = [
     'SeqLike',
-    'Seq_',
-    'MutableSeq_',
     'DecoyGenerator',
     'ContextfulGenerator',
     'EnzymeSpecificGenerator',
@@ -59,4 +62,7 @@ __all__ = [
     'RAND',
     'seq_cast',
     'AMINOACIDS',
+    'keepsn',
+    'keepsc',
+    'keepsterm',
 ]

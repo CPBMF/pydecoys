@@ -5,28 +5,23 @@ pydecoys.strategies
 
 .. automodule:: pydecoys.strategies
 
-.. type:: SeqLike
-
-   ``(str | Seq | MutableSeq)``
+.. autotype:: SeqLike
 
    `SeqLike` objects can be indexed and spliced; `str` at runtime.
 
-.. type:: Seq_
+   .. note:: This type doesn't need `Biopython` installed.
 
-   ``Seq``
 
-   `Seq` type that doesn't require Biopython; `str` at runtime.
+.. autotype:: DecoyGenerator
 
-.. type:: MutableSeq_
+   TypeAlias specifying the signature for decoy strategies.
 
-   ``MutableSeq``
-
-   `MutableSeq` type that doesn't require Biopython; `str` at runtime.
-
-.. note:: None of those types need `Biopython` installed.
+   A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
+   :type:`SeqLike`.
 
 .. data:: RAND
    :type: typing.Final[random.Random]
+   :value: random.Random(SEED)
 
    Random number generator for stochastic decoy strategies.
 
@@ -48,13 +43,9 @@ pydecoys.strategies
 
    Standard 20 aminoacids single-letter codes, majuscule.
 
-.. autoclass:: DecoyGenerator
-   :show-inheritance:
-   :special-members: __call__
-   :members:
-
 .. autoclass:: ContextfulGenerator
    :show-inheritance:
+   :special-members: __call__
    :members:
 
    .. note::
@@ -90,3 +81,7 @@ pydecoys.strategies
    is constructed and compiled at initialization, changing either property would
    just cause a mismatch between the visible specifications and the actual
    behavior.
+
+.. autofunction:: keepsn
+.. autofunction:: keepsc
+.. autofunction:: keepsterm

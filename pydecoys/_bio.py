@@ -20,13 +20,10 @@ the relevant names and namespacing utility functions related to the Biopython
 interface.
 """
 
-import re
 from typing import Iterable
 
 from Bio.SeqRecord import SeqRecord
-from Bio.Seq import Seq, MutableSeq
-
-from pydecoys.strategies import ReversePep, ShufflePep
+from Bio.Seq import Seq
 
 
 def SeqRecord_to_tuple(record: SeqRecord) -> tuple[str, str]:
@@ -45,28 +42,3 @@ def iter_SeqRecord(seq: Iterable[SeqRecord] | SeqRecord) -> Iterable[SeqRecord]:
 
 def str_to_Seq(sequence: str) -> Seq:
     return Seq(sequence)
-
-
-# Hackish solution, but it allows dispatched methods to only load
-# Biopython and reference the dispatch types when needed.
-#
-# Rebinding the name makes it lose its previous __doc__, so we also have
-# to fix them.
-def register():
-    def reverse_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
-        fragments = re.split(self._pattern, str(sequence))
-        rev_frags = [frag[::-1] for frag in fragments]
-        cls = type(sequence)
-        return cls("".join(rev_frags))
-
-    reverse_decoy_from_Seq.__doc__ = ReversePep.decoy_from_Seq.__doc__
-    ReversePep.decoy_from_Seq = reverse_decoy_from_Seq  # type: ignore
-
-    def shuffle_decoy_from_Seq(self, sequence: Seq | MutableSeq) -> Seq | MutableSeq:
-        fragments = re.split(self._pattern, str(sequence))
-        shuf_frags = [self._shuffle(frag) for frag in fragments]
-        cls = type(sequence)
-        return cls("".join(shuf_frags))
-
-    shuffle_decoy_from_Seq.__doc__ = ShufflePep.decoy_from_Seq.__doc__
-    ShufflePep.decoy_from_Seq = shuffle_decoy_from_Seq  # type: ignore

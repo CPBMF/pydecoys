@@ -17,7 +17,7 @@
 
 """Internal logic for implemented strategies."""
 
-from typing import Literal, cast
+from typing import Iterable, Literal, cast
 
 from pydecoys import strategies as s
 
@@ -59,6 +59,33 @@ shuffle_keepc = s.keepsc(shuffle)
 
 shuffle_keepterm = s.keepsterm(shuffle)
 """Return the shuffled `sequence`, except terminal aas."""
+
+
+class Randomize:
+    _AA_TO_INDEX = {aa: i for i, aa in enumerate(s.AMINOACIDS)}
+
+    def __init__(self):
+        self._weights = [0] * 20
+
+    def learn_context(self, sequences: Iterable[s.SeqLike]):
+        self._weights = [0] * 20
+
+        for seq in sequences:
+            for aa in seq:
+                idx = self._AA_TO_INDEX.get(aa)
+                if idx is not None:
+                    self._weights[idx] += 1
+
+    def __call__[T: s.SeqLike](self, sequence: T) -> T:
+        length = len(sequence)
+        new = s.RAND.choices(s.AMINOACIDS, weights=self._weights, k=length)
+        return s.seq_cast(sequence, "".join(new))
+
+
+randomize = Randomize()
+randomize_keepn = s.keepsn(Randomize())
+randomize_keepc = s.keepsc(Randomize())
+randomize_keepterm = s.keepsterm(Randomize())
 
 
 # Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
@@ -115,6 +142,21 @@ shufflepep_stricttrypsin_keepn = \
     s.keepsn(_with_enzyme(s.ShufflePep, _STRICT_TRYPSIN))
 
 
+randomizepep_trypsin = _with_enzyme(s.RandomizePep, _TRYPSIN)
+randomizepep_stricttrypsin = _with_enzyme(s.RandomizePep, _STRICT_TRYPSIN)
+randomizepep_argc = _with_enzyme(s.RandomizePep, _ARG_C)
+randomizepep_aspn = _with_enzyme(s.RandomizePep, _ASP_N)
+randomizepep_chymo = _with_enzyme(s.RandomizePep, _CHYMO)
+randomizepep_gluc = _with_enzyme(s.RandomizePep, _GLU_C)
+randomizepep_lysc = _with_enzyme(s.RandomizePep, _LYS_C)
+randomizepep_lysn = _with_enzyme(s.RandomizePep, _LYS_N)
+randomizepep_pepsina = _with_enzyme(s.RandomizePep, _PEPSIN_A)
+randomizepep_cnbr = _with_enzyme(s.RandomizePep, _CNBR)
+
+randomizepep_stricttrypsin_keepn = \
+    s.keepsn(_with_enzyme(s.RandomizePep, _STRICT_TRYPSIN))
+
+
 decoy_strategy: dict[str, s.DecoyGenerator] = {
     "reverse": reverse,
     "reverse-keepn": reverse_keepn,
@@ -124,6 +166,10 @@ decoy_strategy: dict[str, s.DecoyGenerator] = {
     "shuffle-keepn": shuffle_keepn,
     "shuffle-keepc": shuffle_keepc,
     "shuffle-keepterm": shuffle_keepterm,
+    "randomize": randomize,
+    "randomize-keepn": randomize_keepn,
+    "randomize-keepc": randomize_keepc,
+    "randomize-keepterm": randomize_keepterm,
     "reversepep-trypsin": reversepep_trypsin,
     "reversepep-stricttrypsin": reversepep_stricttrypsin,
     "reversepep-argc": reversepep_argc,
@@ -142,4 +188,13 @@ decoy_strategy: dict[str, s.DecoyGenerator] = {
     "shufflepep-lysc": shufflepep_lysc,
     "shufflepep-lysn": shufflepep_lysn,
     "shufflepep-stricttrypsin-keepn": shufflepep_stricttrypsin_keepn,  # noqa: E501
+    "randomizepep-trypsin": randomizepep_trypsin,
+    "randomizepep-stricttrypsin": randomizepep_stricttrypsin,
+    "randomizepep-argc": randomizepep_argc,
+    "randomizepep-aspn": randomizepep_aspn,
+    "randomizepep-chymo": randomizepep_chymo,
+    "randomizepep-gluc": randomizepep_gluc,
+    "randomizepep-lysc": randomizepep_lysc,
+    "randomizepep-lysn": randomizepep_lysn,
+    "randomizepep-stricttrypsin-keepn": randomizepep_stricttrypsin_keepn,  # noqa: E501
 }

@@ -22,8 +22,7 @@ from Bio.Seq import Seq, MutableSeq
 import pytest
 
 from pydecoys import _builtins as _b
-from pydecoys.strategies import DecoyGenerator, RAND
-from pydecoys.strategies.core import SeqLike
+from pydecoys.strategies import DecoyGenerator, RAND, ContextfulGenerator, SeqLike
 
 
 SEQ = 'DNIDYKAVYR'
@@ -40,6 +39,8 @@ def rng():
 # We ensure each builtin returns the correct type
 @pytest.mark.parametrize(['type', 'fn'], itertools.product(TYPES, FUNCS))
 def test_bultin_types(type: type[SeqLike], fn: DecoyGenerator):
+    if isinstance(fn, ContextfulGenerator):
+        fn.learn_context([SEQ])
     seq = fn(type(SEQ))
     assert isinstance(seq, type)
 
@@ -50,6 +51,11 @@ def test_builtins(key: str):
     fn = _b.decoy_strategy[key]
 
     targets = SeqIO.parse('tests/data/2026_01_ccp_crap.fasta', 'fasta')
+
+    if isinstance(fn, ContextfulGenerator):
+        target_seqs = [target.seq for target in targets]
+        fn.learn_context(target_seqs)
+
     decoys = (fn(record.seq) for record in targets)
     corrects = SeqIO.parse(f'tests/data/out/2026_01_ccp_crap_{filename}.fasta', 'fasta')
 

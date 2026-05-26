@@ -256,22 +256,6 @@ class ReversePep(EnzymeSpecificGenerator):
         rev_frags = [frag[::-1] for frag in fragments]
         return seq_cast(sequence, "".join(rev_frags))
 
-    def decoy_from_str(self, sequence: str) -> str:
-        """Convenience funcion. Equivalent to ``ReversePep(sequence)`` where
-        `sequence` is a `str`.
-        """
-        fragments = re.split(self._pattern, str(sequence))
-        rev_frags = [frag[::-1] for frag in fragments]
-        return "".join(rev_frags)
-
-    def decoy_from_Seq[T: Seq | MutableSeq](self, sequence: T) -> T:
-        """Convenience funcion. Equivalent to ``ReversePep(sequence)`` where
-        `sequence` is a `Seq` or `MutableSeq`.
-        """
-        from .. import _bio
-        _bio.register()
-        return self.decoy_from_Seq(sequence)
-
 
 class ShufflePep(EnzymeSpecificGenerator):
     """Appliy pseudo-shuffle decoy generation with the specified enzyme
@@ -350,25 +334,136 @@ class ShufflePep(EnzymeSpecificGenerator):
         shuf_frags = [self._shuffle(frag) for frag in fragments]
         return seq_cast(sequence, "".join(shuf_frags))
 
-    def decoy_from_str(self, sequence: str) -> str:
-        """Convenience funcion. Equivalent to ``ShufflePep(sequence)`` where
-        `sequence` is a `str`.
-        """
-        fragments = re.split(self._pattern, str(sequence))
-        shuf_frags = [self._shuffle(frag) for frag in fragments]
-        return "".join(shuf_frags)
-
-    def decoy_from_Seq[T: Seq | MutableSeq](self, sequence: T) -> T:
-        """Convenience funcion. Equivalent to ``ShufflePep(sequence)`` where
-        `sequence` is a `Seq` or `MutableSeq`.
-        """
-        from .. import _bio
-        _bio.register()
-        return self.decoy_from_Seq(sequence)
-
     def _shuffle(self, frag: str) -> str:
         new = list(frag)
         RAND.shuffle(new)
+        return "".join(new)
+
+
+class RandomizePep(EnzymeSpecificGenerator):
+    """Appliy pseudo-randomize decoy generation with the specified enzyme
+    properties.
+
+    Pseudo-randomize (or randomize peptide) means that the enzymatic peptides
+    will be randomized, except for the cleavage site. For trypsin:
+
+    - `QSYKPTRTHQ -> QSYKPTR.THQ -> TPKYSQRQHT`
+
+    The randomization happens based on aminoacid proportions from the target
+    database. Cleavage sites aren't counted.
+
+    This better preserves actual peptide amount and sizes from the targets to
+    the decoys.
+
+    Parameters
+    ----------
+    cut
+        Cleavage sites as a string.
+    sense
+        Whether the enzyme cleaves the 'C' or 'N' bond of the cleavage site.
+    nocut
+        Aminoacids that stop cleavage as a string, or `None`. If given, the
+        enzyme won't cut aminoacids followed by these.
+    keep_term
+        Terminal aminoacids that should be kept.
+
+    Examples
+    --------
+    >>> rand = RandomizePep("R", sense="N")
+    >>> print(rand.cut, rand.nocut, rand.sense, sep=', ')
+    R, None, N
+    >>> rand = RandomizePep("KR", nocut="P")
+    >>> print(rand.cut, rand.nocut, rand.sense, sep=', ')
+    KR, P, C
+
+    Cut argument cannot be an empty string:
+
+    >>> rand = RandomizePep("")
+    Traceback (most recent call last):
+        ...
+    ValueError: Need string for cut aminoacids
+
+    Aminoacids must be one of the 20 standard aminoacid single-letter codes:
+
+    >>> rand = RandomizePep("KR", nocut="B")
+    Traceback (most recent call last):
+        ...
+    ValueError: Not an standard aminoacid single-letter code: 'B'
+    """
+
+    _AA_TO_INDEX = {aa: i for i, aa in enumerate(AMINOACIDS)}
+
+    @override
+    def __init__(
+        self,
+        cut: str,
+        nocut: str | None = None,
+        sense: Literal['N', 'C'] = 'C',
+    ) -> None:
+        super().__init__(cut, nocut, sense)
+        self._weights = [0] * 20
+
+    @override
+    def __call__[T: SeqLike](self, sequence: T) -> T:
+        """Receive a sequence and return a pseudo-randomized decoy.
+
+        Parameters
+        ----------
+        sequence
+            A single sequence.
+
+        Returns
+        -------
+        A pseudo-randomized version of `sequence`, according to the enzyme
+        specifications given at class instantiation.
+
+        Examples
+        --------
+        >>> rand = RandomizePep("KR", nocut="P")
+        >>> rand('QSYKPTRTHQ')
+        'DSDPCCRGIS'
+        >>> rand = ShufflePep("K", sense="N")
+        >>> rand('QSYKPTRTHQ')
+        'PINKMEVDAP'
+        """
+
+        rand_frags = []
+        fragments = re.split(self._pattern, str(sequence))
+
+        for i, frag in enumerate(fragments):
+            if not (i % 2 == 1):
+                frag = self._get_rand(frag)
+            rand_frags.append(frag)
+
+        decoy = "".join(rand_frags)
+        return seq_cast(sequence, decoy)
+
+    def learn_context(self, sequences: Iterable[SeqLike]) -> None:
+        """Receive the target proteins set to learn aminoacid proportions and
+        use them as weights during randomization.
+
+        Since cleavage sites are unaltered during randomization, they are
+        ignored here, so proportions are kept equal.
+
+        Parameters
+        ----------
+        sequences
+            The target dataset.
+        """
+        self._weights = [0] * 20
+
+        for seq in sequences:
+            for i, frag in enumerate(re.split(self._pattern, str(seq))):
+                if i % 2 == 1:
+                    continue
+                for aa in frag:
+                    idx = self._AA_TO_INDEX.get(aa)
+                    if idx is not None:
+                        self._weights[idx] += 1
+
+    def _get_rand(self, frag: str) -> str:
+        length = len(frag)
+        new = RAND.choices(AMINOACIDS, weights=self._weights, k=length)
         return "".join(new)
 
 

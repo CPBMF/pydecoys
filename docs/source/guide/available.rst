@@ -5,14 +5,16 @@ Available strategies
 Available strategies for protein generation, that can be used from the CLI or
 API:
 
-=================== =================================================================================
+=================== ==================================================================================
 str key             Description
-=================== =================================================================================
+=================== ==================================================================================
 reverse             Reverse the aminoacid order of the target protein
 shuffle             Shuffle the target protein aminoacids
+randomize           Randomize the target protein aminoacids using the proportions of the target tabase
 reversepep-<enzyme> Reverse the aminoacid order of the enzymatic fragments, except the cleavage sites
 shufflepep-<enzyme> Shuffle the aminoacids of the enzymatic fragments, except the cleavage sites
-=================== =================================================================================
+randomize-<enzyme>  Randomize the aminoacids of the enzymatic fragments, except the cleavage sites
+=================== ==================================================================================
 
 Terminal-aa options
 -------------------

@@ -192,6 +192,14 @@ def from_SeqRecords(
     decoy_seq1: RYVAKYDIND
     decoy_seq2: PHTVTCMYSQ
     decoy_seq3: LLEETLSWQC
+
+    The `sequence` can be a single value:
+
+    >>> from types import GeneratorType
+    >>> seq = SeqRecord(Seq('DNIDYKAVYR'), 'seq1')
+    >>> decoy = from_SeqRecords(seq, 'reverse')
+    >>> isinstance(decoy, GeneratorType)  # Still returns a Generator
+    True
     """
 
     from pydecoys import _bio

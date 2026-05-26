@@ -95,10 +95,7 @@ class ContextfulGenerator(DecoyGenerator, Protocol):
     learned context.
     """
 
-    def learn_context(
-        self,
-        sequences: Sequence[SeqLike]
-    ) -> None:
+    def learn_context(self, sequences: Sequence[SeqLike]) -> None:
         """Receive the target proteins set to generate the necessary context.
 
         Parameters

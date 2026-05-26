@@ -3,7 +3,8 @@ Creating custom strategies
 
 .. currentmodule:: pydecoys
 
-The :py:mod:`pydecoys.strategies` module exposes the API used for decoy strategies.
+The :py:mod:`pydecoys.strategies` module exposes the API used for decoy
+strategies.
 
 The basic protocol all strategies must follow is
 :py:class:`strategies.DecoyGenerator`. This protocol is just a callable class
@@ -48,9 +49,9 @@ size:
         return "".join(new)
 
 This will work perfectly already, and for most usecases it'll be enough.
-However, it might fire static type checkers: ``random`` doesn't yet implement the
-correct overloads. PyDecoys :py:class:`strategies.DecoyGenerator` protocol has
-three overloads for ``__call__``.
+However, it might fire static type checkers: ``random`` doesn't yet implement
+the correct overloads. PyDecoys :py:class:`strategies.DecoyGenerator` protocol
+has three overloads for ``__call__``.
 
 Our implementation also isn't interfaceable with Biopython, which means it
 might break or at least return a ``str`` when it should return ``Seq`` or
@@ -264,7 +265,7 @@ You might want to set your own enzyme-specific strategy. Luckily, there's an
 ABC for that: :py:class:`strategies.EnzymeSpecificGenerator`. This class sets
 up the :py:meth:`strategies.EnzymeSpecificGenerator.__init__` method we used
 earlier to add the new enzyme. It also sets
-:py:attr:`strategies.EnzymeSpecificGenerator.cut`, 
+:py:attr:`strategies.EnzymeSpecificGenerator.cut`,
 :py:attr:`strategies.EnzymeSpecificGenerator.nocut`,
 :py:attr:`strategies.EnzymeSpecificGenerator.sense` and
 :py:attr:`strategies.EnzymeSpecificGenerator.keep_term` get-only properties!

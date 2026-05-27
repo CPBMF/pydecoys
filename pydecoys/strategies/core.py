@@ -182,7 +182,7 @@ class EnzymeSpecificGenerator(ABC):
 
 
 class ReversePep(EnzymeSpecificGenerator):
-    """Appliy pseudo-reverse decoy generation with the specified enzyme
+    """Apply pseudo-reverse decoy generation with the specified enzyme
     properties.
 
     Pseudo-reverse (or reverse peptide) means that the enzymatic peptides will
@@ -202,8 +202,6 @@ class ReversePep(EnzymeSpecificGenerator):
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
         enzyme won't cut aminoacids followed by these.
-    keep_term
-        Terminal aminoacids that should be kept.
 
     Examples
     --------
@@ -258,7 +256,7 @@ class ReversePep(EnzymeSpecificGenerator):
 
 
 class ShufflePep(EnzymeSpecificGenerator):
-    """Appliy pseudo-shuffle decoy generation with the specified enzyme
+    """Apply pseudo-shuffle decoy generation with the specified enzyme
     properties.
 
     Pseudo-shuffle (or shuffle peptide) means that the enzymatic peptides will
@@ -279,8 +277,6 @@ class ShufflePep(EnzymeSpecificGenerator):
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
         enzyme won't cut aminoacids followed by these.
-    keep_n
-        If `True`, the N-terminal aa isn't reverted.
 
     Examples
     --------
@@ -347,7 +343,7 @@ class RandomizePep(EnzymeSpecificGenerator):
     Pseudo-randomize (or randomize peptide) means that the enzymatic peptides
     will be randomized, except for the cleavage site. For trypsin:
 
-    - `QSYKPTRTHQ -> QSYKPTR.THQ -> TPKYSQRQHT`
+    - `QSYKPTRTHQ -> QSYKPTR.THQ -> DSDPCCRGIS`
 
     The randomization happens based on aminoacid proportions from the target
     database. Cleavage sites aren't counted.
@@ -364,8 +360,6 @@ class RandomizePep(EnzymeSpecificGenerator):
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
         enzyme won't cut aminoacids followed by these.
-    keep_term
-        Terminal aminoacids that should be kept.
 
     Examples
     --------
@@ -420,10 +414,10 @@ class RandomizePep(EnzymeSpecificGenerator):
         Examples
         --------
         >>> rand = RandomizePep("KR", nocut="P")
-        >>> rand('QSYKPTRTHQ')
+        >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
         'DSDPCCRGIS'
         >>> rand = ShufflePep("K", sense="N")
-        >>> rand('QSYKPTRTHQ')
+        >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
         'PINKMEVDAP'
         """
 

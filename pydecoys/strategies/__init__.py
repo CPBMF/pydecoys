@@ -17,7 +17,7 @@
 
 """Decoy-generation logic, as well as API to write new decoy strategies.
 
-The main API of `strategies` is the :obj:`DecoyGenerator` type. This is a
+The main API of `strategies` is the :type:`DecoyGenerator` type. This is a
 simple type alias that takes a type ``T: str | Seq | MutableSeq`` and returns a
 type ``T``.
 
@@ -25,11 +25,27 @@ For decoy strategies that need context from the target database (for example,
 that use a Markov State Model), implement the :class:`ContextfulGenerator`
 protocol.
 
-The :class:`ReversePep` and :class:`ShufflePep` classes allow easy definition
-of new enzyme specifications for pseudo-reverse and pseudo-shuffle strategies
-via instantiation. To define new strategies using enzymatic peptides, subclass
-from :class:`EnzymeSpecificGenerator`.
+The :class:`ReversePep`, :class:`ShufflePep` and :class:`RandomizePep`classes
+allow easy definition of new enzyme specifications for pseudo-decoy
+strategies via instantiation. To define new strategies using enzymatic peptides,
+subclass from :class:`EnzymeSpecificGenerator`.
 """
+
+__all__ = [
+    'SeqLike',
+    'DecoyGenerator',
+    'ContextfulGenerator',
+    'EnzymeSpecificGenerator',
+    'ReversePep',
+    'ShufflePep',
+    'RandomizePep',
+    'RAND',
+    'seq_cast',
+    'AMINOACIDS',
+    'keepsn',
+    'keepsc',
+    'keepsterm',
+]
 
 
 from pydecoys.strategies.core import (
@@ -51,20 +67,3 @@ from pydecoys.strategies.factories import (
     keepsc,
     keepsterm,
 )
-
-
-__all__ = [
-    'SeqLike',
-    'DecoyGenerator',
-    'ContextfulGenerator',
-    'EnzymeSpecificGenerator',
-    'ReversePep',
-    'ShufflePep',
-    'RandomizePep',
-    'RAND',
-    'seq_cast',
-    'AMINOACIDS',
-    'keepsn',
-    'keepsc',
-    'keepsterm',
-]

@@ -29,8 +29,10 @@ The following are the implemented strategies:
 
 - Reverse proteins
 - Shuffle proteins
+- Randomize proteins
 - Rerverse enzymatic peptides
 - Shuffle enzymatic peptides
+- Randomize enzymatic peptides
 
 The most used proteases are available:
 
@@ -112,7 +114,7 @@ Note that IO functions and the CLI app **aren't available without Biopython**.
 
 PyDecoys can be used both as a CLI app and through its Python interface.
 
-### Command-line interface (CLI)
+### CLI
 
 To generate a reversed-proteins decoy from a given `targets.fasta`, run:
 
@@ -142,7 +144,7 @@ pydecoys targets.fasta | grep some_seq
 Run with `-h/--help` to get a help message. Run with `-v/--version` to see the
 version. A full list of CLI flags can be found at the documentation.
 
-### Application programming interface (API)
+### API
 
 PyDecoys has a comprehensive API for integration in Python proteomics
 workflows.
@@ -182,7 +184,7 @@ decoys = pydecoys.from_SeqRecords(targets, strategy='reverse')
 
 You can also opt-out of [Biopython] and either use a `tuple[str, str]` iterable
 where the first item is the seqid and the second item is the aa sequence, or
-just a `str` iterable:
+just a `str` iterable representing the aa sequence:
 
 ```py
 # With tuples...
@@ -214,7 +216,7 @@ refer to the documentation.
 
 ## Reporting issues
 
-You can report issues through the GitHub: <issues here!!>.
+You can report issues through GitHub: <https://github.com/CPBMF/pydecoys/issues>.
 
 Provide full context of how the issue happened, as well as how to reproduce
 it. If possible, please provide a code snippet.

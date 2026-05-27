@@ -48,6 +48,27 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     protein. If `fn` is a :py:class:`strategies.ContextfulGenerator`, the
     returned function will also be.
 
+    Examples
+    --------
+    >>> def reverse(sequence): return sequence[::-1]
+    >>> reverse_keep_n = keepsn(reverse)
+    >>> reverse_keep_n('QSYKPTRTHQ')
+    'QQHTRTPKYS'
+
+    ContextfulGenerators are preserved:
+
+    >>> class DummyGenerator:
+    ...     def learn_context(self, sequences):
+    ...         for seq in sequences:
+    ...             print(seq)
+    ...     def __call__(self, sequence):
+    ...         raise NotImplementedError
+    >>> keep_n = keepsn(DummyGenerator())
+    >>> isinstance(keep_n, ContextfulGenerator)
+    True
+    >>> keep_n.learn_context(['QSYKPTRTHQ'])
+    SYKPTRTHQ
+
     Notes
     -----
     This function returns a new closure, meaning attributes other than
@@ -58,7 +79,6 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
         return sequence[0] + fn(sequence[1:])
 
     if isinstance(fn, ContextfulGenerator):
-
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[1:] for sequence in sequences)
@@ -90,6 +110,27 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     protein. If `fn` is a :py:class:`strategies.ContextfulGenerator`, the
     returned function will also be.
 
+    Examples
+    --------
+    >>> def reverse(sequence): return sequence[::-1]
+    >>> reverse_keep_c = keepsc(reverse)
+    >>> reverse_keep_c('QSYKPTRTHQ')
+    'HTRTPKYSQQ'
+
+    ContextfulGenerators are preserved:
+
+    >>> class DummyGenerator:
+    ...     def learn_context(self, sequences):
+    ...         for seq in sequences:
+    ...             print(seq)
+    ...     def __call__(self, sequence):
+    ...         raise NotImplementedError
+    >>> keep_c = keepsc(DummyGenerator())
+    >>> isinstance(keep_c, ContextfulGenerator)
+    True
+    >>> keep_c.learn_context(['QSYKPTRTHQ'])
+    QSYKPTRTH
+
     Notes
     -----
     This function returns a new closure, meaning attributes other than
@@ -100,7 +141,6 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
         return fn(sequence[:-1]) + sequence[-1]
 
     if isinstance(fn, ContextfulGenerator):
-
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[:-1] for sequence in sequences)
@@ -132,6 +172,27 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     protein. If `fn` is a :py:class:`strategies.ContextfulGenerator`, the
     returned function will also be.
 
+    Examples
+    --------
+    >>> def reverse(sequence): return sequence[::-1]
+    >>> reverse_keep_term = keepsterm(reverse)
+    >>> reverse_keep_term('DNIDYKAVYR')
+    'DYVAKYDINR'
+
+    ContextfulGenerators are preserved:
+
+    >>> class DummyGenerator:
+    ...     def learn_context(self, sequences):
+    ...         for seq in sequences:
+    ...             print(seq)
+    ...     def __call__(self, sequence):
+    ...         raise NotImplementedError
+    >>> keep_term = keepsterm(DummyGenerator())
+    >>> isinstance(keep_term, ContextfulGenerator)
+    True
+    >>> keep_term.learn_context(['DNIDYKAVYR'])
+    NIDYKAVY
+
     Notes
     -----
     This function returns a new closure, meaning attributes other than
@@ -141,7 +202,6 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
         return sequence[0] + fn(sequence[1:-1]) + sequence[-1]
 
     if isinstance(fn, ContextfulGenerator):
-
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[1:-1] for sequence in sequences)

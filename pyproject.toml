@@ -55,6 +55,7 @@ doc8 = "^2.0.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+
 [tool.esbonio.sphinx]
 buildCommand = ["sphinx-build", "-M", "dirhtml", ".", "./_build"]
 pythonCommand = ["${venv:.venv}"]

@@ -21,9 +21,6 @@ from typing import Iterable, Literal, cast
 
 from pydecoys import strategies as s
 
-# This file has a lot of overloads, but sphinx autodoc doesn't seem to catch
-# the overloads if I move them to a .pyi file.
-
 
 def reverse[T: s.SeqLike](sequence: T) -> T:
     """Return the reversed `sequence`."""

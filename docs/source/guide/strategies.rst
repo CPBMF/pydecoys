@@ -17,14 +17,14 @@ The basic type signature all strategies must follow is
     type SeqLike = 'str | Seq | MutableSeq'
     type DecoyGenerator[T: SeqLike] = Callable[[T], T]
 
-Note that, although ``SeqLike`` is a Union type of `str`, `Seq` and
-`MutableSeq`, it doesn't actually require Biopython to be installed.
+Note that :type:`SeqLike` is a Union type of ``str``, ``Seq`` and
+``MutableSeq``, but it doesn't actually require `Biopython`.
 
 Creating a simple strategy
 --------------------------
 
-To illustrate how to create custom strategies, let's create a naïve randomizer
-that takes a target protein and returns a fully random decoy protein of same
+To illustrate how to create custom strategies, let's create a naïve randomizer.
+It takes a target protein and returns a fully random decoy protein of same
 length:
 
 .. code-block:: python
@@ -45,11 +45,11 @@ length:
 
 This will work perfectly already, and for most usecases it'll be enough.
 However, it might fire static type checkers: ``random`` doesn't yet implement
-the correct type signature whe saw earlier.
+the correct type signature we saw earlier.
 
-Our implementation also isn't interfaceable with Biopython, which means it
-might break or at least return a ``str`` when it should return ``Seq`` or
-``MutableSeq``.
+Also, our implementation isn't interfaceable with Biopython, which means it
+might break (or at least return a ``str`` when it should return ``Seq`` or
+``MutableSeq``).
 
 Fixing these problems is easy:
 
@@ -64,7 +64,7 @@ Fixing these problems is easy:
         # `seq_cast` handles casting the return value to `sequence`'s type
         return seq_cast(sequence, "".join(new))
 
-Note that :py:type:`strategies.SeqLike` and :py:type:`strategies.seq_cast` work
+Note that :type:`strategies.SeqLike` and :func:`strategies.seq_cast` work
 without `Biopython` installed. Although this function correctly interfaces with
 `Biopython`, it doesn't need `Biopython` to work!
 
@@ -75,16 +75,16 @@ In the previous example, we implemented a naïve randomizer. In practice, a much
 more useful strategy is to give each aminoacid a weighted likelihood based on
 the proportions of aminoacis from the target database. For this, the generator
 would need some way of gathering context from the database prior to decoy
-generation, so it could save it as state.
+generation and storing it.
 
 PyDecoys has a specific protocol for that:
-:py:class:`strategies.ContextfulGenerator`. When a function that takes a set of
-targets receives a :py:class:`strategies.ContextfulGenerator` as strategy, it
-passes all the set database to it beforehand.
+:class:`strategies.ContextfulGenerator`. When a function that takes a set of
+targets receives a :class:`strategies.ContextfulGenerator` as strategy, it
+passes all of the set database to it beforehand.
 
-We need a :py:type:`strategies.DecoyGenerator`, so we'll override its
+We need a :type:`strategies.DecoyGenerator`, so we'll override its
 ``__call__`` method. We also need to override the
-:py:meth:`strategies.ContextfulGenerator.learn_context` method, since this is
+:meth:`strategies.ContextfulGenerator.learn_context` method, since this is
 the method our implementation will use to gather its state.
 
 .. code-block:: python
@@ -108,7 +108,7 @@ the method our implementation will use to gather its state.
         def learn_context(self, sequences: Iterable[SeqLike]) -> None:
             # We'll use the whole dataset to populate weights
 
-            # Just ensure weights is blank before populating them
+            # Just ensure weights is blank before populating it
             self._weights = [0] * 20
 
             for seq in sequences:
@@ -124,51 +124,51 @@ the method our implementation will use to gather its state.
             return seq_cast(sequence, "".join(new))
 
 This gets us a working decoy strategy that correctly implements weights before
-running! When calling :py:mod:`pydecoys` IO or Iterable functions, it'll
+running! When calling :mod:`pydecoys` IO or Iterable functions, it'll
 automatically pass the database to the instance.
 
 .. note::
     If we use the same instance again with one of those functions, it'll learn
-    context again. If you don't wish this to happen, you should implement this
-    behavior.
+    context again. If you don't wish this to happen, you'll have to implement this
+    behavior on your code.
 
-New enzymes for ReversePep and ShufflePep
------------------------------------------
+Adding new enzymes
+------------------
 
-The :py:class:`strategies.ReversePep` and :py:class:`strategies.ShufflePep`
-allow you to set new enzyme specifications for `reversepep` and `shufflepep`
-strategies. Setting new enzymes is an easy instantiation. Let's set
-high-specificity chymotrypsin for each:
+The :class:`strategies.ReversePep`, :class:`strategies.ShufflePep` and
+:class:`RandomizePep` classes allow you to set new enzyme specifications for
+`reversepep`, `shufflepep` and `randomizepep` strategies. Setting new enzymes
+is an easy instantiation. Let's set high-specificity chymotrypsin for
+`reversepep`:
 
 .. code-block:: python
     :linenos:
 
     import pydecoys
-    from pydecoys.strategies import ReversePep, ShufflePep
+    from pydecoys.strategies import ReversePep, ShufflePep, RandomizePep
 
     reversepep_chymohs = ReversePep('FWY', nocut='P', sense='C')
-    shufflepep_chymohs = ShufflePep('FWY', nocut='P', sense='C')
 
-That's it. The ``reversepep_chymohs`` and ``shufflepep_chymohs`` are decoy
-generators that reverse or shuffle high-specificity chymotrypsin fragments!
+    pydecoys.register('reversepep-chymohs', reversepep_chymohs)
 
-Note that you still need to register those instances to use them via a ``str``
-key.
+That's it. Now you can use a `reversepep` strategy with high specificity
+chymotrypsin by providing ``'reversepep-chymohs'`` or ``reversepep_chymohs``
+as a strategy.
 
 Enzyme-specific strategies
 --------------------------
 
 You might want to set your own enzyme-specific strategy. Luckily, there's an
-ABC for that: :py:class:`strategies.EnzymeSpecificGenerator`. This class sets
-up the :py:meth:`strategies.EnzymeSpecificGenerator.__init__` method we used
+ABC for that: :class:`strategies.EnzymeSpecificGenerator`. This class sets
+up the :meth:`strategies.EnzymeSpecificGenerator.__init__` method we used
 earlier to add the new enzyme. It also sets
-:py:attr:`strategies.EnzymeSpecificGenerator.cut`,
-:py:attr:`strategies.EnzymeSpecificGenerator.nocut` and
-:py:attr:`strategies.EnzymeSpecificGenerator.sense` get-only properties!
+:attr:`strategies.EnzymeSpecificGenerator.cut`,
+:attr:`strategies.EnzymeSpecificGenerator.nocut` and
+:attr:`strategies.EnzymeSpecificGenerator.sense` get-only properties!
 
 Most importantly, it sets a regex ``_pattern`` attribute that matches the
-cleavage sites of the specified enzyme. This pattern is already compiled and
-wrapped into a capture group.
+cleavage sites of the specified enzyme at instantiation. This pattern is
+already compiled and wrapped into a capture group.
 
 Let's redo the naïve randomizer, but this time let's randomize peptides:
 
@@ -200,10 +200,6 @@ Let's redo the naïve randomizer, but this time let's randomize peptides:
 
             split = re.split(self._pattern, sequence)
             for pep in split:
-                # split can sometimes return an empty str at the start of the
-                # list
-                if not pep:
-                    continue
                 length = len(pep)
                 new = RAND.choices(AMINOACIDS, k=length)
                 decoy_list.append("".join(new))
@@ -223,10 +219,10 @@ Keeping N- and C-termini
 ------------------------
 
 You might also want to keep the N-, C- or both termini from the target protein
-in the decoy. To accomplish that, use one of the following decorators:
-:py:func:`strategies.keepns`, :py:func:`strategies.keepsc` and
-:py:func:`strategies.keepsterm`. This will return a new callable
-that preserves the terminal aminoacids.
+in the decoy. To accomplish that, use one of the following factories:
+:func:`strategies.keepns`, :func:`strategies.keepsc` and
+:func:`strategies.keepsterm`. Each factory returns a new callable
+that preserves the terminal aminoacids from the argument callable.
 
 :py:class:`strategies.ContextfulGenerator` objects will preserve their
 functionality, but will discard the aminoacid that shouldn't be altered from

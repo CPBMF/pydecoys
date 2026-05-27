@@ -49,7 +49,7 @@ pydecoys.strategies
    :members:
 
    .. note::
-      Functions that don't pass the targets to a ContextfulGenerator are
+      Functions that don't pass the targets to a :meth:`learn_context` are
       documented as such.
 
    .. note::
@@ -76,11 +76,10 @@ pydecoys.strategies
    `EnzymeSpecificGenerator` classes don't have setters and should be treated as
    immutable.
 
-   Internally, they use a regex pattern to identify aminoacids that shouldn't be
-   altered (cleavage sites and maybe terminal aminoacids). Since the regex pattern
-   is constructed and compiled at initialization, changing either property would
-   just cause a mismatch between the visible specifications and the actual
-   behavior.
+   Internally, they use a regex pattern to identify cleavage sites. Since the
+   regex pattern is constructed and compiled at initialization, changing a
+   property would just cause a mismatch between the visible specifications and
+   the actual behavior.
 
 .. autofunction:: keepsn
 .. autofunction:: keepsc

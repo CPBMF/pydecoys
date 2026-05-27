@@ -19,6 +19,7 @@ keywords = [
 
 
 [project.urls]
+hompegage = "https://github.com/CPBMF/pydecoys"
 repository = "https://github.com/CPBMF/pydecoys"
 documentation = "https://cpbmf.github.io/pydecoys/"
 tracker = "https://github.com/CPBMF/pydecoys/issues"
@@ -78,7 +79,7 @@ pythonCommand = ["${venv:.venv}"]
 [tool.doc8]
 ignore = ["D004"]
 ignore-path = [
-    "docs/source/guide/available.rst",
+    "docs/source/available.rst",
     "docs/build/*"
 ]
 max-line-length = 79

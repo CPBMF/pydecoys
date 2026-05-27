@@ -44,7 +44,7 @@ type DecoyGenerator[T: SeqLike] = Callable[[T], T]
 """TypeAlias specifying the signature for decoy strategies.
 
 A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
-:obj:`SeqLike`.
+:type:`SeqLike`.
 """
 
 # So shuffled decoys are always reproducible
@@ -425,6 +425,8 @@ class RandomizePep(EnzymeSpecificGenerator):
         fragments = re.split(self._pattern, str(sequence))
 
         for i, frag in enumerate(fragments):
+            # `re.split` always puts the captured portions in the odd indexes,
+            # so we only randomize the even indexed fragments
             if not (i % 2 == 1):
                 frag = self._get_rand(frag)
             rand_frags.append(frag)
@@ -447,7 +449,10 @@ class RandomizePep(EnzymeSpecificGenerator):
         self._weights = [0] * 20
 
         for seq in sequences:
-            for i, frag in enumerate(re.split(self._pattern, str(seq))):
+            frags = re.split(self._pattern, str(seq))
+            for i, frag in enumerate(frags):
+                # We don't count cleavage sites in the weights since they'll
+                # be directly preserved
                 if i % 2 == 1:
                     continue
                 for aa in frag:
@@ -465,7 +470,7 @@ class RandomizePep(EnzymeSpecificGenerator):
 # without importing Biopython or deferring to another module
 def seq_cast[T: SeqLike](obj: T, sequence: str) -> T:
     """Convenience function. Transforms a `sequence` str into the correct
-    :obj:`SeqLike` representation (through `obj`).
+    :type:`SeqLike` representation (through `obj`).
 
     This function doesn't need Biopython installed.
 

@@ -18,8 +18,8 @@
 """Decoy-generation logic, as well as API to write new decoy strategies.
 
 The main API of `strategies` is the :type:`DecoyGenerator` type. This is a
-simple type alias that takes a type ``T: str | Seq | MutableSeq`` and returns a
-type ``T``.
+simple type alias that takes a type ``T: SeqLike`` target and returns a type
+``T`` decoy. The :type:`SeqLike` is an alias for ``'str | Seq | MutableSeq'``.
 
 For decoy strategies that need context from the target database (for example,
 that use a Markov State Model), implement the :class:`ContextfulGenerator`
@@ -27,8 +27,8 @@ protocol.
 
 The :class:`ReversePep`, :class:`ShufflePep` and :class:`RandomizePep`classes
 allow easy definition of new enzyme specifications for pseudo-decoy
-strategies via instantiation. To define new strategies using enzymatic peptides,
-subclass from :class:`EnzymeSpecificGenerator`.
+strategies via instantiation. To define new strategies using enzymatic
+peptides, subclass from :class:`EnzymeSpecificGenerator`.
 """
 
 __all__ = [

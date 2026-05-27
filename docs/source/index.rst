@@ -20,8 +20,8 @@ are included in the search space as necessarily false hits; assuming decoy
 matches are as likely as target false-positive matches, decoy/target match
 ratios allow for the estimation of false-positive error ratios.
 
-PyDecoys aims to facilitate this decoy generation step in a way that's easily
-integratable to existing Proteomics workflows.
+PyDecoys aims to facilitate this decoy generation step in a way that's highly
+customizable and easily integratable to existing Proteomics workflows.
 
 .. toctree::
    :maxdepth: 2
@@ -30,3 +30,4 @@ integratable to existing Proteomics workflows.
    guide/index
    cli
    api/index
+   avalaible

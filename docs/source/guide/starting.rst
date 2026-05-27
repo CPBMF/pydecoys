@@ -7,7 +7,7 @@ Dependencies
 ------------
 
 - Requires Python 3.12 or superior.
-- CLI and IO functionality requires Biopython. This should be automatically
+- CLI and IO functionalities require Biopython. This should be automatically
   installed.
 
 Installation
@@ -28,8 +28,8 @@ uninstalled via `pipx`:
     pipx uninstall pydecoys
 
 `pipx` should automatically install PyDecoys and make it globally available on
-PATH. You can confirm it's available by running ``pydecoys -v``. In case it isn't,
-run:
+PATH. You can confirm it's available by running ``pydecoys -v``. You should see
+PyDecoy's version along with its license. In case you don't, run:
 
 .. code-block:: sh
 
@@ -63,7 +63,7 @@ PyDecoys can be used without Biopython:
 
     pip install pydecoys --no-deps
 
-If you change your mind later, simply run ``pip install biopython``. In case
-you use other package managers, Biopython's dependency group is ``biopython``.
+If you change your mind later, simply run ``pip install biopython``.
+Biopython's dependency group is ``biopython``.
 
 Note that IO functions and the CLI app **aren't available without Biopython**.

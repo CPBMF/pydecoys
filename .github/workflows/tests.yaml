@@ -24,9 +24,8 @@ jobs:
 
             - name: Run Tests
               run: |
-                source .venv/bin/activate
-                flake8
-                doc8 docs/source/
-                mypy pydecoys/
-                python3 -m doctest pydecoys/**/*.py
-                pytest
+                poetry run flake8
+                poetry run doc8 docs/source/
+                poetry run mypy pydecoys/
+                poetry run python3 -m doctest pydecoys/**/*.py
+                poetry run pytest

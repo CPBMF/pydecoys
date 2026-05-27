@@ -30,4 +30,4 @@ customizable and easily integratable to existing Proteomics workflows.
    guide/index
    cli
    api/index
-   avalaible
+   available

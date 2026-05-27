@@ -100,7 +100,6 @@ __all__ = [
     'tuple_as_decoy',
     'register',
     'strategies',
-    'SeqLike'
 ]
 
 
@@ -115,5 +114,4 @@ from pydecoys._pydecoys import (
     seq_as_decoy,
     tuple_as_decoy,
     register,
-    SeqLike
 )

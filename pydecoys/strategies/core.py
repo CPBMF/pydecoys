@@ -486,4 +486,4 @@ def seq_cast[T: SeqLike](obj: T, sequence: str) -> T:
     MutableSeq('QSYKPTRTHQ')
     """
     cls = type(obj)
-    return cls(sequence)
+    return cls(sequence)  # type: ignore

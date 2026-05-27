@@ -3,7 +3,7 @@
 Welcome to the GitHub page of PyDecoys:
 Proteomics decoy utilities for Python!
 
-Check the full documentation here: <docs here!!!>.
+Check the full documentation here: <https://cpbmf.github.io/pydecoys/>.
 
 ## About
 
@@ -48,7 +48,7 @@ The most used proteases are available:
 - CNBr
 
 A full tutorial on how to set new proteases and decoy strategies can be found
-at the documentation.
+at the [documentation].
 
 ## Getting started
 
@@ -142,7 +142,7 @@ pydecoys targets.fasta | grep some_seq
 ```
 
 Run with `-h/--help` to get a help message. Run with `-v/--version` to see the
-version. A full list of CLI flags can be found at the documentation.
+version. A full list of CLI flags can be found at the [documentation].
 
 ### API
 
@@ -212,7 +212,7 @@ decoys = pydecoys.from_fasta('path/to/targets.fasta', 'custom-decoys')
 ```
 
 For more options and examples, as well as a guide on the `strategies` module,
-refer to the documentation.
+refer to the [documentation].
 
 ## Reporting issues
 
@@ -234,4 +234,5 @@ ORCID™ iDs:
 - [![ORCID][iD]](https://orcid.org/0000-0002-2609-8996) `Cristiano Valim Bizarro`
 
 [Biopython]: https://github.com/biopython/biopython
+[documentation]: https://cpbmf.github.io/pydecoys/
 [iD]: https://img.shields.io/badge/ORCID-iD-%23A6CE39?logo=orcid

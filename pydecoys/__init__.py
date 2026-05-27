@@ -55,24 +55,30 @@ Each decoy strategy is specified by a lowercase string. New strategies can be
 created by following the :type:`strategies.DecoyGenerator` function
 signature or the rest of the :mod:`pydecoys.strategies` API.
 
-- reverse:                     Reverse protein
-- reverse-keepn:               Reverse protein, except N-terminal aa
-- reverse-keepc:               Reverse protein, except C-terminal aa
-- reverse-keepterm:            Reserse protein, except terminal aas
-- shuffle:                     Shuffle protein
-- shuffle-keepn:               Shuffle protein, except N-terminal aa
-- shuffle-keepc:               Shuffle protein, except C-terminal aa
-- shuffle-keepterm:            Shuffle protein, except terminal aas
-- randomize:                   Randomize protein
-- randomize-keepn:             Randomize protein, except N-terminal aa
-- randomize-keepc:             Randomize protein, except C-terminal aa
-- randomize-keepterm:          Randomize protein, except terminal aas
-- reversepep-[enzyme]:         Pseudo-reverse enzymatic fragments
-- reversepep-[enzyme]-keepn:   Pseudo-reverse enzymatic fragments, except N-terminal aa
-- shufflepep-[enzyme]:         Pseudo-shuffle enzymatic fragments
-- shufflepep-[enzyme]-keepn:   Pseudo-shuffle enzymatic fragments, except N-terminal aa
-- randomizepep-[enzyme]:       Pseudo-randomize enzymatic fragments
-- randomizepep-[enzyme]-keepn: Pseudo-randomize enzymatic fragments, except N-terminal aa
+- reverse:                         Reverse protein
+- reverse-keepn:                   Reverse protein, except N-terminal aa
+- reverse-keepc:                   Reverse protein, except C-terminal aa
+- reverse-keepterm:                Reserse protein, except terminal aas
+- shuffle:                         Shuffle protein
+- shuffle-keepn:                   Shuffle protein, except N-terminal aa
+- shuffle-keepc:                   Shuffle protein, except C-terminal aa
+- shuffle-keepterm:                Shuffle protein, except terminal aas
+- randomize:                       Randomize protein
+- randomize-keepn:                 Randomize protein, except N-terminal aa
+- randomize-keepc:                 Randomize protein, except C-terminal aa
+- randomize-keepterm:              Randomize protein, except terminal aas
+- reversepep-[enzyme]:             Pseudo-reverse enzymatic fragments
+- reversepep-[enzyme]-keepn:       Pseudo-reverse enzymatic fragments, except N-terminal aa
+- reversepep-[enzyme]-keepc:       Pseudo-reverse enzymatic fragments, except C-terminal aa
+- reversepep-[enzyme]-keepterm:    Pseudo-reverse enzymatic fragments, except terminal aas
+- shufflepep-[enzyme]:             Pseudo-shuffle enzymatic fragments
+- shufflepep-[enzyme]-keepn:       Pseudo-shuffle enzymatic fragments, except N-terminal aa
+- shufflepep-[enzyme]-keepc:       Pseudo-shuffle enzymatic fragments, except C-terminal aa
+- shufflepep-[enzyme]-keepterm:    Pseudo-shuffle enzymatic fragments, except terminal aas
+- randomizepep-[enzyme]:           Pseudo-randomize enzymatic fragments
+- randomizepep-[enzyme]-keepn:     Pseudo-randomize enzymatic fragments, except N-terminal aa
+- randomizepep-[enzyme]-keepc:     Pseudo-randomize enzymatic fragments, except C-terminal aa
+- randomizepep-[enzyme]-keepterm:  Pseudo-randomize enzymatic fragments, except terminal aas
 
 You can check the full list of proteases and how to add more at the
 documentation.

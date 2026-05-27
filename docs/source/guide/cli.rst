@@ -32,12 +32,12 @@ another strategy, use the ``-s/--strategy`` flag followed by the strategy key.
     pydecoys targets.fasta -o shuf.fasta -s shuffle
 
 
-STDIN and STDOUT
-----------------
+`stdin` and `stdout`
+--------------------
 
-Bot ``input`` and ``output`` are optional. By default, ``pydecoys`` will read
-from ``stdin`` and write to ``stdout``. As a result, you can pipe both from and
-to ``pydecoys``:
+Both ``input`` and ``output`` are optional, and by default ``pydecoys`` will
+read from ``stdin`` and write to ``stdout``. As a result, you can pipe from
+and to ``pydecoys``:
 
 .. code-block:: sh
 
@@ -53,7 +53,7 @@ to ``pydecoys``:
 Concatenating targets and decoys
 --------------------------------
 
-Sometimes, you might want to get both targets and decoys in one fasta database.
+Sometimes, you might want one fasta file containing the targets and decoys.
 You can use the ``--concat`` flag so that the output is a concatenated database
 containing both target and decoy proteins:
 

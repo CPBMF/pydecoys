@@ -1,3 +1,9 @@
+[![Issues](https://img.shields.io/badge/Issues-critical?logo=github)](https://github.com/CPBMF/pydecoys/issues)
+[![CI](https://github.com/CPBMF/pydecoys/actions/workflows/tests.yaml/badge.svg)](https://github.com/CPBMF/pydecoys/actions/workflows/tests.yaml)
+[![documentation](https://github.com/CPBMF/pydecoys/actions/workflows/documentation.yaml/badge.svg)](https://github.com/CPBMF/pydecoys/actions/workflows/documentation.yaml)
+![Image](https://img.shields.io/badge/Python-3.12+-FFD43B?logo=python&logoColor=blue)
+![Image](https://img.shields.io/badge/License-GPL--3.0+-red)
+
 # PyDecoys
 
 Welcome to the GitHub page of PyDecoys:

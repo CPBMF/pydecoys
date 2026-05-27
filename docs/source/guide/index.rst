@@ -8,4 +8,3 @@ Guide
     cli
     pydecoys
     strategies
-    available

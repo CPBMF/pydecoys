@@ -17,12 +17,10 @@
 
 """Internal logic for implemented strategies."""
 
+import itertools
 from typing import Iterable, Literal, cast
 
 from pydecoys import strategies as s
-
-# This file has a lot of overloads, but sphinx autodoc doesn't seem to catch
-# the overloads if I move them to a .pyi file.
 
 
 def reverse[T: s.SeqLike](sequence: T) -> T:
@@ -88,75 +86,6 @@ randomize_keepc = s.keepsc(Randomize())
 randomize_keepterm = s.keepsterm(Randomize())
 
 
-# Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
-
-type _Enzyme = tuple[str, str | None, Literal['N', 'C']]
-
-_TRYPSIN: _Enzyme = ('KR', 'P', 'C')
-_STRICT_TRYPSIN: _Enzyme = ('KR', None, 'C')
-_ARG_C: _Enzyme = ('R', 'P', 'C')
-_ASP_N: _Enzyme = ('D', None, 'N')
-_CHYMO: _Enzyme = ('FLWY', 'P', 'C')
-_GLU_C: _Enzyme = ('DE', 'P', 'C')
-_LYS_C: _Enzyme = ('K', 'P', 'C')
-_LYS_N: _Enzyme = ('K', None, 'N')
-_PEPSIN_A: _Enzyme = ('FL', None, 'C')
-_CNBR: _Enzyme = ('M', None, 'C')
-
-
-def _with_enzyme[T: s.EnzymeSpecificGenerator](
-    generator: type[T],
-    enzyme: _Enzyme,
-) -> T:
-    return generator(enzyme[0], enzyme[1], enzyme[2])
-
-
-reversepep_trypsin = _with_enzyme(s.ReversePep, _TRYPSIN)
-reversepep_stricttrypsin = _with_enzyme(s.ReversePep, _STRICT_TRYPSIN)
-reversepep_argc = _with_enzyme(s.ReversePep, _ARG_C)
-reversepep_aspn = _with_enzyme(s.ReversePep, _ASP_N)
-reversepep_chymo = _with_enzyme(s.ReversePep, _CHYMO)
-reversepep_gluc = _with_enzyme(s.ReversePep, _GLU_C)
-reversepep_lysc = _with_enzyme(s.ReversePep, _LYS_C)
-reversepep_lysn = _with_enzyme(s.ReversePep, _LYS_N)
-reversepep_pepsina = _with_enzyme(s.ReversePep, _PEPSIN_A)
-reversepep_cnbr = _with_enzyme(s.ReversePep, _CNBR)
-
-# Keep-n versions
-reversepep_stricttrypsin_keepn = \
-    s.keepsn(_with_enzyme(s.ReversePep, _STRICT_TRYPSIN))
-
-shufflepep_trypsin = _with_enzyme(s.ShufflePep, _TRYPSIN)
-shufflepep_stricttrypsin = _with_enzyme(s.ShufflePep, _STRICT_TRYPSIN)
-shufflepep_argc = _with_enzyme(s.ShufflePep, _ARG_C)
-shufflepep_aspn = _with_enzyme(s.ShufflePep, _ASP_N)
-shufflepep_chymo = _with_enzyme(s.ShufflePep, _CHYMO)
-shufflepep_gluc = _with_enzyme(s.ShufflePep, _GLU_C)
-shufflepep_lysc = _with_enzyme(s.ShufflePep, _LYS_C)
-shufflepep_lysn = _with_enzyme(s.ShufflePep, _LYS_N)
-shufflepep_pepsina = _with_enzyme(s.ShufflePep, _PEPSIN_A)
-shufflepep_cnbr = _with_enzyme(s.ShufflePep, _CNBR)
-
-# Keep-n versions
-shufflepep_stricttrypsin_keepn = \
-    s.keepsn(_with_enzyme(s.ShufflePep, _STRICT_TRYPSIN))
-
-
-randomizepep_trypsin = _with_enzyme(s.RandomizePep, _TRYPSIN)
-randomizepep_stricttrypsin = _with_enzyme(s.RandomizePep, _STRICT_TRYPSIN)
-randomizepep_argc = _with_enzyme(s.RandomizePep, _ARG_C)
-randomizepep_aspn = _with_enzyme(s.RandomizePep, _ASP_N)
-randomizepep_chymo = _with_enzyme(s.RandomizePep, _CHYMO)
-randomizepep_gluc = _with_enzyme(s.RandomizePep, _GLU_C)
-randomizepep_lysc = _with_enzyme(s.RandomizePep, _LYS_C)
-randomizepep_lysn = _with_enzyme(s.RandomizePep, _LYS_N)
-randomizepep_pepsina = _with_enzyme(s.RandomizePep, _PEPSIN_A)
-randomizepep_cnbr = _with_enzyme(s.RandomizePep, _CNBR)
-
-randomizepep_stricttrypsin_keepn = \
-    s.keepsn(_with_enzyme(s.RandomizePep, _STRICT_TRYPSIN))
-
-
 decoy_strategy: dict[str, s.DecoyGenerator] = {
     "reverse": reverse,
     "reverse-keepn": reverse_keepn,
@@ -170,31 +99,57 @@ decoy_strategy: dict[str, s.DecoyGenerator] = {
     "randomize-keepn": randomize_keepn,
     "randomize-keepc": randomize_keepc,
     "randomize-keepterm": randomize_keepterm,
-    "reversepep-trypsin": reversepep_trypsin,
-    "reversepep-stricttrypsin": reversepep_stricttrypsin,
-    "reversepep-argc": reversepep_argc,
-    "reversepep-aspn": reversepep_aspn,
-    "reversepep-chymo": reversepep_chymo,
-    "reversepep-gluc": reversepep_gluc,
-    "reversepep-lysc": reversepep_lysc,
-    "reversepep-lysn": reversepep_lysn,
-    "reversepep-stricttrypsin-keepn": reversepep_stricttrypsin_keepn,  # noqa: E501
-    "shufflepep-trypsin": shufflepep_trypsin,
-    "shufflepep-stricttrypsin": shufflepep_stricttrypsin,
-    "shufflepep-argc": shufflepep_argc,
-    "shufflepep-aspn": shufflepep_aspn,
-    "shufflepep-chymo": shufflepep_chymo,
-    "shufflepep-gluc": shufflepep_gluc,
-    "shufflepep-lysc": shufflepep_lysc,
-    "shufflepep-lysn": shufflepep_lysn,
-    "shufflepep-stricttrypsin-keepn": shufflepep_stricttrypsin_keepn,  # noqa: E501
-    "randomizepep-trypsin": randomizepep_trypsin,
-    "randomizepep-stricttrypsin": randomizepep_stricttrypsin,
-    "randomizepep-argc": randomizepep_argc,
-    "randomizepep-aspn": randomizepep_aspn,
-    "randomizepep-chymo": randomizepep_chymo,
-    "randomizepep-gluc": randomizepep_gluc,
-    "randomizepep-lysc": randomizepep_lysc,
-    "randomizepep-lysn": randomizepep_lysn,
-    "randomizepep-stricttrypsin-keepn": randomizepep_stricttrypsin_keepn,  # noqa: E501
 }
+
+
+# Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
+
+type _Enzyme = tuple[str, str | None, Literal['N', 'C'], str]
+
+_TRYPSIN: _Enzyme = ('KR', 'P', 'C', 'trypsin')
+_STRICT_TRYPSIN: _Enzyme = ('KR', None, 'C', 'stricttrypsin')
+_ARG_C: _Enzyme = ('R', 'P', 'C', 'argc')
+_ASP_N: _Enzyme = ('D', None, 'N', 'aspn')
+_CHYMO: _Enzyme = ('FLWY', 'P', 'C', 'chymo')
+_GLU_C: _Enzyme = ('DE', 'P', 'C', 'gluc')
+_LYS_C: _Enzyme = ('K', 'P', 'C', 'lysc')
+_LYS_N: _Enzyme = ('K', None, 'N', 'lysn')
+_PEPSIN_A: _Enzyme = ('FL', None, 'C', 'pepsina')
+_CNBR: _Enzyme = ('M', None, 'C', 'cnbr')
+
+
+def _register_enzymatic_strategies():
+    strategies = itertools.product(
+        [s.ReversePep, s.ShufflePep, s.RandomizePep],
+        [
+            _TRYPSIN,
+            _STRICT_TRYPSIN,
+            _ARG_C,
+            _ASP_N,
+            _CHYMO,
+            _GLU_C,
+            _LYS_C,
+            _LYS_N,
+            _PEPSIN_A,
+            _CNBR
+        ],
+        ['keepsn', 'keepsc', 'keepsterm', None],
+    )
+
+    for factory, enzyme, term in strategies:
+        key = factory.__name__.lower() + '-' + enzyme[3]
+        generator = factory(enzyme[0], enzyme[1], enzyme[2])
+        match term:
+            case 'keepsn':
+                generator = s.keepsn(generator)
+                key += '-keepn'
+            case 'keepsc':
+                generator = s.keepsc(generator)
+                key += '-keepc'
+            case 'keepsterm':
+                generator = s.keepsterm(generator)
+                key += '-keepterm'
+        decoy_strategy[key] = generator
+
+
+_register_enzymatic_strategies()

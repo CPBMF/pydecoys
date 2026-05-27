@@ -24,7 +24,6 @@ import os
 import typing as t
 
 if t.TYPE_CHECKING:
-    from Bio.Seq import Seq, MutableSeq
     from Bio.SeqRecord import SeqRecord
 
 from pydecoys import strategies
@@ -51,7 +50,7 @@ def from_fasta(
         Path or handle to a fasta file.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -98,7 +97,7 @@ def to_fasta(
         Path or handle to a fasta file.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -166,7 +165,7 @@ def from_SeqRecords(
         A list (or iterator) of `SeqRecord` objects, or a single `SeqRecord`.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -210,42 +209,12 @@ def from_SeqRecords(
     yield from records
 
 
-@t.overload
-def from_tuples(
-    sequences: t.Iterable[tuple[str, str]],
+def from_tuples[T: SeqLike](
+    sequences: t.Iterable[tuple[str, T]],
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
-) -> t.Generator[tuple[str, str], None, None]:
-    ...
-
-
-@t.overload
-def from_tuples(
-    sequences: t.Iterable[tuple[str, Seq]],
-    strategy: _Strategy,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
-) -> t.Generator[tuple[str, Seq], None, None]:
-    ...
-
-
-@t.overload
-def from_tuples(
-    sequences: t.Iterable[tuple[str, MutableSeq]],
-    strategy: _Strategy,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
-) -> t.Generator[tuple[str, MutableSeq], None, None]:
-    ...
-
-
-def from_tuples(
-    sequences: t.Iterable[tuple[str, SeqLike]],
-    strategy: _Strategy,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
-) -> t.Generator[tuple[str, SeqLike], None, None]:
+) -> t.Generator[tuple[str, T], None, None]:
     """Apply a decoy generation strategy to a set of tuples.
 
     Differently from other functions in this module, `from_tuples` cannot
@@ -259,7 +228,7 @@ def from_tuples(
         seqid, and the second item should be the sequence.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -319,44 +288,20 @@ def from_tuples(
         yield (id, seq)
 
 
-@t.overload
-def from_seqs(
-    sequences: t.Iterable[str] | str,
+def from_seqs[T: SeqLike](
+    sequences: t.Iterable[T] | T,
     strategy: _Strategy,
-) -> t.Generator[str, None, None]:
-    ...
-
-
-@t.overload
-def from_seqs(
-    sequences: t.Iterable[Seq] | Seq,
-    strategy: _Strategy,
-) -> t.Generator[Seq, None, None]:
-    ...
-
-
-@t.overload
-def from_seqs(
-    sequences: t.Iterable[MutableSeq] | MutableSeq,
-    strategy: _Strategy,
-) -> t.Generator[MutableSeq, None, None]:
-    ...
-
-
-def from_seqs(
-    sequences: t.Iterable[SeqLike] | SeqLike,
-    strategy: _Strategy,
-) -> t.Generator[SeqLike, None, None]:
+) -> t.Generator[T, None, None]:
     """Apply a decoy generation strategy to a set of sequences.
 
     Parameters
     ----------
     sequences
-        A list (or iterator) of :obj:`SeqLike` objects, or a single
-        :obj:`SeqLike`.
+        A list (or iterator) of :type:`SeqLike` objects, or a single
+        :type:`SeqLike`.
     strategy:
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
 
     Yields
     ------
@@ -402,17 +347,14 @@ def from_seqs(
     try:
         from Bio.Seq import Seq, MutableSeq
         if isinstance(sequences, str | Seq | MutableSeq):
-            sequences = [sequences]
+            sequences = [sequences]  # type: ignore
 
     except ModuleNotFoundError:
         if isinstance(sequences, str):
-            sequences = [sequences]
-
-    # if isinstance(decoy_generator, strategies.StatefulGenerator):
-    #     sequences = decoy_generator.learn_state(sequences)
+            sequences = [sequences]  # type: ignore
 
     if isinstance(decoy_generator, strategies.ContextfulGenerator):
-        sequences = list(sequences)
+        sequences = list(sequences)  # type: ignore
         seqs_only = [s[1] for s in sequences]
         decoy_generator.learn_context(seqs_only)
 
@@ -420,7 +362,7 @@ def from_seqs(
         if not sequence:
             raise ValueError(f"No seq present for item {i}")
 
-        yield decoy_generator(sequence)
+        yield decoy_generator(sequence)  # type: ignore
 
 
 def SeqRecord_as_decoy(
@@ -437,7 +379,7 @@ def SeqRecord_as_decoy(
         A single `SeqRecord`.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -460,8 +402,8 @@ def SeqRecord_as_decoy(
 
     Notes
     -----
-    This function won't give context to
-    :py:class:`pydecoys.ContextfulGerenator` objects.
+    This function won't give context to :class:`strategies.ContextfulGerenator`
+    objects.
     """
     from Bio.SeqRecord import SeqRecord
 
@@ -479,42 +421,12 @@ def SeqRecord_as_decoy(
     return SeqRecord(seq, id, description="")
 
 
-@t.overload
-def tuple_as_decoy(
-    sequence: tuple[str, str],
+def tuple_as_decoy[T: SeqLike](
+    sequence: tuple[str, T],
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
-) -> tuple[str, str]:
-    ...
-
-
-@t.overload
-def tuple_as_decoy(
-    sequence: tuple[str, Seq],
-    strategy: _Strategy,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
-) -> tuple[str, Seq]:
-    ...
-
-
-@t.overload
-def tuple_as_decoy(
-    sequence: tuple[str, MutableSeq],
-    strategy: _Strategy,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
-) -> tuple[str, MutableSeq]:
-    ...
-
-
-def tuple_as_decoy(
-    sequence: tuple[str, SeqLike],
-    strategy: _Strategy,
-    decoy_tag: str = 'decoy_',
-    prefix: bool = True,
-) -> tuple[str, SeqLike]:
+) -> tuple[str, T]:
     """Get a decoy from a given `tuple`.
 
     Parameters
@@ -524,7 +436,7 @@ def tuple_as_decoy(
         item should be the sequence.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -548,13 +460,13 @@ def tuple_as_decoy(
     >>> from Bio.Seq import Seq
     >>> seq = ('seq1', Seq('DNIDYKAVYR'))
     >>> decoy = tuple_as_decoy(seq, 'reverse')
-    >>> type(decoy[1])
-    <class 'Bio.Seq.Seq'>
+    >>> isinstance(decoy[1], Seq)
+    True
 
     Notes
     -----
-    This function won't give context to
-    :py:class:`pydecoys.ContextfulGerenator` objects.
+    This function won't give context to :class:`strategies.ContextfulGerenator`
+    objects.
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -570,43 +482,19 @@ def tuple_as_decoy(
     return (id, seq)
 
 
-@t.overload
-def seq_as_decoy(
-    sequence: str,
+def seq_as_decoy[T: SeqLike](
+    sequence: T,
     strategy: _Strategy,
-) -> str:
-    ...
-
-
-@t.overload
-def seq_as_decoy(
-    sequence: Seq,
-    strategy: _Strategy,
-) -> Seq:
-    ...
-
-
-@t.overload
-def seq_as_decoy(
-    sequence: MutableSeq,
-    strategy: _Strategy,
-) -> MutableSeq:
-    ...
-
-
-def seq_as_decoy(
-    sequence: SeqLike,
-    strategy: _Strategy,
-) -> SeqLike:
-    """Get a decoy from a given :obj:`SeqLike`.
+) -> T:
+    """Get a decoy from a given :type:`SeqLike`.
 
     Parameters
     ----------
     sequence
-        A single :obj:`SeqLike`.
+        A single :type:`SeqLike`.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-        :class:`strategies.DecoyGenerator`.
+         :type:`strategies.DecoyGenerator` function.
 
     Returns
     -------
@@ -625,8 +513,8 @@ def seq_as_decoy(
 
     Notes
     -----
-    This function won't give context to
-    :py:class:`pydecoys.ContextfulGerenator` objects.
+    This function won't give context to :class:`strategies.ContextfulGerenator`
+    objects.
     """
 
     decoy_generator = _validate_strategy(strategy)
@@ -645,7 +533,7 @@ def register(
         Lower case string identifying the decoy strategy. Must not be already
         defined.
     strategy_fn
-        A function following the :class:`strategies.DecoyGenerator` protocol.
+        A function following the :type:`strategies.DecoyGenerator` signature.
 
     Examples
     --------

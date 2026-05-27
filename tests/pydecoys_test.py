@@ -54,7 +54,7 @@ def SeqRecord_iter():
 def test_from_fasta_path():
     decoys = pydecoys.from_fasta(PATH, 'reverse')
     corrects = SeqIO.parse(CORRECT, 'fasta')
-    for decoy, correct in zip(decoys, corrects):
+    for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy.id == correct.id
         assert decoy.seq == correct.seq
 
@@ -62,7 +62,7 @@ def test_from_fasta_path():
 def test_from_fasta_handle(fasta_handle):
     decoys = pydecoys.from_fasta(fasta_handle, 'reverse')
     corrects = SeqIO.parse(CORRECT, 'fasta')
-    for decoy, correct in zip(decoys, corrects):
+    for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy.id == correct.id
         assert decoy.seq == correct.seq
 
@@ -71,7 +71,7 @@ def test_to_fasta_path(tmp_file):
     pydecoys.to_fasta(PATH, tmp_file, 'reverse')
     decoys = SeqIO.parse(tmp_file, 'fasta')
     corrects = SeqIO.parse(CORRECT, 'fasta')
-    for decoy, correct in zip(decoys, corrects):
+    for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy.id == correct.id
         assert decoy.seq == correct.seq
 
@@ -80,7 +80,7 @@ def test_to_fasta_handle(fasta_handle, tmp_file):
     pydecoys.to_fasta(fasta_handle, tmp_file, 'reverse')
     decoys = SeqIO.parse(tmp_file, 'fasta')
     corrects = SeqIO.parse(CORRECT, 'fasta')
-    for decoy, correct in zip(decoys, corrects):
+    for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy.id == correct.id
         assert decoy.seq == correct.seq
 
@@ -89,7 +89,7 @@ def test_to_fasta_iter(SeqRecord_iter, tmp_file):
     pydecoys.to_fasta(SeqRecord_iter, tmp_file, 'reverse')
     decoys = SeqIO.parse(tmp_file, 'fasta')
     corrects = SeqIO.parse(CORRECT, 'fasta')
-    for decoy, correct in zip(decoys, corrects):
+    for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy.id == correct.id
         assert decoy.seq == correct.seq
 

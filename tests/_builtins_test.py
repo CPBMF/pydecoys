@@ -53,11 +53,12 @@ def test_builtins(key: str):
     targets = SeqIO.parse('tests/data/2026_01_ccp_crap.fasta', 'fasta')
 
     if isinstance(fn, ContextfulGenerator):
+        targets = list(targets)
         target_seqs = [target.seq for target in targets]
         fn.learn_context(target_seqs)
 
     decoys = (fn(record.seq) for record in targets)
     corrects = SeqIO.parse(f'tests/data/out/2026_01_ccp_crap_{filename}.fasta', 'fasta')
 
-    for decoy, correct in zip(decoys, corrects):
+    for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy == correct.seq

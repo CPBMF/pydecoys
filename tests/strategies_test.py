@@ -34,8 +34,8 @@ class TestEnzymeSpecificGenerator:
     GOOD_NOCUT = ['D', 'E', 'M', 'DE', 'MA', 'MGH', None]
     GOOD_SENSE = ['N', 'C']
 
-    SHARED_CUT = ['K', 'Y', 'KY', 'KRY']
-    SHARED_NOCUT = ['K', 'Y', 'KY', 'KRY']
+    SHARED_CUT = ['K', 'KY', 'KRY']
+    SHARED_NOCUT = ['K', 'KY', 'KRY']
 
     def test_not_str_cut(self):
         with pytest.raises(TypeError):
@@ -61,7 +61,7 @@ class TestEnzymeSpecificGenerator:
         ['cut', 'nocut'],
         itertools.product(SHARED_CUT, SHARED_NOCUT)
     )
-    def shared_cut_nocut(self, cut, nocut):
+    def test_shared_cut_nocut(self, cut, nocut):
         with pytest.raises(ValueError):
             DummyEnzymeSpecificGenerator(cut, nocut=nocut)
 

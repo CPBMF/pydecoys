@@ -398,12 +398,12 @@ def SeqRecord_as_decoy(
     >>> print(f'{decoy.id}: {decoy.seq}')
     decoy_seq1: RYVAKYDIND
 
-    Notes
+    Notes_bio
     -----
     This function won't give context to :class:`strategies.ContextfulGerenator`
     objects.
     """
-    import _bio
+    from pydecoys import _bio
     seq_tuple = _bio.SeqRecord_to_tuple(sequence)
     decoy = tuple_as_decoy(seq_tuple, strategy, decoy_tag, prefix)
     return _bio.tuple_to_SeqRecord(decoy)

@@ -23,7 +23,7 @@ import io
 import os
 import typing as t
 
-if t.TYPE_CHECKING:
+if t.TYPE_CHECKING:  # pragma: no cover
     from Bio.SeqRecord import SeqRecord
 
 from pydecoys import strategies
@@ -267,11 +267,9 @@ def from_tuples[T: SeqLike](
     True
     True
     """
-
     decoy_generator = _validate_strategy(strategy)
 
-    if not isinstance(decoy_tag, str):
-        raise TypeError("Need a string for the decoy tag")
+    _validate_tag(decoy_tag)
 
     if isinstance(decoy_generator, strategies.ContextfulGenerator):
         sequences = list(sequences)
@@ -281,7 +279,7 @@ def from_tuples[T: SeqLike](
 
     for i, sequence in enumerate(sequences):
         if not sequence[1]:
-            raise ValueError(f"Seq not present for tuple {i}: '{sequence[0]}'")
+            raise ValueError(f"Seq not present for sequence '{sequence[0]}'")
 
         id = decoy_tag + sequence[0] if prefix else sequence[0] + decoy_tag
         seq = decoy_generator(sequence[1])
@@ -349,7 +347,7 @@ def from_seqs[T: SeqLike](
         if isinstance(sequences, str | Seq | MutableSeq):
             sequences = [sequences]  # type: ignore
 
-    except ModuleNotFoundError:
+    except ImportError:
         if isinstance(sequences, str):
             sequences = [sequences]  # type: ignore
 
@@ -360,7 +358,7 @@ def from_seqs[T: SeqLike](
 
     for i, sequence in enumerate(sequences):
         if not sequence:
-            raise ValueError(f"No seq present for item {i}")
+            raise ValueError(f"Seq not present for sequence {i}")
 
         yield decoy_generator(sequence)  # type: ignore
 
@@ -405,20 +403,10 @@ def SeqRecord_as_decoy(
     This function won't give context to :class:`strategies.ContextfulGerenator`
     objects.
     """
-    from Bio.SeqRecord import SeqRecord
-
-    decoy_generator = _validate_strategy(strategy)
-
-    if not isinstance(decoy_tag, str):
-        raise TypeError("Need a string for the decoy tag")
-
-    if sequence.seq is None:
-        raise ValueError(f"Seq not present for SeqRecord '{sequence.id}'")
-
-    id = sequence.id if sequence.id else ""
-    id = decoy_tag + id if prefix else id + decoy_tag
-    seq = decoy_generator(sequence.seq)
-    return SeqRecord(seq, id, description="")
+    import _bio
+    seq_tuple = _bio.SeqRecord_to_tuple(sequence)
+    decoy = tuple_as_decoy(seq_tuple, strategy, decoy_tag, prefix)
+    return _bio.tuple_to_SeqRecord(decoy)
 
 
 def tuple_as_decoy[T: SeqLike](
@@ -471,8 +459,7 @@ def tuple_as_decoy[T: SeqLike](
 
     decoy_generator = _validate_strategy(strategy)
 
-    if not isinstance(decoy_tag, str):
-        raise TypeError("Need a string for the decoy tag")
+    _validate_tag(decoy_tag)
 
     if not sequence[1]:
         raise ValueError(f"Seq not present for '{sequence[0]}'")
@@ -595,3 +582,8 @@ def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
         raise ValueError(f"Unknown strategy: '{strategy}'")
 
     return decoy_generator
+
+
+def _validate_tag(decoy_tag: t.Any):
+    if not isinstance(decoy_tag, str):
+        raise TypeError("Need a string for the decoy tag")

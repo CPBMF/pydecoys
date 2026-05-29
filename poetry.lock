@@ -1019,6 +1019,21 @@ pytest = ">=7"
 testing = ["process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
+name = "pytest-missing-modules"
+version = "0.2.2"
+description = "Pytest plugin to easily fake missing modules"
+optional = false
+python-versions = ">=3.8"
+groups = ["dev"]
+files = [
+    {file = "pytest_missing_modules-0.2.2-py3-none-any.whl", hash = "sha256:b95797ecb3b6af72c9f634a1c40c043a5f4b78aef5292e5d8dc2cbb7ed5f491b"},
+    {file = "pytest_missing_modules-0.2.2.tar.gz", hash = "sha256:d23252e1d5f9e4dff1b58448e5d70cc66aa209258338e7c006756af412cafd45"},
+]
+
+[package.dependencies]
+pytest = ">=8.3.2"
+
+[[package]]
 name = "requests"
 version = "2.34.2"
 description = "Python HTTP for Humans."
@@ -1290,4 +1305,4 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "40d837cf2488aba61318565898d7d66b337201b99da0018f6eb9099b6955f2fb"
+content-hash = "fe4af6648e106655bf2c640c3e297d66429678b96c54a33114889738cd151923"

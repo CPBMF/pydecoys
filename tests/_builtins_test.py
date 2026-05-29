@@ -22,18 +22,13 @@ from Bio.Seq import Seq, MutableSeq
 import pytest
 
 from pydecoys import _builtins as _b
-from pydecoys.strategies import DecoyGenerator, RAND, ContextfulGenerator, SeqLike
+from pydecoys.strategies import DecoyGenerator, ContextfulGenerator, SeqLike
 
 
 SEQ = 'DNIDYKAVYR'
 TYPES: list[type] = [str, Seq, MutableSeq]
 KEYS = _b.decoy_strategy.keys()
 FUNCS = _b.decoy_strategy.values()
-
-
-@pytest.fixture(autouse=True)
-def rng():
-    RAND.seed(10)
 
 
 # We ensure each builtin returns the correct type

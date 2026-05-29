@@ -462,7 +462,7 @@ def tuple_as_decoy[T: SeqLike](
     _validate_tag(decoy_tag)
 
     if not sequence[1]:
-        raise ValueError(f"Seq not present for '{sequence[0]}'")
+        raise ValueError(f"Seq not present for sequence '{sequence[0]}'")
 
     id = decoy_tag + sequence[0] if prefix else sequence[0] + decoy_tag
     seq = decoy_generator(sequence[1])

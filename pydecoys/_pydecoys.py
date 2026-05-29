@@ -398,7 +398,7 @@ def SeqRecord_as_decoy(
     >>> print(f'{decoy.id}: {decoy.seq}')
     decoy_seq1: RYVAKYDIND
 
-    Notes_bio
+    Notes
     -----
     This function won't give context to :class:`strategies.ContextfulGerenator`
     objects.
@@ -505,6 +505,8 @@ def seq_as_decoy[T: SeqLike](
     """
 
     decoy_generator = _validate_strategy(strategy)
+    if not sequence:
+        raise ValueError('Seq not present (cannot be an empty str)')
     return decoy_generator(sequence)
 
 

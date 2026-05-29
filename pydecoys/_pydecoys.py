@@ -564,6 +564,9 @@ def register(
     if strategy_key in decoy_strategy:
         raise ValueError(f"Strategy key '{strategy_key}' already defined")
 
+    if not callable(strategy_fn):
+        raise TypeError("Strategy function must be a callable")
+
     decoy_strategy[strategy_key] = strategy_fn
 
 

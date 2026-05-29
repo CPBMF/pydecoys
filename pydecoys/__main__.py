@@ -20,7 +20,7 @@
 from pydecoys import to_fasta
 
 
-def main() -> None:
+def main(arg_list: list[str] | None = None) -> None:
     import argparse
 
     from pydecoys import __version__
@@ -83,7 +83,7 @@ def main() -> None:
         help='if specified, output fasta will have both target and decoy entries'
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(arg_list)
 
     to_fasta(
         args.input,

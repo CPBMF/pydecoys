@@ -13,10 +13,9 @@ sys.path.insert(0, str(Path('..', '..').resolve()))
 
 
 project = 'pydecoys'
-copyright = [
-    '2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil',
-    '2026, Bruno Maestri A Becker',
-]
+copyright = \
+    '2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker'
+
 author = 'Bruno Maestri A Becker'
 release = '0.1.0'
 

@@ -163,7 +163,7 @@ class EnzymeSpecificGenerator(ABC):
         A decoy version of `sequence`, according to the enzyme specifications
         given at class instantiation.
         """
-        pass
+        ...
 
     @property
     def cut(self) -> str:

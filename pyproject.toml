@@ -69,6 +69,8 @@ optional = true
 mypy = "^2.1.0"
 flake8 = "^7.3.0"
 pytest = "^9.0.3"
+pytest-cov = "^7.1.0"
+pytest-missing-modules = "^0.2.2"
 
 
 [tool.poetry.group.docs]
@@ -98,3 +100,7 @@ ignore-path = [
     "docs/build/*"
 ]
 max-line-length = 79
+
+
+[tool.coverage.run]
+omit = ["pydecoys/_bio.py"]

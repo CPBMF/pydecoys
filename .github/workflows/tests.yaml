@@ -23,6 +23,7 @@ jobs:
             - name: Install Dependencies
               run: |
                 poetry install --no-interaction --all-groups
+                pip install "setuptools<82"
                 pip install coverage-badge
 
             - name: Run Tests

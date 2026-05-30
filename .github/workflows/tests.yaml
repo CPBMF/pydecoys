@@ -34,7 +34,7 @@ jobs:
                 poetry run pytest --cov=pydecoys
             
             - name: Generate coverage badge
-              run:
+              run: |
                 mkdir -p public
                 coverage-badge -o public/coverage.svg -f
   

@@ -56,32 +56,40 @@ DEC_ID_SUFFIX = ID + '_decoy'
 DEC_ID_CUSTOM = 'rev_' + ID
 DEC_ID_CUSTOM_SUFFIX = ID + '_rev'
 
-PATH = 'tests/data/2026_01_ccp_crap.fasta'
-CORRECT = 'tests/data/out/2026_01_ccp_crap_reverse.fasta'
-
-COUNT = len(list(SeqIO.parse(PATH, 'fasta')))
+PATH = 'data/2026_01_ccp_crap.fasta'
+CORRECT = 'data/out/2026_01_ccp_crap_reverse.fasta'
 
 
 @pytest.fixture
-def fasta_path():
-    return PATH
+def fasta_path(root):
+    return root / PATH
 
 
 @pytest.fixture
-def fasta_handle():
-    with open(PATH, 'r') as f:
+def fasta_handle(root):
+    with open(root / PATH, 'r') as f:
         yield f
 
 
 @pytest.fixture
-def fasta_correct_handle():
-    with open(CORRECT, 'r') as f:
+def fasta_correct(root):
+    return root / CORRECT
+
+
+@pytest.fixture
+def fasta_correct_handle(root):
+    with open(root / CORRECT, 'r') as f:
         yield f
 
 
 @pytest.fixture
 def tmp_file(tmp_path):
     return tmp_path / 'tmp_file.txt'
+
+
+@pytest.fixture
+def correct_count(fasta_correct):
+    return len(list(SeqIO.parse(fasta_correct, 'fasta')))
 
 
 class DummyContextfulGenerator:
@@ -187,10 +195,10 @@ def test_custom_tag_suffix(fn, input, correct_id):
 # ====================
 
 @pytest.mark.parametrize('input', ['fasta_path', 'fasta_handle'])
-def test_from_fasta(input, request):
+def test_from_fasta(input, fasta_correct, request):
     input = request.getfixturevalue(input)
     decoys = pydecoys.from_fasta(input, 'reverse')
-    corrects = SeqIO.parse(CORRECT, 'fasta')
+    corrects = SeqIO.parse(fasta_correct, 'fasta')
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy.id == correct.id
         assert decoy.seq == correct.seq
@@ -204,16 +212,24 @@ def test_from_fasta(input, request):
         [True, False]
     )
 )
-def test_to_fasta_path(input, concat, tmp_file, request):
+def test_to_fasta_path(
+    input,
+    tmp_file,       # Output
+    concat,
+    fasta_path,     # Original
+    fasta_correct,  # Expected
+    correct_count,
+    request
+):
     input = request.getfixturevalue(input)
 
-    orig = SeqIO.parse(PATH, 'fasta')
-    corrects = SeqIO.parse(CORRECT, 'fasta')
+    orig = SeqIO.parse(fasta_path, 'fasta')
+    corrects = SeqIO.parse(fasta_correct, 'fasta')
     corrects = _if_concat(orig, corrects, concat)
 
     count = pydecoys.to_fasta(input, tmp_file, 'reverse', concat=concat)
     decoys = SeqIO.parse(tmp_file, 'fasta')
-    assert count == (COUNT*2 if concat else COUNT)
+    assert count == (correct_count*2 if concat else correct_count)
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert_decoy_equal(decoy, correct)
 
@@ -240,22 +256,28 @@ def test_to_fasta_not_IO(input, concat, tmp_file):
 
 # Testing outputs
 @pytest.mark.parametrize('concat', [True, False])
-def test_to_fasta_output(fasta_path, tmp_file, concat):
+def test_to_fasta_output(
+    fasta_path,
+    tmp_file,
+    concat,
+    correct_count,
+    fasta_correct
+):
 
-    orig = SeqIO.parse(PATH, 'fasta')
-    corrects = SeqIO.parse(CORRECT, 'fasta')
+    orig = SeqIO.parse(fasta_path, 'fasta')
+    corrects = SeqIO.parse(fasta_correct, 'fasta')
     corrects = list(_if_concat(orig, corrects, concat))
 
     count = pydecoys.to_fasta(fasta_path, tmp_file, 'reverse', concat=concat)
     decoys = SeqIO.parse(tmp_file, 'fasta')
-    assert count == (COUNT*2 if concat else COUNT)
+    assert count == (correct_count*2 if concat else correct_count)
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert_decoy_equal(decoy, correct)
 
     with open(tmp_file, 'w') as handle:
         count = pydecoys.to_fasta(fasta_path, handle, 'reverse', concat=concat)
     decoys = SeqIO.parse(tmp_file, 'fasta')
-    assert count == (COUNT*2 if concat else COUNT)
+    assert count == (correct_count*2 if concat else correct_count)
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert_decoy_equal(decoy, correct)
 

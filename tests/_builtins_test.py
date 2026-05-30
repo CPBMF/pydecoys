@@ -41,11 +41,12 @@ def test_bultin_types(type: type[SeqLike], fn: DecoyGenerator):
 
 
 @pytest.mark.parametrize('key', KEYS)
-def test_builtins(key: str):
+def test_builtins(key, root):
     filename = key.replace('-', '_')
     fn = _b.decoy_strategy[key]
 
-    targets = SeqIO.parse('tests/data/2026_01_ccp_crap.fasta', 'fasta')
+    targets = SeqIO.parse(root / 'data/2026_01_ccp_crap.fasta', 'fasta')
+    output = root / f'data/out/2026_01_ccp_crap_{filename}.fasta'
 
     if isinstance(fn, ContextfulGenerator):
         targets = list(targets)
@@ -53,7 +54,7 @@ def test_builtins(key: str):
         fn.learn_context(target_seqs)
 
     decoys = (fn(record.seq) for record in targets)
-    corrects = SeqIO.parse(f'tests/data/out/2026_01_ccp_crap_{filename}.fasta', 'fasta')
+    corrects = SeqIO.parse(output, 'fasta')
 
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert decoy == correct.seq

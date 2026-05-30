@@ -1,5 +1,8 @@
 name: Tests
 
+permissions:
+  contents: write
+
 on:
     push:
         branches: [ main ]
@@ -21,7 +24,10 @@ jobs:
                 cache: 'poetry'
   
             - name: Install Dependencies
-              run: poetry install --no-interaction --all-groups
+              run: |
+                poetry install --no-interaction --all-groups
+                pip install "setuptools<82"
+                pip install coverage-badge
 
             - name: Run Tests
               run: |
@@ -29,4 +35,16 @@ jobs:
                 poetry run doc8 docs/source/
                 poetry run mypy pydecoys/
                 poetry run python3 -m doctest pydecoys/**/*.py
-                poetry run pytest
+                poetry run pytest --cov=pydecoys
+            
+            - name: Generate coverage badge
+              run: |
+                mkdir -p public
+                coverage-badge -o public/coverage.svg -f
+  
+            - name: Generate coverage-badge
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                publish_dir: ./public
+                publish_branch: gh-pages

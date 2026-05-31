@@ -301,7 +301,7 @@ def from_tuples[T: SeqLike](
         seqs_only = [s[1] for s in sequences]
         decoy_generator.learn_context(seqs_only)
 
-    for i, sequence in enumerate(sequences):
+    for sequence in sequences:
         if not sequence[1]:
             raise ValueError(f"Seq not present for sequence '{sequence[0]}'")
 
@@ -376,8 +376,7 @@ def from_seqs[T: SeqLike](
 
     if isinstance(decoy_generator, strategies.ContextfulGenerator):
         sequences = list(sequences)  # type: ignore
-        seqs_only = [s[1] for s in sequences]
-        decoy_generator.learn_context(seqs_only)
+        decoy_generator.learn_context(sequences)
 
     for i, sequence in enumerate(sequences):
         if not sequence:

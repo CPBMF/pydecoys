@@ -19,7 +19,7 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 import io
 import os
 import typing as t
@@ -306,30 +306,14 @@ def from_tuples[T: SeqLike](
 
     _validate_tag(decoy_tag)
 
-    if (
-        isinstance(decoy_generator, strategies.ContextfulGenerator)
-        and not decoy_generator.is_set
-    ):
+    if isinstance(decoy_generator, strategies.ContextfulGenerator):
         sequences = list(sequences)
-        # We extract the protein sequences itself
-        seqs_only = [s[1] for s in sequences]
-        with _contextualized(decoy_generator, seqs_only):
-            for sequence in sequences:
-                if not sequence[1]:
-                    raise ValueError(f"Seq not present for sequence '{sequence[0]}'")
 
-                id = decoy_tag + sequence[0] if prefix else sequence[0] + decoy_tag
-                seq = decoy_generator(sequence[1])
-                yield (id, seq)
-
-    else:
-        for sequence in sequences:
-            if not sequence[1]:
-                raise ValueError(f"Seq not present for sequence '{sequence[0]}'")
-
-            id = decoy_tag + sequence[0] if prefix else sequence[0] + decoy_tag
-            seq = decoy_generator(sequence[1])
-            yield (id, seq)
+    with _get_contextualized(sequences, lambda x: x[1], decoy_generator) as gen:
+        for seq in sequences:
+            if not seq[1]:
+                raise ValueError(f"Seq not present for sequence '{seq[0]}'")
+            yield (_build_id(seq[0], decoy_tag, prefix), gen(seq[1]))
 
 
 def from_seqs[T: SeqLike](
@@ -401,24 +385,14 @@ def from_seqs[T: SeqLike](
         if isinstance(sequences, str):
             sequences = [sequences]  # type: ignore
 
-    if (
-        isinstance(decoy_generator, strategies.ContextfulGenerator)
-        and not decoy_generator.is_set
-    ):
+    if isinstance(decoy_generator, strategies.ContextfulGenerator):
         sequences = list(sequences)  # type: ignore
-        with _contextualized(decoy_generator, sequences):
-            for i, sequence in enumerate(sequences):
-                if not sequence:
-                    raise ValueError(f"Seq not present for sequence {i}")
 
-                yield decoy_generator(sequence)  # type: ignore
-
-    else:
-        for i, sequence in enumerate(sequences):
-            if not sequence:
-                raise ValueError(f"Seq not present for sequence {i}")
-
-            yield decoy_generator(sequence)  # type: ignore
+    with _get_contextualized(sequences, lambda x: x, decoy_generator) as gen:
+        for i, seq in enumerate(sequences):
+            if not seq:
+                raise ValueError(f'Seq not present for sequence {i}')
+            yield gen(seq)  # type: ignore
 
 
 def SeqRecord_as_decoy(
@@ -537,12 +511,13 @@ def tuple_as_decoy[T: SeqLike](
     ):
         raise RuntimeError(
             f"Strategy '{strategy}' requires context. "
-            f"Do: `strategy = get_contextualized_strategy(sequences, {strategy})`"
+            f"Use: `strategy = get_contextualized_strategy(sequences, {strategy})`"
         )
 
-    id = decoy_tag + sequence[0] if prefix else sequence[0] + decoy_tag
-    seq = decoy_generator(sequence[1])
-    return (id, seq)
+    if not sequence[1]:
+        raise ValueError('Seq not present (cannot be empty str)')
+
+    return (_build_id(sequence[0], decoy_tag, prefix), decoy_generator(sequence[1]))
 
 
 def seq_as_decoy[T: SeqLike](
@@ -589,11 +564,12 @@ def seq_as_decoy[T: SeqLike](
     ):
         raise RuntimeError(
             f"Strategy '{strategy}' requires context. "
-            f"Do: `strategy = get_contextualized_strategy(sequences, {strategy})`"
+            f"Use: `strategy = get_contextualized_strategy(sequences, {strategy})`"
         )
 
     if not sequence:
         raise ValueError('Seq not present (cannot be an empty str)')
+
     return decoy_generator(sequence)
 
 
@@ -660,13 +636,9 @@ def register(
 def get_contextualized_strategy(
     sequences: t.Iterable[SeqLike],
     strategy_key: str
-) -> strategies.DecoyGenerator:
-    """Return a bare :type:`strategies.DecoyGenerator` function from a
-    context-based strategy key.
-
-    The returned function will have context from the given database, but it is
-    not an instance of :type:`strategies.ContextfulGenerator`. It cannot have
-    its context reset.
+) -> strategies.ContextfulGenerator:
+    """Return a bare :type:`strategies.ContextfulGeneatir` from a
+    context-based strategy key, with added context.
 
     Parameters
     ----------
@@ -716,6 +688,33 @@ def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
 def _validate_tag(decoy_tag: t.Any):
     if not isinstance(decoy_tag, str):
         raise TypeError("Need a string for the decoy tag")
+
+
+def _get_contextualized[T: SeqLike, U](
+    sequences: t.Iterable[U],
+    extract: t.Callable[[U], T],
+    decoy_generator: strategies.DecoyGenerator[T],
+):
+    """Utilitary function.
+
+    Normalizes `decoy_generator` as a ContextManager to ensure proper setup
+    and cleanup for :clas:`strategies.ContextfulGenerator` instances that
+    aren't set-up while avoiding code repetition for other cases.
+
+    `extract` is just a callable to convert whatever type `U` is into a
+    SeqLike.
+    """
+    if (
+        isinstance(decoy_generator, strategies.ContextfulGenerator)
+        and not decoy_generator.is_set
+    ):
+        extracted = (extract(seq) for seq in sequences)
+        return _contextualized(decoy_generator, extracted)
+    return nullcontext(decoy_generator)
+
+
+def _build_id(seq_id: str, decoy_tag: str, prefix: bool) -> str:
+    return decoy_tag + seq_id if prefix else seq_id + decoy_tag
 
 
 @contextmanager

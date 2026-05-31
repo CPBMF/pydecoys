@@ -26,6 +26,29 @@ from pydecoys.strategies import DecoyGenerator, SeqLike
 from pydecoys.strategies.core import ContextfulGenerator
 
 
+class _FactoryContextful:
+    def __init__(self, strategy: ContextfulGenerator):
+        self._strategy = strategy
+        wraps(strategy)(self)
+
+    @property
+    def is_set(self):
+        return self._strategy.is_set
+
+    @property
+    def reset(self):
+        return self._strategy.reset()
+
+    def __call__[T: SeqLike](self, sequence: T) -> T:
+        return self._call(sequence)
+
+    def learn_context(self, sequences: Iterable[SeqLike]):
+        raise NotImplementedError
+
+    def _call[T: SeqLike](self, sequence: T) -> T:
+        raise NotImplementedError
+
+
 def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     """Factory that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the N-terminal aa.
@@ -74,16 +97,26 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
-    @wraps(fn)
-    def wrapper(sequence):
-        return sequence[0] + fn(sequence[1:])
-
     if isinstance(fn, ContextfulGenerator):
+        wrapper_class = _FactoryContextful(fn)
+
+        @wraps(fn.__call__)
+        def call(sequence):
+            return sequence[0] + fn.__call__(sequence[1:])
+
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[1:] for sequence in sequences)
             return fn.learn_context(sequences)
-        wrapper.learn_context = learn_context  # type: ignore
+
+        wrapper_class._call = call
+        wrapper_class.learn_context = learn_context
+
+        return wrapper_class
+
+    @wraps(fn)
+    def wrapper(sequence):
+        return sequence[0] + fn(sequence[1:])
 
     return wrapper
 
@@ -136,16 +169,26 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
-    @wraps(fn)
-    def wrapper(sequence):
-        return fn(sequence[:-1]) + sequence[-1]
-
     if isinstance(fn, ContextfulGenerator):
+        wrapper_class = _FactoryContextful(fn)
+
+        @wraps(fn.__call__)
+        def call(sequence):
+            return fn.__call__(sequence[:-1]) + sequence[-1]
+
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[:-1] for sequence in sequences)
             return fn.learn_context(sequences)
-        wrapper.learn_context = learn_context  # type: ignore
+
+        wrapper_class._call = call
+        wrapper_class.learn_context = learn_context
+
+        return wrapper_class
+
+    @wraps(fn)
+    def wrapper(sequence):
+        return fn(sequence[:-1]) + sequence[-1]
 
     return wrapper
 
@@ -198,14 +241,25 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
-    def wrapper(sequence):
-        return sequence[0] + fn(sequence[1:-1]) + sequence[-1]
-
     if isinstance(fn, ContextfulGenerator):
+        wrapper_class = _FactoryContextful(fn)
+
+        @wraps(fn.__call__)
+        def call(sequence):
+            return sequence[0] + fn.__call__(sequence[1:-1]) + sequence[-1]
+
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[1:-1] for sequence in sequences)
             return fn.learn_context(sequences)
-        wrapper.learn_context = learn_context  # type: ignore
+
+        wrapper_class._call = call
+        wrapper_class.learn_context = learn_context
+
+        return wrapper_class
+
+    @wraps(fn)
+    def wrapper(sequence):
+        return sequence[0] + fn(sequence[1:-1]) + sequence[-1]
 
     return wrapper

@@ -18,7 +18,6 @@
 # Most of this package's functionality is covered either by example docstrings
 # (with doctest) or on an underlayer through `_builtins_test.py`
 
-import importlib
 import itertools
 from typing import NoReturn
 
@@ -128,25 +127,33 @@ def assert_decoy_equal(decoy, correct):
 # Ensure code works without Biopython
 # ===================================
 
-def test_optional_Bio(missing_modules):
-    with missing_modules('Bio'):
-        importlib.reload(pydecoys)
+def test_SeqRecords_no_Bio(without_bio):
+    err = r"Module 'Biopython' necessary for SeqRecord operations\. .+"
+
+    with pytest.raises(ImportError, match=err):
+        list(pydecoys.from_SeqRecords(SEQ_RECORD, 'reverse'))
+
+    with pytest.raises(ImportError, match=err):
+        pydecoys.SeqRecord_as_decoy(SEQ_RECORD, 'reverse')
 
 
-# This is the only function that actually has a custom path without Biopython
-# apart from raising an exception
-@pytest.mark.parametrize(
-    ['input', 'corrects'],
-    [
-        (STR_SEQ, [DEC_STR]),
-        ([STR_SEQ], [DEC_STR])
-    ]
-)
-def test_from_seqs_no_Bio(input, corrects, missing_modules):
-    with missing_modules('Bio'):
-        decoys = pydecoys.from_seqs(input, 'reverse')
-        for decoy, correct in zip(decoys, corrects, strict=True):
-            assert_decoy_equal(decoy, correct)
+def test_IO_no_Bio(fasta_path, tmp_file, without_bio):
+    err = r"Module 'Biopython' necessary for IO operations\. .+"
+
+    with pytest.raises(ImportError, match=err):
+        list(pydecoys.from_fasta(fasta_path, 'reverse'))
+
+    with pytest.raises(ImportError, match=err):
+        pydecoys.to_fasta(fasta_path, tmp_file, 'reverse')
+
+
+# This is the only function that has a different path without Bio apart from
+# raising
+@pytest.mark.parametrize('input', [STR_SEQ, [STR_SEQ]])
+def test_from_seqs_no_Bio(input, without_bio):
+    decoys = pydecoys.from_seqs(input, 'reverse')
+    for decoy, correct in zip(decoys, [DEC_STR], strict=True):
+        assert_decoy_equal(decoy, correct)
 
 
 # Test decoy tagging

@@ -23,8 +23,14 @@ import io
 import os
 import typing as t
 
-if t.TYPE_CHECKING:  # pragma: no cover
+try:
+    _HAS_BIO = True
+    import Bio  # noqa: F401
     from Bio.SeqRecord import SeqRecord
+except ImportError as e:
+    _HAS_BIO = False
+    from warnings import warn
+    warn(f"Module 'Biopython' not found: {str(e)}")
 
 from pydecoys import strategies
 from pydecoys.strategies import SeqLike
@@ -71,6 +77,12 @@ def from_fasta(
     >>> targets = SeqIO.parse(input, format='fasta')  # doctest: +SKIP
     >>> decoys = from_SeqRecords(targets, strategy)   # doctest: +SKIP
     """
+
+    if not _HAS_BIO:
+        raise ImportError(
+            "Module 'Biopython' necessary for IO operations. "
+            "Install it with: 'pip install biopython'."
+        )
 
     from Bio import SeqIO
     targets = SeqIO.parse(input, format='fasta')
@@ -128,6 +140,12 @@ def to_fasta(
     If `True`, the `concat` flag will cause all sequences to be loaded
     into a list prior to decoy generation to avoid parsing sequences twice.
     """
+
+    if not _HAS_BIO:
+        raise ImportError(
+            "Module 'Biopython' necessary for IO operations. "
+            "Install it with: 'pip install biopython'."
+        )
 
     from Bio import SeqIO
     from Bio.SeqRecord import SeqRecord
@@ -200,6 +218,12 @@ def from_SeqRecords(
     >>> isinstance(decoy, GeneratorType)  # Still returns a Generator
     True
     """
+
+    if not _HAS_BIO:
+        raise ImportError(
+            "Module 'Biopython' necessary for SeqRecord operations. "
+            "Install it with: 'pip install biopython'."
+        )
 
     from pydecoys import _bio
     sequences = _bio.iter_SeqRecord(sequences)
@@ -342,12 +366,11 @@ def from_seqs[T: SeqLike](
 
     decoy_generator = _validate_strategy(strategy)
 
-    try:
+    if _HAS_BIO:
         from Bio.Seq import Seq, MutableSeq
         if isinstance(sequences, str | Seq | MutableSeq):
             sequences = [sequences]  # type: ignore
-
-    except ImportError:
+    else:
         if isinstance(sequences, str):
             sequences = [sequences]  # type: ignore
 
@@ -403,6 +426,12 @@ def SeqRecord_as_decoy(
     This function won't give context to :class:`strategies.ContextfulGerenator`
     objects.
     """
+    if not _HAS_BIO:
+        raise ImportError(
+            "Module 'Biopython' necessary for SeqRecord operations. "
+            "Install it with: 'pip install biopython'."
+        )
+
     from pydecoys import _bio
     seq_tuple = _bio.SeqRecord_to_tuple(sequence)
     decoy = tuple_as_decoy(seq_tuple, strategy, decoy_tag, prefix)

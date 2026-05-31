@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
-"""Internal module responsible for lazily importing Biopython and namespacing
-utility functions related to the Biopython interface.
+"""Internal module to namespace utility functions related to the Biopython
+interface.
 """
 
 from typing import Iterable

@@ -368,12 +368,11 @@ def from_seqs[T: SeqLike](
 
     if _HAS_BIO:
         from Bio.Seq import Seq, MutableSeq
-        types = str | Seq | MutableSeq
+        if isinstance(sequences, str | Seq | MutableSeq):
+            sequences = [sequences]  # type: ignore
     else:
-        types = str
-
-    if isinstance(sequences, types):
-        sequences = [sequences]  # type: ignore
+        if isinstance(sequences, str):
+            sequences = [sequences]  # type: ignore
 
     if isinstance(decoy_generator, strategies.ContextfulGenerator):
         sequences = list(sequences)  # type: ignore

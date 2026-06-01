@@ -9,7 +9,7 @@ pydecoys.strategies
 
    `SeqLike` objects can be indexed and spliced; `str` at runtime.
 
-   .. note:: This type doesn't need `Biopython` installed.
+   .. note:: This type doesn't depend on `Biopython`.
 
 
 .. autotype:: DecoyGenerator
@@ -21,7 +21,7 @@ pydecoys.strategies
 
 .. data:: RAND
    :type: typing.Final[random.Random]
-   :value: random.Random(SEED)
+   :value: random.Random(_SEED)
 
    Random number generator for stochastic decoy strategies.
 
@@ -49,13 +49,8 @@ pydecoys.strategies
    :members:
 
    .. note::
-      Functions that don't pass the targets to a :meth:`learn_context` are
+      Functions that don't pass the targets to :meth:`learn_context` are
       documented as such.
-
-   .. note::
-      PyDecoys doesn't discriminate between ContextfulGenerators that have been
-      already given context or not. You should implement this yourself if you
-      want this behavior.
 
 .. autoclass:: EnzymeSpecificGenerator
    :show-inheritance:

@@ -77,6 +77,9 @@ def from_fasta(
     >>> from Bio import SeqIO
     >>> targets = SeqIO.parse(input, format='fasta')  # doctest: +SKIP
     >>> decoys = from_SeqRecords(targets, strategy)   # doctest: +SKIP
+
+    This function will automatically pass the sequences as context to an unset
+    :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.
     """
 
     if not _HAS_BIO:
@@ -140,6 +143,9 @@ def to_fasta(
 
     If `True`, the `concat` flag will cause all sequences to be loaded
     into a list prior to decoy generation to avoid parsing sequences twice.
+
+    This function will automatically pass the sequences as context to an unset
+    :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.
     """
 
     if not _HAS_BIO:

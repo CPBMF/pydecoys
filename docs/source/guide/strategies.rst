@@ -48,8 +48,8 @@ However, it might fire static type checkers: ``random`` doesn't yet implement
 the correct type signature we saw earlier.
 
 Also, our implementation isn't interfaceable with Biopython, which means it
-might break (or at least return a ``str`` when it should return ``Seq`` or
-``MutableSeq``).
+might break (or at least return a ``str``) when it should return ``Seq`` or
+``MutableSeq``.
 
 Fixing these problems is easy:
 
@@ -75,17 +75,18 @@ In the previous example, we implemented a naïve randomizer. In practice, a much
 more useful strategy is to give each aminoacid a weighted likelihood based on
 the proportions of aminoacis from the target database. For this, the generator
 would need some way of gathering context from the database prior to decoy
-generation and storing it.
+generation.
 
 PyDecoys has a specific protocol for that:
 :class:`strategies.ContextfulGenerator`. When a function that takes a set of
 targets receives a :class:`strategies.ContextfulGenerator` as strategy, it
-passes all of the set database to it beforehand.
+can pass all of the set database to it beforehand.
 
 We need a :type:`strategies.DecoyGenerator`, so we'll override its
-``__call__`` method. We also need to override the
-:meth:`strategies.ContextfulGenerator.learn_context` method, since this is
-the method our implementation will use to gather its state.
+``__call__`` method. We also need to implement the
+:meth:`strategies.ContextfulGenerator.learn_context` and
+:meth:`strategies.ContextfulGenerator.reset` methods, and add a
+:attr:`strategies.ContextfulGenerator.is_set` attribute.
 
 .. code-block:: python
     :linenos:
@@ -102,13 +103,11 @@ the method our implementation will use to gather its state.
     # Since `ContextfulGenerator` is a protocol, no need to inherit it
     class SmartRandomizer:
         def __init__(self):
-            # We just define a list of 0's
-            self._weights = [0] * 20
+            # We'll use a None placeholder until contextualization
+            self._weights = None
 
         def learn_context(self, sequences: Iterable[SeqLike]) -> None:
-            # We'll use the whole dataset to populate weights
-
-            # Just ensure weights is blank before populating it
+            # We init weights
             self._weights = [0] * 20
 
             for seq in sequences:
@@ -118,6 +117,14 @@ the method our implementation will use to gather its state.
                     pos = AMINOACIDS.find(aa)
                     self._weights[pos] += 1
 
+        def reset(self):
+            self._weights = None
+
+        @property
+        def is_set(self) -> bool:
+            # We can use a property to ensure is_set is always updated
+            return self._weights is not None
+
         def __call__[T: SeqLike](self, sequence: T) -> T:
             length = len(sequence)
             new = RAND.choices(AMINOACIDS, weights=self._weights, k=length)
@@ -125,21 +132,24 @@ the method our implementation will use to gather its state.
 
 This gets us a working decoy strategy that correctly implements weights before
 running! When calling :mod:`pydecoys` IO or Iterable functions, it'll
-automatically pass the database to the instance.
+automatically pass the database to the instance if it's unset, and reset it
+again at the end.
 
-.. note::
-    If we use the same instance again with one of those functions, it'll learn
-    context again. If you don't wish this to happen, you'll have to implement this
-    behavior on your code.
+.. warning::
+    When using IO or Iterable functions from PyDecoys with an unset context-dependant
+    strategy, the API will handle setting it, generating the decoys and then resetting
+    it at the end. For single-data functions, using an unset strategy will raise a
+    ``ValueError``, since they never receive a full dataset. See
+    :func:`pydecoys.get_contextualized_strategy` to circumvent this.
 
 Adding new enzymes
 ------------------
 
 The :class:`strategies.ReversePep`, :class:`strategies.ShufflePep` and
-:class:`RandomizePep` classes allow you to set new enzyme specifications for
-`reversepep`, `shufflepep` and `randomizepep` strategies. Setting new enzymes
-is an easy instantiation. Let's set high-specificity chymotrypsin for
-`reversepep`:
+:class:`strategies.RandomizePep` classes allow you to set new enzyme
+specifications for `reversepep`, `shufflepep` and `randomizepep`
+strategies. Setting new enzymes is an easy instantiation. Let's set
+high-specificity chymotrypsin for `reversepep`:
 
 .. code-block:: python
     :linenos:
@@ -148,7 +158,6 @@ is an easy instantiation. Let's set high-specificity chymotrypsin for
     from pydecoys.strategies import ReversePep, ShufflePep, RandomizePep
 
     reversepep_chymohs = ReversePep('FWY', nocut='P', sense='C')
-
     pydecoys.register('reversepep-chymohs', reversepep_chymohs)
 
 That's it. Now you can use a `reversepep` strategy with high specificity
@@ -166,9 +175,12 @@ earlier to add the new enzyme. It also sets
 :attr:`strategies.EnzymeSpecificGenerator.nocut` and
 :attr:`strategies.EnzymeSpecificGenerator.sense` get-only properties!
 
-Most importantly, it sets a regex ``_pattern`` attribute that matches the
-cleavage sites of the specified enzyme at instantiation. This pattern is
-already compiled and wrapped into a capture group.
+Most importantly, it sets the
+:meth:`strategies.EnzymeSpecificGenerator.split_sequence` method. This method
+splits a given sequence into its enzymatic fragments (minus cleavage sites) and
+the cleavage sites themselves. It yields tuples of an enzymatic fragments and
+`False` or a cleavage site and `True`, in the order they appear in the
+sequence. The cleavage sites are guaranteed to only ever be one aminoacid.
 
 Let's redo the naïve randomizer, but this time let's randomize peptides:
 
@@ -187,30 +199,16 @@ Let's redo the naïve randomizer, but this time let's randomize peptides:
 
     class RandomizePep(EnzymeSpecificGenerator):
         def __call__[T: SeqLike](self, sequence: T) -> T:
-            # re module requires `str`
-            sequence = str(sequence)
-
-            # List of tuples with position and aa of sites to keep
-            keep = []
-            for pep in re.finditer(self._pattern, sequence):
-                keep.append((pep.start(), pep.group()))
-
-            # We save each portion of the decoy to a list
             decoy_list = []
-
-            split = re.split(self._pattern, sequence)
-            for pep in split:
-                length = len(pep)
-                new = RAND.choices(AMINOACIDS, k=length)
-                decoy_list.append("".join(new))
+            for frag, cleavage in self.split_sequence(sequence):
+                if not cleavage:
+                    length = len(pep)
+                    new = RAND.choices(AMINOACIDS, k=length)
+                    frag = "".join(new)
+                decoy_list.append(frag)
 
             decoy = "".join(decoy_list)
-
-            # Reinsert aminoacids that should be kept
-            for i, pep in keep:
-                decoy = decoy[:i] + keep + decoy[i+1:]
-
-            return seq_cast("".join(decoy))
+            return seq_cast(sequence, decoy)
 
     # We can now create pep randomizers:
     randompep_trypsin = RandomPep('KR', nocut='P', sense='C')

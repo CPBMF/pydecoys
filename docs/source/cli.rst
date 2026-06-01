@@ -6,7 +6,8 @@ CLI Reference
 Dependencies
 ------------
 - Requires Python 3.12 or superior.
-- Requires Biopython. This should be automatically installed.
+- Requires Biopython. This should be automatically installed. If not,
+  run `pip install biopython`.
 
 
 CLI options

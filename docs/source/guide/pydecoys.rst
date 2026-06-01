@@ -6,7 +6,7 @@ Using the PyDecoys API
 PyDecoys has a comprehensive API for integration in Python proteomics
 workflows.
 
-This section provides some basic examples. Refer to the API Reference for more
+This section provides some basic examples. Refer to the :ref:`api` for more
 detailed explanations.
 
 Basic funcionality
@@ -26,10 +26,13 @@ To read a target fasta file and get decoys from it, use :func:`from_fasta`:
 >>> import pydecoys
 >>> decoys = pydecoys.from_fasta('path/to/targets.fasta', strategy='reverse')
 
-With :func:`to_fasta`, you can write decoys to a fasta file using a target set:
+You can also use :func:`to_fasta` to write a decoy fasta file using a target
+dataset:
 
 >>> targets = SeqIO.parse('path/to/targets.fasta', format='fasta')]
+>>> # It returns the number of entries written
 >>> pydecoys.to_fasta(targets, 'path/to/decoys.fasta', strategy='reverse')
+125
 
 For convenience, you can directly pass a path or file handle to
 :func:`to_fasta`:
@@ -39,17 +42,19 @@ For convenience, you can directly pass a path or file handle to
 ...     'path/to/decoys.fasta',
 ...     strategy='reverse'
 ... )
+125
 
 You might want to concatenate the targets and decoys files into a single fasta
 file. For that, simply set the ``concat`` parameter to ``True``:
 
->>> count = pydecoys.to_fasta(
+>>> pydecoys.to_fasta(
 ...     'path/to/targets.fasta',
 ...     'path/to/concat.fasta',
 ...     strategy='reverse',
 ...     # the resulting fasta will contain both targets and decoys
 ...     concat=True
 ... )
+250
 
 Iterable functions
 ^^^^^^^^^^^^^^^^^^
@@ -102,7 +107,6 @@ objects:
 .. code-block:: python
     :linenos:
 
-    from types import GeneratorType
     from Bio import SeqIO
     from Bio.SeqRecord import SeqRecord
 
@@ -110,6 +114,12 @@ objects:
     target = SeqIO.read('path/to/target.fasta', format='fasta')
     decoy = pydecoys.SeqRecord_as_decoy(target, strategy='reverse')
     assert instance(decoys, SeqRecord)
+
+
+And two more functions for ``tuple`` and ``str`` records:
+
+.. code-block:: python
+    :linenos:
 
     tuple_target = ('seq1', 'DNIDYKAVYR')
     decoy = pydecoys.tuple_as_decoy(target, strategy='reverse')
@@ -137,7 +147,7 @@ You can register a new decoy strategy using the register function:
     from pydecoys.strategies import SeqLike
 
 
-    def custom_decoys(sequence: SeqLike) -> SeqLike:
+    def custom_decoys[T: SeqLike](sequence: T) -> T:
         ...
 
     pydecoys.register('custom-decoys', custom_decoys)
@@ -152,7 +162,7 @@ Custom strategy functions can also be passed directly:
     from pydecoys.strategies import SeqLike
 
 
-    def custom_decoys(sequence: SeqLike) -> SeqLike:
+    def custom_decoys[T: SeqLike](sequence: T) -> T:
         ...
 
     decoys = pydecoys.from_fasta('path/to/targets.fasta', custom_decoys)

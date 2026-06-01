@@ -37,6 +37,7 @@ classifiers = [
 [project.urls]
 hompegage = "https://github.com/CPBMF/pydecoys"
 repository = "https://github.com/CPBMF/pydecoys"
+changelog = "https://github.com/CPBMF/pydecoys/blob/main/CHANGELOG.md"
 documentation = "https://cpbmf.github.io/pydecoys/"
 tracker = "https://github.com/CPBMF/pydecoys/issues"
 

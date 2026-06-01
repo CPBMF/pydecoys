@@ -509,7 +509,7 @@ def tuple_as_decoy[T: SeqLike](
         isinstance(decoy_generator, strategies.ContextfulGenerator)
         and not decoy_generator.is_set
     ):
-        raise RuntimeError(
+        raise ValueError(
             f"Strategy '{strategy}' requires context. "
             f"Use: `strategy = get_contextualized_strategy(sequences, {strategy})`"
         )
@@ -562,7 +562,7 @@ def seq_as_decoy[T: SeqLike](
         isinstance(decoy_generator, strategies.ContextfulGenerator)
         and not decoy_generator.is_set
     ):
-        raise RuntimeError(
+        raise ValueError(
             f"Strategy '{strategy}' requires context. "
             f"Use: `strategy = get_contextualized_strategy(sequences, {strategy})`"
         )

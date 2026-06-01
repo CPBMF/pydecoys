@@ -19,10 +19,10 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager, nullcontext
 import io
 import os
 import typing as t
+from contextlib import contextmanager, nullcontext
 
 try:
     _HAS_BIO = True
@@ -34,9 +34,8 @@ except ImportError as e:
     warn(f"Module 'Biopython' not found: {str(e)}")
 
 from pydecoys import strategies
-from pydecoys.strategies import SeqLike
 from pydecoys._builtins import decoy_strategy
-
+from pydecoys.strategies import SeqLike
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
 type _Strategy = str | strategies.DecoyGenerator
@@ -384,7 +383,7 @@ def from_seqs[T: SeqLike](
     decoy_generator = _validate_strategy(strategy)
 
     if _HAS_BIO:
-        from Bio.Seq import Seq, MutableSeq
+        from Bio.Seq import MutableSeq, Seq
         if isinstance(sequences, str | Seq | MutableSeq):
             sequences = [sequences]  # type: ignore
     else:

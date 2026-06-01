@@ -19,29 +19,19 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 import random
 import re
-from typing import (
-    Callable,
-    Final,
-    Generator,
-    Iterable,
-    Literal,
-    Protocol,
-    TYPE_CHECKING,
-    override,
-    runtime_checkable,
-)
+import typing as t
+from abc import ABC, abstractmethod
 
-if TYPE_CHECKING:
-    from Bio.Seq import Seq, MutableSeq
+if t.TYPE_CHECKING:
+    from Bio.Seq import MutableSeq, Seq
 
 
 type SeqLike = 'str | Seq | MutableSeq'
 """`SeqLike` objects can be indexed and spliced; `str` at runtime."""
 
-type DecoyGenerator[T: SeqLike] = Callable[[T], T]
+type DecoyGenerator[T: SeqLike] = t.Callable[[T], T]
 """TypeAlias specifying the signature for decoy strategies.
 
 A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
@@ -49,20 +39,20 @@ A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
 """
 
 # So shuffled decoys are always reproducible
-RAND: Final = random.Random(10)
+RAND: t.Final = random.Random(10)
 """Random number generator for stochastic decoy strategies."""
 
-AMINOACIDS: Final = 'QWERTYIPASDFGHKLCVNM'
+AMINOACIDS: t.Final = 'QWERTYIPASDFGHKLCVNM'
 """Standard 20 aminoacids single-letter codes, majuscule."""
 
 
-@runtime_checkable
-class ContextfulGenerator(Protocol):
+@t.runtime_checkable
+class ContextfulGenerator(t.Protocol):
     """Protocol defining a decoy generator function that uses previously
     learned context.
     """
 
-    def learn_context(self, sequences: Iterable[SeqLike]) -> None:
+    def learn_context(self, sequences: t.Iterable[SeqLike]) -> None:
         """Receive the target proteins set to generate the necessary context.
 
         Parameters
@@ -124,7 +114,7 @@ class EnzymeSpecificGenerator(ABC):
         self,
         cut: str,
         nocut: str | None = None,
-        sense: Literal['N', 'C'] = 'C',
+        sense: t.Literal['N', 'C'] = 'C',
     ) -> None:
         # A lot of type-guarding...
         if not isinstance(cut, str):
@@ -161,13 +151,13 @@ class EnzymeSpecificGenerator(ABC):
 
         self.__cut = cut
         self.__nocut = nocut
-        self.__sense: Literal['N', 'C'] = sense
+        self.__sense: t.Literal['N', 'C'] = sense
         self.__pattern = re.compile(pattern)
 
     def split_sequence(
         self,
         sequence: SeqLike
-    ) -> Generator[tuple[str, bool], None, None]:
+    ) -> t.Generator[tuple[str, bool], None, None]:
         """Split a given sequence into enzymatic fragments (minus the clevage
         site) and cleavage sites, in the order they appear.
 
@@ -223,7 +213,7 @@ class EnzymeSpecificGenerator(ABC):
         return self.__cut
 
     @property
-    def sense(self) -> Literal['N', 'C']:
+    def sense(self) -> t.Literal['N', 'C']:
         """Sense of cleavage."""
         return self.__sense
 
@@ -279,7 +269,7 @@ class ReversePep(EnzymeSpecificGenerator):
     ValueError: Not an standard aminoacid single-letter code: 'B'
     """
 
-    @override
+    @t.override
     def __call__[T: SeqLike](self, sequence: T) -> T:
         """Receive a sequence and return a pseudo-reversed decoy.
 
@@ -357,7 +347,7 @@ class ShufflePep(EnzymeSpecificGenerator):
     ValueError: Not an standard aminoacid single-letter code: 'B'
     """
 
-    @override
+    @t.override
     def __call__[T: SeqLike](self, sequence: T) -> T:
         """Receive a sequence and return a pseudo-shuffled decoy.
 
@@ -445,17 +435,17 @@ class RandomizePep(EnzymeSpecificGenerator):
 
     _AA_TO_INDEX = {aa: i for i, aa in enumerate(AMINOACIDS)}
 
-    @override
+    @t.override
     def __init__(
         self,
         cut: str,
         nocut: str | None = None,
-        sense: Literal['N', 'C'] = 'C',
+        sense: t.Literal['N', 'C'] = 'C',
     ) -> None:
         super().__init__(cut, nocut, sense)
         self._weights: list[int] | None = None
 
-    @override
+    @t.override
     def __call__[T: SeqLike](self, sequence: T) -> T:
         """Receive a sequence and return a pseudo-randomized decoy.
 
@@ -490,7 +480,7 @@ class RandomizePep(EnzymeSpecificGenerator):
         decoy = "".join(rand_frags)
         return seq_cast(sequence, decoy)
 
-    def learn_context(self, sequences: Iterable[SeqLike]) -> None:
+    def learn_context(self, sequences: t.Iterable[SeqLike]) -> None:
         """Receive the target proteins set to learn aminoacid proportions and
         use them as weights during randomization.
 

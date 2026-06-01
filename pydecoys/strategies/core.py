@@ -25,6 +25,7 @@ import re
 from typing import (
     Callable,
     Final,
+    Generator,
     Iterable,
     Literal,
     Protocol,
@@ -71,6 +72,17 @@ class ContextfulGenerator(Protocol):
         """
         ...
 
+    def reset(self) -> None:
+        """Reset the generator, so it holds no context and :attr:`is_set` i
+        `False`.
+        """
+        ...
+
+    @property
+    def is_set(self) -> bool:
+        """Whether the generator has context (`True`) or not (`False`)."""
+        ...
+
     def __call__[T: SeqLike](self, sequence: T) -> T:
         """Receive a sequence and return a decoy based on previous context.
 
@@ -90,9 +102,12 @@ class EnzymeSpecificGenerator(ABC):
     """Abstract base class for enzymatic aware decoy generation.
 
     This class creates a compiled regex pattern at instantiation that captures
-    cleavage sites. The pattern can be accessed through ``self._pattern``.
+    cleavage sites. A sequence can be split with :meth:`split_sequence`.
 
     This class also save the enzymatic specifications as get-only attributes.
+
+    The nocut value is always considered at the C-terminal, even if the sense
+    is N.
 
     Parameters
     ----------
@@ -103,6 +118,7 @@ class EnzymeSpecificGenerator(ABC):
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
         enzyme won't cut aminoacids with a C-terminal followed by these.
+        The nocut value is always at the C-terminal, even if the sense is N.
     """
     def __init__(
         self,
@@ -135,7 +151,7 @@ class EnzymeSpecificGenerator(ABC):
         if nocut is not None and (shared := set(cut) & set(nocut)):
             raise ValueError(f"Shared cut and nocut aminoacids: {"".join(shared)}")
 
-        if not isinstance(sense, str) or not sense or sense not in 'NC':
+        if not isinstance(sense, str) or not sense or sense not in {'N', 'C'}:
             raise TypeError("Cleavage sense must be 'N' or 'C'")
 
         pattern = rf"([{cut}])"
@@ -146,8 +162,44 @@ class EnzymeSpecificGenerator(ABC):
         self.__cut = cut
         self.__nocut = nocut
         self.__sense: Literal['N', 'C'] = sense
+        self.__pattern = re.compile(pattern)
 
-        self._pattern = re.compile(pattern)
+    def split_sequence(
+        self,
+        sequence: SeqLike
+    ) -> Generator[tuple[str, bool], None, None]:
+        """Split a given sequence into enzymatic fragments (minus the clevage
+        site) and cleavage sites, in the order they appear.
+
+        Parameters
+        ----------
+        sequence
+            Aminoacid sequence to be split.
+
+        Yields
+        ------
+        A tuple containin an enzymatic fragments (minus the clevage site) and
+        `False`, or a cleavage site and `True`. Cleavage sites are guaranteed
+        to be one character only.
+
+        Examples
+        --------
+        >>> class DummySpecificGenerator(EnzymeSpecificGenerator):
+        ...     def __call__(self, sequence): raise NotImplementedError
+        >>> splitter = DummySpecificGenerator('KR')
+        >>> for val in splitter.split_sequence('QSYKPTRTHQ'):
+        ...     print(val)
+        ('QSY', False)
+        ('K', True)
+        ('PT', False)
+        ('R', True)
+        ('THQ', False)
+        """
+        for i, frag in enumerate(re.split(self.__pattern, str(sequence))):
+            if frag:
+                # Captured values (in this case, cleavage sites) are
+                # guaranteed to be in odd indexes
+                yield frag, i % 2 == 1
 
     @abstractmethod
     def __call__[T: SeqLike](self, sequence: T) -> T:
@@ -250,8 +302,11 @@ class ReversePep(EnzymeSpecificGenerator):
         >>> rev('QSYKPTRTHQ')
         'YSQKQHTRTP'
         """
-        fragments = re.split(self._pattern, str(sequence))
-        rev_frags = [frag[::-1] for frag in fragments]
+
+        # Cleavage sites are guaranteed to always be one letter only,
+        # reverting them is no-op
+        fragments = self.split_sequence(sequence)
+        rev_frags = [frag[0][::-1] for frag in fragments]
         return seq_cast(sequence, "".join(rev_frags))
 
 
@@ -325,19 +380,22 @@ class ShufflePep(EnzymeSpecificGenerator):
         >>> shuf('QSYKPTRTHQ')
         'QYSKTHRPTQ'
         """
-        fragments = re.split(self._pattern, str(sequence))
 
-        shuf_frags = [self._shuffle(frag) for frag in fragments]
+        # Cleavage sites are guaranteed to always be one letter only,
+        # shuffling them is no-op
+        fragments = self.split_sequence(sequence)
+        shuf_frags = [self._shuffle(frag[0]) for frag in fragments]
         return seq_cast(sequence, "".join(shuf_frags))
 
-    def _shuffle(self, frag: str) -> str:
+    @staticmethod
+    def _shuffle(frag: str) -> str:
         new = list(frag)
         RAND.shuffle(new)
         return "".join(new)
 
 
 class RandomizePep(EnzymeSpecificGenerator):
-    """Appliy pseudo-randomize decoy generation with the specified enzyme
+    """Apply pseudo-randomize decoy generation with the specified enzyme
     properties.
 
     Pseudo-randomize (or randomize peptide) means that the enzymatic peptides
@@ -395,7 +453,7 @@ class RandomizePep(EnzymeSpecificGenerator):
         sense: Literal['N', 'C'] = 'C',
     ) -> None:
         super().__init__(cut, nocut, sense)
-        self._weights = [0] * 20
+        self._weights: list[int] | None = None
 
     @override
     def __call__[T: SeqLike](self, sequence: T) -> T:
@@ -422,12 +480,10 @@ class RandomizePep(EnzymeSpecificGenerator):
         """
 
         rand_frags = []
-        fragments = re.split(self._pattern, str(sequence))
+        fragments = self.split_sequence(sequence)
 
-        for i, frag in enumerate(fragments):
-            # `re.split` always puts the captured portions in the odd indexes,
-            # so we only randomize the even indexed fragments
-            if not (i % 2 == 1):
+        for frag, cleavage in fragments:
+            if not cleavage:
                 frag = self._get_rand(frag)
             rand_frags.append(frag)
 
@@ -446,19 +502,28 @@ class RandomizePep(EnzymeSpecificGenerator):
         sequences
             The target dataset.
         """
+
         self._weights = [0] * 20
 
         for seq in sequences:
-            frags = re.split(self._pattern, str(seq))
-            for i, frag in enumerate(frags):
+            for frag, cleavage in self.split_sequence(seq):
                 # We don't count cleavage sites in the weights since they'll
                 # be directly preserved
-                if i % 2 == 1:
+                if cleavage:
                     continue
                 for aa in frag:
                     idx = self._AA_TO_INDEX.get(aa)
                     if idx is not None:
                         self._weights[idx] += 1
+
+    def reset(self) -> None:
+        """Reset the generator, erasing its previous context."""
+        self._weights = None
+
+    @property
+    def is_set(self) -> bool:
+        """Whether the generator has context (`True`) or not (`False`)."""
+        return self._weights is not None
 
     def _get_rand(self, frag: str) -> str:
         length = len(frag)
@@ -485,5 +550,6 @@ def seq_cast[T: SeqLike](obj: T, sequence: str) -> T:
     >>> seq_cast(bio_seq, str_seq)
     MutableSeq('QSYKPTRTHQ')
     """
+
     cls = type(obj)
     return cls(sequence)  # type: ignore

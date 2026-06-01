@@ -21,6 +21,6 @@ def root():
 def without_bio(missing_modules):
     warn = "Module 'Biopython' not found: .+"
     with missing_modules('Bio'), pytest.warns(UserWarning, match=warn):
-        importlib.reload(pydecoys._pydecoys)  # type: ignore
+        importlib.reload(pydecoys.core)  # type: ignore
         yield
-    importlib.reload(pydecoys._pydecoys)  # type: ignore
+    importlib.reload(pydecoys.core)  # type: ignore

@@ -63,7 +63,7 @@ class Randomize:
     _AA_TO_INDEX = {aa: i for i, aa in enumerate(s.AMINOACIDS)}
 
     def __init__(self):
-        self._weights = [0] * 20
+        self._weights = None
 
     def learn_context(self, sequences: Iterable[s.SeqLike]):
         self._weights = [0] * 20
@@ -73,6 +73,13 @@ class Randomize:
                 idx = self._AA_TO_INDEX.get(aa)
                 if idx is not None:
                     self._weights[idx] += 1
+
+    def reset(self) -> None:
+        self._weights = None
+
+    @property
+    def is_set(self) -> bool:
+        return self._weights is not None
 
     def __call__[T: s.SeqLike](self, sequence: T) -> T:
         length = len(sequence)

@@ -99,12 +99,13 @@ __all__ = [
     'seq_as_decoy',
     'tuple_as_decoy',
     'register',
+    'get_contextualized_strategy',
     'strategies',
 ]
 
 
 from pydecoys import strategies
-from pydecoys._pydecoys import (
+from pydecoys.core import (
     from_fasta,
     to_fasta,
     from_SeqRecords,
@@ -114,4 +115,5 @@ from pydecoys._pydecoys import (
     seq_as_decoy,
     tuple_as_decoy,
     register,
+    get_contextualized_strategy
 )

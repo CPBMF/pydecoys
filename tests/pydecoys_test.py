@@ -28,7 +28,7 @@ from Bio.SeqRecord import SeqRecord
 
 from pydecoys._builtins import decoy_strategy
 import pydecoys
-from pydecoys._pydecoys import _validate_strategy, _validate_tag
+from pydecoys.core import _validate_strategy, _validate_tag
 
 
 KEYS = decoy_strategy.keys()
@@ -94,13 +94,18 @@ def correct_count(fasta_correct):
 class DummyContextfulGenerator:
     """Dummy class to emulate a ContextfulGenerator."""
     def __init__(self):
-        self.learned = False
+        self.is_set = False
 
     def learn_context(self, _):
-        self.learned = True
+        self.is_set = True
 
     def __call__(self, sequence):
-        return sequence
+        if not self.is_set:
+            raise ValueError(f'{self.__class__.__name__} not set!')
+        return sequence[::-1]
+
+    def reset(self):
+        self.is_set = False
 
 
 def dummy_strategy(_) -> NoReturn:
@@ -320,6 +325,55 @@ def test_from_batch(fn, inputs, corrects):
         assert_decoy_equal(decoy, correct)
 
 
+@pytest.mark.parametrize(
+    ['fn', 'inputs', 'corrects'],
+    [
+        (pydecoys.from_SeqRecords, [SEQ_RECORD],  [DEC_RECORD]),
+        (pydecoys.from_SeqRecords, SEQ_RECORD,    [DEC_RECORD]),
+        (pydecoys.from_tuples,     [STR_TUP],     [DEC_STR_TUP]),
+        (pydecoys.from_tuples,     [BIO_TUP],     [DEC_BIO_TUP]),
+        (pydecoys.from_tuples,     [MUT_TUP],     [DEC_MUT_TUP]),
+        (pydecoys.from_seqs,       [STR_SEQ],     [DEC_STR]),
+        (pydecoys.from_seqs,       [BIO_SEQ],     [DEC_BIO]),
+        (pydecoys.from_seqs,       [MUT_SEQ],     [DEC_MUT]),
+        (pydecoys.from_seqs,       STR_SEQ,       [DEC_STR]),
+        (pydecoys.from_seqs,       BIO_SEQ,       [DEC_BIO]),
+        (pydecoys.from_seqs,       MUT_SEQ,       [DEC_MUT]),
+    ]
+)
+def test_from_batch_contextful(fn, inputs, corrects):
+    generator = DummyContextfulGenerator()
+    decoys = fn(inputs, generator)
+    for decoy, correct in zip(decoys, corrects, strict=True):
+        assert_decoy_equal(decoy, correct)
+    assert not generator.is_set
+
+
+@pytest.mark.parametrize(
+    ['fn', 'inputs', 'corrects'],
+    [
+        (pydecoys.from_SeqRecords, [SEQ_RECORD],  [DEC_RECORD]),
+        (pydecoys.from_SeqRecords, SEQ_RECORD,    [DEC_RECORD]),
+        (pydecoys.from_tuples,     [STR_TUP],     [DEC_STR_TUP]),
+        (pydecoys.from_tuples,     [BIO_TUP],     [DEC_BIO_TUP]),
+        (pydecoys.from_tuples,     [MUT_TUP],     [DEC_MUT_TUP]),
+        (pydecoys.from_seqs,       [STR_SEQ],     [DEC_STR]),
+        (pydecoys.from_seqs,       [BIO_SEQ],     [DEC_BIO]),
+        (pydecoys.from_seqs,       [MUT_SEQ],     [DEC_MUT]),
+        (pydecoys.from_seqs,       STR_SEQ,       [DEC_STR]),
+        (pydecoys.from_seqs,       BIO_SEQ,       [DEC_BIO]),
+        (pydecoys.from_seqs,       MUT_SEQ,       [DEC_MUT]),
+    ]
+)
+def test_from_batch_owned_contextful(fn, inputs, corrects):
+    generator = DummyContextfulGenerator()
+    generator.learn_context(inputs)
+    decoys = fn(inputs, generator)
+    for decoy, correct in zip(decoys, corrects, strict=True):
+        assert_decoy_equal(decoy, correct)
+    assert generator.is_set
+
+
 # Testing the single data functions
 # =================================
 
@@ -340,21 +394,21 @@ def test_as_decoy(fn, input, correct):
     assert_decoy_equal(decoy, correct)
 
 
-# Testing if ContextfulGenerators actually learn
-# ==============================================
-
 @pytest.mark.parametrize(
     ['fn', 'input'],
     [
-        (pydecoys.from_SeqRecords, [SEQ_RECORD]),
-        (pydecoys.from_tuples,     [STR_TUP]),
-        (pydecoys.from_seqs,       [STR_SEQ]),
+        (pydecoys.SeqRecord_as_decoy, SEQ_RECORD),
+        (pydecoys.tuple_as_decoy,     STR_TUP),
+        (pydecoys.seq_as_decoy,       STR_SEQ),
     ]
 )
-def test_contextful_learns(fn, input):
-    contextful = DummyContextfulGenerator()
-    list(fn(input, contextful))
-    assert contextful.learned
+def test_as_decoy_contextful(fn, input):
+    matches = (
+        r"Strategy '.+' requires context. "
+        r"Use: `strategy = get_contextualized_strategy\(sequences, .+\)`"
+    )
+    with pytest.raises(ValueError, match=matches):
+        fn(input, DummyContextfulGenerator())
 
 
 # Empty seqs
@@ -391,9 +445,9 @@ def test_validate_decoy_tag_bad_type():
 # =================
 
 def test_register(monkeypatch):
-    monkeypatch.setattr('pydecoys._pydecoys.decoy_strategy', {})
+    monkeypatch.setattr('pydecoys.core.decoy_strategy', {})
     pydecoys.register('dummy', dummy_strategy)
-    strategy = pydecoys._pydecoys.decoy_strategy['dummy']  # type: ignore
+    strategy = pydecoys.core.decoy_strategy['dummy']  # type: ignore
     assert strategy is dummy_strategy
 
 
@@ -427,6 +481,29 @@ def test_register_already_defined():
     matches = r"Strategy key '.+' already defined"
     with pytest.raises(ValueError, match=matches):
         pydecoys.register('reverse', dummy_strategy)
+
+
+# Test get_contextualized_strategy
+# ================================
+
+@pytest.mark.parametrize('sequence', [STR_SEQ, BIO_SEQ, MUT_SEQ])
+def test_get_contextualized_strategy(sequence):
+    strategy = pydecoys.get_contextualized_strategy([sequence], 'randomize')
+    assert type(strategy) is pydecoys._builtins.Randomize  # type: ignore
+    assert strategy.is_set
+
+
+def test_get_contextualized_strategy_callable():
+    with pytest.raises(TypeError):
+        pydecoys.get_contextualized_strategy(
+            [STR_SEQ],
+            DummyContextfulGenerator()  # type: ignore
+        )
+
+
+def test_get_contextualized_strategy_bad_strategy():
+    with pytest.raises(ValueError):
+        pydecoys.get_contextualized_strategy([STR_SEQ], 'reverse')
 
 
 # Ensuring strategy keys are correctly validated

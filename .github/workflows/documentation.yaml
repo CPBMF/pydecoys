@@ -11,19 +11,32 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Install poetry
+        run: |
+          pipx install poetry
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+          cache: 'poetry'
+
       - name: Install dependencies
         run: |
-          pip install -r docs/source/requirements.txt
-      - name: Install project
+          poetry install --no-interaction --all-groups
+          poetry run pip install "setuptools<82"
+          poetry run pip install coverage-badge
+
+      - name: Generate coverage-badge
         run: |
-          pip install -e .
+          poetry run pytest --cov=pydecoys
+          mkdir -p docs/source/_static
+          poetry run coverage-badge -o docs/source/_static/coverage.svg -f
+          
       - name: Sphinx build
         run: |
-          sphinx-build -W -b dirhtml docs/source docs/build
+          poetry run sphinx-build -W -b dirhtml docs/source docs/build
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

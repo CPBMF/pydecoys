@@ -117,8 +117,8 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
             sequences = (sequence[1:] for sequence in sequences)
             return fn.learn_context(sequences)
 
-        wrapper_class._call = call
-        wrapper_class.learn_context = learn_context
+        wrapper_class._call = call  # type: ignore
+        wrapper_class.learn_context = learn_context  # type: ignore
 
         return wrapper_class
 
@@ -196,8 +196,8 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
             sequences = (sequence[:-1] for sequence in sequences)
             return fn.learn_context(sequences)
 
-        wrapper_class._call = call
-        wrapper_class.learn_context = learn_context
+        wrapper_class._call = call  # type: ignore
+        wrapper_class.learn_context = learn_context  # type: ignore
 
         return wrapper_class
 
@@ -275,8 +275,8 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
             sequences = (sequence[1:-1] for sequence in sequences)
             return fn.learn_context(sequences)
 
-        wrapper_class._call = call
-        wrapper_class.learn_context = learn_context
+        wrapper_class._call = call  # type: ignore
+        wrapper_class.learn_context = learn_context  # type: ignore
 
         return wrapper_class
 

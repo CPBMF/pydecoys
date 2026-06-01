@@ -453,7 +453,7 @@ class RandomizePep(EnzymeSpecificGenerator):
         sense: Literal['N', 'C'] = 'C',
     ) -> None:
         super().__init__(cut, nocut, sense)
-        self._weights = None
+        self._weights: list[int] | None = None
 
     @override
     def __call__[T: SeqLike](self, sequence: T) -> T:
@@ -552,4 +552,4 @@ def seq_cast[T: SeqLike](obj: T, sequence: str) -> T:
     """
 
     cls = type(obj)
-    return cls(sequence)
+    return cls(sequence)  # type: ignore

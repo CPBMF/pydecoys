@@ -99,6 +99,7 @@ __all__ = [
     'seq_as_decoy',
     'tuple_as_decoy',
     'register',
+    'get_contextualized_strategy',
     'strategies',
 ]
 
@@ -114,4 +115,5 @@ from pydecoys.core import (
     seq_as_decoy,
     tuple_as_decoy,
     register,
+    get_contextualized_strategy
 )

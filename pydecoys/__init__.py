@@ -104,7 +104,7 @@ __all__ = [
 
 
 from pydecoys import strategies
-from pydecoys._pydecoys import (
+from pydecoys.core import (
     from_fasta,
     to_fasta,
     from_SeqRecords,

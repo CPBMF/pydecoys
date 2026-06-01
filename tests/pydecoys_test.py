@@ -28,7 +28,7 @@ from Bio.SeqRecord import SeqRecord
 
 from pydecoys._builtins import decoy_strategy
 import pydecoys
-from pydecoys._pydecoys import _validate_strategy, _validate_tag
+from pydecoys.core import _validate_strategy, _validate_tag
 
 
 KEYS = decoy_strategy.keys()
@@ -391,9 +391,9 @@ def test_validate_decoy_tag_bad_type():
 # =================
 
 def test_register(monkeypatch):
-    monkeypatch.setattr('pydecoys._pydecoys.decoy_strategy', {})
+    monkeypatch.setattr('pydecoys.core.decoy_strategy', {})
     pydecoys.register('dummy', dummy_strategy)
-    strategy = pydecoys._pydecoys.decoy_strategy['dummy']  # type: ignore
+    strategy = pydecoys.core.decoy_strategy['dummy']  # type: ignore
     assert strategy is dummy_strategy
 
 

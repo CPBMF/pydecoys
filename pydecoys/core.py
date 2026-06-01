@@ -57,7 +57,7 @@ def from_fasta(
         Path or handle to a fasta file.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -110,7 +110,7 @@ def to_fasta(
         Path or handle to a fasta file.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -184,7 +184,7 @@ def from_SeqRecords(
         A list (or iterator) of `SeqRecord` objects, or a single `SeqRecord`.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -258,7 +258,7 @@ def from_tuples[T: SeqLike](
         seqid, and the second item should be the sequence.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -329,7 +329,7 @@ def from_seqs[T: SeqLike](
         :type:`SeqLike`.
     strategy:
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
 
     Yields
     ------
@@ -409,7 +409,7 @@ def SeqRecord_as_decoy(
         A single `SeqRecord`.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -464,7 +464,7 @@ def tuple_as_decoy[T: SeqLike](
         item should be the sequence.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
     decoy_tag
         An optional tag that is appended to each input's id. Defaults to
         `'decoy_'`.
@@ -532,7 +532,7 @@ def seq_as_decoy[T: SeqLike](
         A single :type:`SeqLike`.
     strategy
         Lower case string specifying the decoy strategy to be used, or a
-         :type:`strategies.DecoyGenerator` function.
+        :type:`strategies.DecoyGenerator` function.
 
     Returns
     -------
@@ -637,7 +637,7 @@ def get_contextualized_strategy(
     sequences: t.Iterable[SeqLike],
     strategy_key: str
 ) -> strategies.ContextfulGenerator:
-    """Return a bare :type:`strategies.ContextfulGeneatir` from a
+    """Return a bare :type:`strategies.ContextfulGenerator` from a
     context-based strategy key, with added context.
 
     Parameters

@@ -25,7 +25,7 @@ For decoy strategies that need context from the target database (for example,
 that use a Markov State Model), implement the :class:`ContextfulGenerator`
 protocol.
 
-The :class:`ReversePep`, :class:`ShufflePep` and :class:`RandomizePep`classes
+The :class:`ReversePep`, :class:`ShufflePep` and :class:`RandomizePep` classes
 allow easy definition of new enzyme specifications for pseudo-decoy
 strategies via instantiation. To define new strategies using enzymatic
 peptides, subclass from :class:`EnzymeSpecificGenerator`.

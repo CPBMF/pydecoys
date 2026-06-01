@@ -483,8 +483,6 @@ class RandomizePep(EnzymeSpecificGenerator):
         fragments = self.split_sequence(sequence)
 
         for frag, cleavage in fragments:
-            # `re.split` always puts the captured portions in the odd indexes,
-            # so we only randomize the even indexed fragments
             if not cleavage:
                 frag = self._get_rand(frag)
             rand_frags.append(frag)

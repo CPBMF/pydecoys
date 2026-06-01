@@ -26,6 +26,7 @@ from pydecoys.strategies import DecoyGenerator, SeqLike
 from pydecoys.strategies.core import ContextfulGenerator
 
 
+# Applicative class to hold the closures for ContextfulGenerator fns
 class _FactoryContextful:
     def __init__(self, strategy: ContextfulGenerator):
         self._strategy = strategy
@@ -81,11 +82,18 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     ContextfulGenerators are preserved:
 
     >>> class DummyGenerator:
+    ...     def __init__(self):
+    ...         self.is_set = False
     ...     def learn_context(self, sequences):
+    ...         self.is_set = True
     ...         for seq in sequences:
     ...             print(seq)
+    ...     def reset(self):
+    ...         self.is_set = False
     ...     def __call__(self, sequence):
     ...         raise NotImplementedError
+    >>> isinstance(DummyGenerator(), ContextfulGenerator)
+    True
     >>> keep_n = keepsn(DummyGenerator())
     >>> isinstance(keep_n, ContextfulGenerator)
     True
@@ -139,7 +147,7 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
     Returns
     -------
-    A version of `fn` that doesn't alter the C-termina aminoacid of the target
+    A version of `fn` that doesn't alter the C-terminal aminoacid of the target
     protein. If `fn` is a :class:`strategies.ContextfulGenerator`, the
     returned function will also be.
 
@@ -153,11 +161,18 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     ContextfulGenerators are preserved:
 
     >>> class DummyGenerator:
+    ...     def __init__(self):
+    ...         self.is_set = False
     ...     def learn_context(self, sequences):
+    ...         self.is_set = True
     ...         for seq in sequences:
     ...             print(seq)
+    ...     def reset(self):
+    ...         self.is_set = False
     ...     def __call__(self, sequence):
     ...         raise NotImplementedError
+    >>> isinstance(DummyGenerator(), ContextfulGenerator)
+    True
     >>> keep_c = keepsc(DummyGenerator())
     >>> isinstance(keep_c, ContextfulGenerator)
     True
@@ -225,16 +240,23 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     ContextfulGenerators are preserved:
 
     >>> class DummyGenerator:
+    ...     def __init__(self):
+    ...         self.is_set = False
     ...     def learn_context(self, sequences):
+    ...         self.is_set = True
     ...         for seq in sequences:
     ...             print(seq)
+    ...     def reset(self):
+    ...         self.is_set = False
     ...     def __call__(self, sequence):
     ...         raise NotImplementedError
+    >>> isinstance(DummyGenerator(), ContextfulGenerator)
+    True
     >>> keep_term = keepsterm(DummyGenerator())
     >>> isinstance(keep_term, ContextfulGenerator)
     True
-    >>> keep_term.learn_context(['DNIDYKAVYR'])
-    NIDYKAVY
+    >>> keep_term.learn_context(['QSYKPTRTHQ'])
+    SYKPTRTH
 
     Notes
     -----

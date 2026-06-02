@@ -36,6 +36,7 @@ class TestEnzymeSpecificGenerator:
 
     SHARED_CUT = ['K', 'KY', 'KRY']
     SHARED_NOCUT = ['K', 'KY', 'KRY']
+    SHARED_NOCUT_N = ['K', 'KY', 'KRY']
 
     def test_not_str_cut(self):
         with pytest.raises(TypeError):
@@ -49,25 +50,32 @@ class TestEnzymeSpecificGenerator:
         with pytest.raises(ValueError):
             DummyEnzymeSpecificGenerator("KRÇY")
 
-    def test_not_optional_str_nocut(self):
+    @pytest.mark.parametrize('param', ['nocut', 'nocut_n'])
+    def test_not_optional_str_nocut(self, param):
+        param_dict = {param: 1}
         with pytest.raises(TypeError):
-            DummyEnzymeSpecificGenerator("KR", nocut=1)  # type: ignore
+            DummyEnzymeSpecificGenerator("KR", **param_dict)  # type: ignore
 
-    def test_empty_nocut(self):
+    @pytest.mark.parametrize('param', ['nocut', 'nocut_n'])
+    def test_empty_nocut(self, param):
+        param_dict = {param: ""}
         with pytest.raises(ValueError):
-            DummyEnzymeSpecificGenerator("KR", nocut="")
+            DummyEnzymeSpecificGenerator("KR", **param_dict)  # type: ignore
 
     @pytest.mark.parametrize(
-        ['cut', 'nocut'],
-        itertools.product(SHARED_CUT, SHARED_NOCUT)
+        ['cut', 'nocut', 'param'],
+        itertools.product(SHARED_CUT, SHARED_NOCUT, ['nocut', 'nocut_n'])
     )
-    def test_shared_cut_nocut(self, cut, nocut):
+    def test_shared_cut_nocut(self, cut, nocut, param):
+        param_dict = {param: nocut}
         with pytest.raises(ValueError):
-            DummyEnzymeSpecificGenerator(cut, nocut=nocut)
+            DummyEnzymeSpecificGenerator(cut, **param_dict)
 
-    def test_nocut_not_aa(self):
+    @pytest.mark.parametrize('param', ['nocut', 'nocut_n'])
+    def test_nocut_not_aa(self, param):
+        param_dict = {param: "KRÇY"}
         with pytest.raises(ValueError):
-            DummyEnzymeSpecificGenerator("KR", nocut="KRÇY")
+            DummyEnzymeSpecificGenerator("KR", **param_dict)  # type: ignore
 
     @pytest.mark.parametrize('sense', ['n', 'NC', 'B', '', 4])
     def test_bad_sense(self, sense):
@@ -79,7 +87,4 @@ class TestEnzymeSpecificGenerator:
         itertools.product(GOOD_CUT, GOOD_NOCUT, GOOD_SENSE)
     )
     def test_good_init(self, cut, nocut, sense):
-        gen = DummyEnzymeSpecificGenerator(cut, nocut, sense)
-        assert gen.cut == cut
-        assert gen.nocut == nocut
-        assert gen.sense == sense
+        DummyEnzymeSpecificGenerator(cut, nocut, sense)

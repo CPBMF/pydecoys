@@ -137,6 +137,31 @@ class EnzymeSpecificGenerator(ABC):
         the N position.
     sense
         Whether the enzyme cleaves the C or N bond of the cleavage site.
+
+    Examples
+    --------
+    >>> class DummyEnzymeGenerator(EnzymeSpecificGenerator):
+    ...     def __call__(sequence): raise NotImplementedError
+    >>> dummy = DummyEnzymeGenerator("R", sense="N")
+    >>> print(dummy.pattern)
+    re.compile('([R])')
+    >>> dummy = DummyEnzymeGenerator("KR", nocut="P")
+    >>> print(dummy.pattern)
+    re.compile('([KR])(?![P])')
+
+    Cut argument cannot be an empty string:
+
+    >>> dummy = DummyEnzymeGenerator("")
+    Traceback (most recent call last):
+        ...
+    ValueError: Need string for cut aminoacids
+
+    Aminoacids must be one of the :data:`EXT_AMINOACIDS` single-letter codes:
+
+    >>> dummy = DummyEnzymeGenerator("KR", nocut="7")
+    Traceback (most recent call last):
+        ...
+    ValueError: Not a valid aminoacid single-letter code: '7'
     """
 
     def __init__(
@@ -312,34 +337,16 @@ class ReversePep(EnzymeSpecificGenerator):
     ----------
     cut
         Cleavage sites as a string.
-    sense
-        Whether the enzyme cleaves the 'C' or 'N' bond of the cleavage site.
     nocut
-        Aminoacids that stop cleavage as a string, or `None`. If given, the
-        enzyme won't cut aminoacids followed by these.
-
-    Examples
-    --------
-    >>> rev = ReversePep("R", sense="N")
-    >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
-    R, None, N
-    >>> rev = ReversePep("KR", nocut="P")
-    >>> print(rev.cut, rev.nocut, rev.sense, sep=', ')
-    KR, P, C
-
-    Cut argument cannot be an empty string:
-
-    >>> rev = ReversePep("")
-    Traceback (most recent call last):
-        ...
-    ValueError: Need string for cut aminoacids
-
-    Aminoacids must be one of the 20 standard aminoacid single-letter codes:
-
-    >>> rev = ReversePep("KR", nocut="B")
-    Traceback (most recent call last):
-        ...
-    ValueError: Not an standard aminoacid single-letter code: 'B'
+        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids followed by these at
+        the C position.
+    nocut_n
+        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids preceeded by these at
+        the N position.
+    sense
+        Whether the enzyme cleaves the C or N bond of the cleavage site.
     """
 
     @t.override
@@ -389,35 +396,16 @@ class ShufflePep(EnzymeSpecificGenerator):
     ----------
     cut
         Cleavage sites as a string.
-    sense
-        Sense cleavage (whether the enzyme cleaves the 'C' or 'N' bond of the
-        cleavage site).
     nocut
-        Aminoacids that stop cleavage as a string, or `None`. If given, the
-        enzyme won't cut aminoacids followed by these.
-
-    Examples
-    --------
-    >>> shuf = ShufflePep("R", sense="N")
-    >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
-    R, None, N
-    >>> shuf = ShufflePep("KR", nocut="P")
-    >>> print(shuf.cut, shuf.nocut, shuf.sense, sep=', ')
-    KR, P, C
-
-    Cut argument cannot be an empty string:
-
-    >>> shuf = ShufflePep("")
-    Traceback (most recent call last):
-        ...
-    ValueError: Need string for cut aminoacids
-
-    Aminoacids must be one of the 20 standard aminoacid single-letter codes:
-
-    >>> shuf = ShufflePep("KR", nocut="B")
-    Traceback (most recent call last):
-        ...
-    ValueError: Not an standard aminoacid single-letter code: 'B'
+        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids followed by these at
+        the C position.
+    nocut_n
+        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids preceeded by these at
+        the N position.
+    sense
+        Whether the enzyme cleaves the C or N bond of the cleavage site.
     """
 
     @t.override
@@ -476,34 +464,16 @@ class RandomizePep(EnzymeSpecificGenerator):
     ----------
     cut
         Cleavage sites as a string.
-    sense
-        Whether the enzyme cleaves the 'C' or 'N' bond of the cleavage site.
     nocut
-        Aminoacids that stop cleavage as a string, or `None`. If given, the
-        enzyme won't cut aminoacids followed by these.
-
-    Examples
-    --------
-    >>> rand = RandomizePep("R", sense="N")
-    >>> print(rand.cut, rand.nocut, rand.sense, sep=', ')
-    R, None, N
-    >>> rand = RandomizePep("KR", nocut="P")
-    >>> print(rand.cut, rand.nocut, rand.sense, sep=', ')
-    KR, P, C
-
-    Cut argument cannot be an empty string:
-
-    >>> rand = RandomizePep("")
-    Traceback (most recent call last):
-        ...
-    ValueError: Need string for cut aminoacids
-
-    Aminoacids must be one of the 20 standard aminoacid single-letter codes:
-
-    >>> rand = RandomizePep("KR", nocut="B")
-    Traceback (most recent call last):
-        ...
-    ValueError: Not an standard aminoacid single-letter code: 'B'
+        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids followed by these at
+        the C position.
+    nocut_n
+        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids preceeded by these at
+        the N position.
+    sense
+        Whether the enzyme cleaves the C or N bond of the cleavage site.
     """
 
     _AA_TO_INDEX = {aa: i for i, aa in enumerate(EXT_AMINOACIDS)}
@@ -560,6 +530,8 @@ class RandomizePep(EnzymeSpecificGenerator):
 
         Since cleavage sites are unaltered during randomization, they are
         ignored here, so proportions are kept equal.
+
+        Any character not in :data:`EXT_AMINOACIDS` is ignored.
 
         Parameters
         ----------

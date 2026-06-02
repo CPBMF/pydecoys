@@ -60,13 +60,13 @@ shuffle_keepterm = s.keepsterm(shuffle)
 
 
 class Randomize:
-    _AA_TO_INDEX = {aa: i for i, aa in enumerate(s.AMINOACIDS)}
+    _AA_TO_INDEX = {aa: i for i, aa in enumerate(s.EXT_AMINOACIDS)}
 
     def __init__(self):
         self._weights = None
 
     def learn_context(self, sequences: Iterable[s.SeqLike]):
-        self._weights = [0] * 20
+        self._weights = [0] * len(s.EXT_AMINOACIDS)
 
         for seq in sequences:
             for aa in seq:
@@ -83,7 +83,7 @@ class Randomize:
 
     def __call__[T: s.SeqLike](self, sequence: T) -> T:
         length = len(sequence)
-        new = s.RAND.choices(s.AMINOACIDS, weights=self._weights, k=length)
+        new = s.RAND.choices(s.EXT_AMINOACIDS, weights=self._weights, k=length)
         return s.seq_cast(sequence, "".join(new))
 
 

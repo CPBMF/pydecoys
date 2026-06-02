@@ -32,16 +32,17 @@ peptides, subclass from :class:`EnzymeSpecificGenerator`.
 """
 
 __all__ = [
+    'RAND',
+    'STD_AMINOACIDS',
+    'EXT_AMINOACIDS',
     'SeqLike',
     'DecoyGenerator',
     'ContextfulGenerator',
     'EnzymeSpecificGenerator',
+    'RandomizePep',
     'ReversePep',
     'ShufflePep',
-    'RandomizePep',
-    'RAND',
     'seq_cast',
-    'AMINOACIDS',
     'keepsn',
     'keepsc',
     'keepsterm',
@@ -49,21 +50,16 @@ __all__ = [
 
 
 from pydecoys.strategies.core import (
+    RAND,
+    STD_AMINOACIDS,
+    EXT_AMINOACIDS,
     SeqLike,
     DecoyGenerator,
     ContextfulGenerator,
     EnzymeSpecificGenerator,
+    RandomizePep,
     ReversePep,
     ShufflePep,
-    RandomizePep,
-    RAND,
-    seq_cast,
-    AMINOACIDS,
+    seq_cast
 )
-
-
-from pydecoys.strategies.factories import (
-    keepsn,
-    keepsc,
-    keepsterm,
-)
+from pydecoys.strategies.factories import keepsc, keepsn, keepsterm

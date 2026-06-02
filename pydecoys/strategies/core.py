@@ -42,8 +42,34 @@ A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
 RAND: t.Final = random.Random(10)
 """Random number generator for stochastic decoy strategies."""
 
-AMINOACIDS: t.Final = 'QWERTYIPASDFGHKLCVNM'
+STD_AMINOACIDS: t.Final = 'QWERTYIPASDFGHKLCVNM'
 """Standard 20 aminoacids single-letter codes, majuscule."""
+
+EXT_AMINOACIDS: t.Final = STD_AMINOACIDS + 'OU' + 'BJZX'
+"""Extended aminoacids single-letter codes, majuscule.
+
+Non-standard aminoacids
+-----------------------
+
+- O: Pyrrolysine
+- U: Selenocysteine
+
+Special codes
+-------------
+
+- B: Aspartic acid (D) or Asparagine (N)
+- J: Leucine (L) or Isoleucine (I)
+- Z: Glutamic acid (E) or Glutamine (Q)
+- X: Any aminoacid
+
+Notes
+-----
+
+Special letter codes are treated as literal characters when matching against
+proteins. For example, 'B' won't match against either 'D' or 'N'. Those are
+meant as ambiguous stand-ins in fasta protein sequences, not as regex
+shortcuts.
+"""
 
 
 @t.runtime_checkable
@@ -122,10 +148,8 @@ class EnzymeSpecificGenerator(ABC):
         if not cut:
             raise ValueError("Need string for cut aminoacids")
         for aa in cut:
-            if aa not in AMINOACIDS:
-                raise ValueError(
-                    f"Not an standard aminoacid single-letter code: '{aa}'"
-                )
+            if aa not in EXT_AMINOACIDS:
+                raise ValueError(f"Not a valid aminoacid single-letter code: '{aa}'")
 
         if not isinstance(nocut, str | None):
             raise TypeError("No-cut aminoacids must be string or None")
@@ -133,9 +157,9 @@ class EnzymeSpecificGenerator(ABC):
             if not nocut:
                 raise ValueError("Need string no-cut aminoacids (or None)")
             for aa in nocut:
-                if aa not in AMINOACIDS:
+                if aa not in EXT_AMINOACIDS:
                     raise ValueError(
-                        f"Not an standard aminoacid single-letter code: '{aa}'"
+                        f"Not a valid aminoacid single-letter code: '{aa}'"
                     )
 
         if nocut is not None and (shared := set(cut) & set(nocut)):
@@ -433,7 +457,7 @@ class RandomizePep(EnzymeSpecificGenerator):
     ValueError: Not an standard aminoacid single-letter code: 'B'
     """
 
-    _AA_TO_INDEX = {aa: i for i, aa in enumerate(AMINOACIDS)}
+    _AA_TO_INDEX = {aa: i for i, aa in enumerate(EXT_AMINOACIDS)}
 
     @t.override
     def __init__(
@@ -493,7 +517,7 @@ class RandomizePep(EnzymeSpecificGenerator):
             The target dataset.
         """
 
-        self._weights = [0] * 20
+        self._weights = [0] * len(EXT_AMINOACIDS)
 
         for seq in sequences:
             for frag, cleavage in self.split_sequence(seq):
@@ -517,7 +541,7 @@ class RandomizePep(EnzymeSpecificGenerator):
 
     def _get_rand(self, frag: str) -> str:
         length = len(frag)
-        new = RAND.choices(AMINOACIDS, weights=self._weights, k=length)
+        new = RAND.choices(EXT_AMINOACIDS, weights=self._weights, k=length)
         return "".join(new)
 
 

@@ -47,7 +47,7 @@ class TestEnzymeSpecificGenerator:
 
     def test_cut_not_aa(self):
         with pytest.raises(ValueError):
-            DummyEnzymeSpecificGenerator("KRBY")
+            DummyEnzymeSpecificGenerator("KRÇY")
 
     def test_not_optional_str_nocut(self):
         with pytest.raises(TypeError):
@@ -67,7 +67,7 @@ class TestEnzymeSpecificGenerator:
 
     def test_nocut_not_aa(self):
         with pytest.raises(ValueError):
-            DummyEnzymeSpecificGenerator("KR", nocut="KRBY")
+            DummyEnzymeSpecificGenerator("KR", nocut="KRÇY")
 
     @pytest.mark.parametrize('sense', ['n', 'NC', 'B', '', 4])
     def test_bad_sense(self, sense):

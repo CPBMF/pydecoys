@@ -664,12 +664,12 @@ def get_contextualized_strategy(
     Examples
     --------
     >>> database = ['DNIDYKAVYR']
-    >>> strategy = (database, 'randomize')
+    >>> strategy = get_contextualized_strategy(database, 'randomize')
     >>> isinstance(strategy, strategies.ContextfulGenerator)
     True
     >>> strategy.is_set
     True
-    >>> strategy = (database, 'reverse')
+    >>> strategy = get_contextualized_strategy(database, 'reverse')
     Traceback (most recent call last):
         ...
     ValueError: Strategy 'reverse' is not contextful

@@ -67,15 +67,12 @@ PyDecoys requires Python 3.12 or superior.
 
 ### Installation
 
-If you only care about the CLI, PyDecoys can be easily installed, upgraded or
-uninstalled via `pipx`:
+If you only care about the CLI, PyDecoys can be easily installed or uninstalled
+via `pipx`:
 
 ```sh
 # Install current version
-pipx install pydecoys
-
-# Upgrade to latest version
-pipx upgrade pydecoys
+pipx install git+https://github.com/CPBMF/pydecoys@v0.2.0
 
 # Uninstall
 pipx uninstall pydecoys
@@ -96,14 +93,17 @@ installed via `pip`:
 pip install --user pipx
 ```
 
+In case `pipx` didn't automatically install [Biopython], run:
+
+```sh
+pipx inject pydecoys biopython
+```
+
 For API usage, you can use `pip` or other package managers:
 
 ```sh
 # Install
-pip install pydecoys
-
-# Upgrade
-pip install --upgrade pydecoys
+pip install git+https://github.com/CPBMF/pydecoys@v0.2.0
 
 # Uninstall
 pip uninstall pydecoys
@@ -111,9 +111,14 @@ pip uninstall pydecoys
 
 #### Installing without Biopython
 
-PyDecoys can be used without [Biopython]: ``pip install pydecoys --no-deps``.
-If you change your mind later, simply run ``pip install biopython``. In case
-you use other package managers, [Biopython]'s dependency group is `biopython`.
+To install PyDecoys without [Biopython], use the ``--no-deps`` flag:
+
+```sh
+pip install git+https://github.com/CPBMF/pydecoys@v0.2.0 --no-deps
+```
+
+If you change your mind later, simply run ``pip install biopython``.
+[Biopython]'s dependency group is `biopython`.
 
 Note that IO functions and the CLI app **aren't available without Biopython**.
 

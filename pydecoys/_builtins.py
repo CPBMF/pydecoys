@@ -111,18 +111,18 @@ decoy_strategy: dict[str, s.DecoyGenerator] = {
 
 # Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
 
-type _Enzyme = tuple[str, str | None, Literal['N', 'C'], str]
+type _Enzyme = tuple[str, str | None, str | None, Literal['N', 'C'], str]
 
-_TRYPSIN: _Enzyme = ('KR', 'P', 'C', 'trypsin')
-_STRICT_TRYPSIN: _Enzyme = ('KR', None, 'C', 'stricttrypsin')
-_ARG_C: _Enzyme = ('R', 'P', 'C', 'argc')
-_ASP_N: _Enzyme = ('BD', None, 'N', 'aspn')
-_CHYMO: _Enzyme = ('FLWY', 'P', 'C', 'chymo')
-_GLU_C: _Enzyme = ('DE', 'P', 'C', 'gluc')
-_LYS_C: _Enzyme = ('K', 'P', 'C', 'lysc')
-_LYS_N: _Enzyme = ('K', None, 'N', 'lysn')
-_PEPSIN_A: _Enzyme = ('FL', None, 'C', 'pepsina')
-_CNBR: _Enzyme = ('M', None, 'C', 'cnbr')
+_TRYPSIN: _Enzyme = ('KR', 'P', None, 'C', 'trypsin')
+_STRICT_TRYPSIN: _Enzyme = ('KR', None, None, 'C', 'stricttrypsin')
+_ARG_C: _Enzyme = ('R', 'P', None, 'C', 'argc')
+_ASP_N: _Enzyme = ('BD', None, None, 'N', 'aspn')
+_CHYMO: _Enzyme = ('FLWY', 'P', None, 'C', 'chymo')
+_GLU_C: _Enzyme = ('DE', 'P', None, 'C', 'gluc')
+_LYS_C: _Enzyme = ('K', 'P', None, 'C', 'lysc')
+_LYS_N: _Enzyme = ('K', None, None, 'N', 'lysn')
+_PEPSIN_A: _Enzyme = ('FL', None, None, 'C', 'pepsina')
+_CNBR: _Enzyme = ('M', None, None, 'C', 'cnbr')
 
 
 def _register_enzymatic_strategies():
@@ -144,8 +144,8 @@ def _register_enzymatic_strategies():
     )
 
     for factory, enzyme, term in strategies:
-        key = factory.__name__.lower() + '-' + enzyme[3]
-        generator = factory(enzyme[0], enzyme[1], enzyme[2])
+        key = factory.__name__.lower() + '-' + enzyme[4]
+        generator = factory(enzyme[0], enzyme[1], enzyme[2], enzyme[3])
         match term:
             case 'keepsn':
                 generator = s.keepsn(generator)

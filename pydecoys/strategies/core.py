@@ -120,8 +120,6 @@ class EnzymeSpecificGenerator(ABC):
     This class creates a compiled regex pattern at instantiation that captures
     cleavage sites. A sequence can be split with :meth:`split_sequence`.
 
-    This class also save the enzymatic specifications as get-only attributes.
-
     The nocut value is always considered at the C-terminal, even if the sense
     is N.
 
@@ -130,9 +128,13 @@ class EnzymeSpecificGenerator(ABC):
     cut
         Cleavage sites as a string.
     nocut
-        Aminoacids that stop cleavage as a string, or `None`. If given, the
-        enzyme won't cut aminoacids with a C-terminal followed by these.
-        The nocut value is always at the C-terminal, even if the sense is N.
+        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids followed by these at
+        the C position.
+    nocut_n
+        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
+        given, the enzyme will ignore `cut` aminoacids preceeded by these at
+        the N position.
     sense
         Whether the enzyme cleaves the C or N bond of the cleavage site.
     """
@@ -141,6 +143,7 @@ class EnzymeSpecificGenerator(ABC):
         self,
         cut: str,
         nocut: str | None = None,
+        nocut_n: str | None = None,
         sense: t.Literal['N', 'C'] = 'C',
     ) -> None:
         # A lot of type-guarding...
@@ -151,14 +154,24 @@ class EnzymeSpecificGenerator(ABC):
         self._check_if_aa(cut)
 
         if not isinstance(nocut, str | None):
-            raise TypeError("No-cut aminoacids must be string or None")
+            raise TypeError("Nocut aminoacids must be string or None")
         if nocut is not None:
             if not nocut:
-                raise ValueError("Need string for no-cut aminoacids (or None)")
+                raise ValueError("Need string for nocut aminoacids (or None)")
             self._check_if_aa(nocut)
+
+        if not isinstance(nocut_n, str | None):
+            raise TypeError("Nocut_n aminoacids must be string or None")
+        if nocut_n is not None:
+            if not nocut_n:
+                raise ValueError("Need string for nocut_n aminoacids (or None)")
+            self._check_if_aa(nocut_n)
 
         if nocut is not None and (shared := set(cut) & set(nocut)):
             raise ValueError(f"Shared cut and nocut aminoacids: {"".join(shared)}")
+
+        if nocut_n is not None and (shared := set(cut) & set(nocut_n)):
+            raise ValueError(f"Shared cut and nocut_n aminoacids: {"".join(shared)}")
 
         if not isinstance(sense, str) or sense not in {'N', 'C'}:
             raise TypeError("Cleavage sense must be 'N' or 'C'")
@@ -167,10 +180,9 @@ class EnzymeSpecificGenerator(ABC):
 
         if nocut is not None:
             pattern += rf"(?!{nocut})"
+        if nocut_n is not None:
+            pattern = rf"(?<!{nocut_n})" + pattern
 
-        self.__cut = cut
-        self.__nocut = nocut
-        self.__sense: t.Literal['N', 'C'] = sense
         self.__pattern = re.compile(pattern)
 
     def split_sequence(
@@ -187,7 +199,7 @@ class EnzymeSpecificGenerator(ABC):
 
         Yields
         ------
-        A tuple containin an enzymatic fragments (minus the clevage site) and
+        A tuple containin an enzymatic fragment (minus the clevage site) and
         `False`, or a cleavage site and `True`. Cleavage sites are guaranteed
         to be one character only.
 
@@ -228,19 +240,50 @@ class EnzymeSpecificGenerator(ABC):
         ...
 
     @property
-    def cut(self) -> str:
-        """Cleavage sites as a string."""
-        return self.__cut
+    def pattern(self) -> re.Pattern:
+        """Regex pattern to capture cleavage sites."""
+        return self.__pattern
 
-    @property
-    def sense(self) -> t.Literal['N', 'C']:
-        """Sense of cleavage."""
-        return self.__sense
+    @classmethod
+    def from_regex(
+        cls, pattern: str | re.Pattern[str],
+        sense: t.Literal['N', 'C'] = 'C'
+    ) -> t.Self:
+        """Return a new instance with a specified regex pattern.
 
-    @property
-    def nocut(self) -> str | None:
-        """Aminoacids that stop cleavage as a string."""
-        return self.__nocut
+        The regex MUST match **only** the cleavage sites that shouldn't be
+        altered. The cleavage sites MUST be captured by the regex pattern.
+        Else, the resulting iterator from :meth:`split_sequence` won't yield
+        all aminoacid residues.
+
+        Parameters
+        ----------
+        pattern
+            A regex pattern that must capture the desired cleavage sites. For
+            example, for trypsin: ``r'([KR])(?!P)'``.
+        sense
+            Whether the enzyme cleaves the C or N bond of the cleavage site.
+            This is unused by default, but can be useful for subclasses
+            overriding the class.
+
+        Returns
+        -------
+        An instance of the class with the specified pattern.
+        """
+
+        obj = cls.__new__(cls)
+
+        if not isinstance(sense, str) or sense not in {'N', 'C'}:
+            raise TypeError("Cleavage sense must be 'N' or 'C'")
+
+        if isinstance(pattern, str):
+            obj.__pattern = re.compile(pattern)
+        elif isinstance(pattern, re.Pattern):
+            obj.__pattern = pattern
+        else:
+            raise TypeError('The pattern must be a string or a re.Pattern obj')
+
+        return obj
 
     @staticmethod
     def _check_if_aa(sequence: str):
@@ -470,9 +513,10 @@ class RandomizePep(EnzymeSpecificGenerator):
         self,
         cut: str,
         nocut: str | None = None,
+        nocut_n: str | None = None,
         sense: t.Literal['N', 'C'] = 'C',
     ) -> None:
-        super().__init__(cut, nocut, sense)
+        super().__init__(cut, nocut, nocut_n, sense)
         self._weights: list[int] | None = None
 
     @t.override

@@ -19,10 +19,10 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager, nullcontext
 import io
 import os
 import typing as t
+from contextlib import contextmanager, nullcontext
 
 try:
     _HAS_BIO = True
@@ -34,9 +34,8 @@ except ImportError as e:
     warn(f"Module 'Biopython' not found: {str(e)}")
 
 from pydecoys import strategies
-from pydecoys.strategies import SeqLike
 from pydecoys._builtins import decoy_strategy
-
+from pydecoys.strategies import SeqLike
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
 type _Strategy = str | strategies.DecoyGenerator
@@ -384,7 +383,7 @@ def from_seqs[T: SeqLike](
     decoy_generator = _validate_strategy(strategy)
 
     if _HAS_BIO:
-        from Bio.Seq import Seq, MutableSeq
+        from Bio.Seq import MutableSeq, Seq
         if isinstance(sequences, str | Seq | MutableSeq):
             sequences = [sequences]  # type: ignore
     else:
@@ -621,6 +620,13 @@ def register(
     Traceback (most recent call last):
         ...
     ValueError: Strategy key 'randomseq' already defined
+
+    The second argument must be a callable:
+
+    >>> register('randomseq2', 'randomseq2')
+    Traceback (most recent call last):
+        ...
+    TypeError: Strategy function must be a callable
     """
 
     if not isinstance(strategy_key, str):
@@ -654,6 +660,19 @@ def get_contextualized_strategy(
     Returns
     -------
     The correspondent decoy strategy.
+
+    Examples
+    --------
+    >>> database = ['DNIDYKAVYR']
+    >>> strategy = get_contextualized_strategy(database, 'randomize')
+    >>> isinstance(strategy, strategies.ContextfulGenerator)
+    True
+    >>> strategy.is_set
+    True
+    >>> strategy = get_contextualized_strategy(database, 'reverse')
+    Traceback (most recent call last):
+        ...
+    ValueError: Strategy 'reverse' is not contextful
     """
 
     import copy
@@ -664,7 +683,7 @@ def get_contextualized_strategy(
     strategy = _validate_strategy(strategy_key)
 
     if not isinstance(strategy, strategies.ContextfulGenerator):
-        raise ValueError(f"Strategy '{strategy_key}' is not contextful.")
+        raise ValueError(f"Strategy '{strategy_key}' is not contextful")
 
     strategy = copy.deepcopy(strategy)
     strategy.learn_context(sequences)

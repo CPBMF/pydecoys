@@ -46,15 +46,6 @@ tracker = "https://github.com/CPBMF/pydecoys/issues"
 pydecoys = "pydecoys.__main__:main"
 
 
-[tool.poetry]
-name = "pydecoys"
-version = "0.1.0"
-description = "Proteomics decoy utilities for Python"
-license = "GPL-3.0-or-later"
-authors = [ "Bruno Maestri A Becker <bruno.maestri@edu.pucrs.br>" ]
-readme = "README.md"
-
-
 [tool.poetry.dependencies]
 python = ">=3.12"
 

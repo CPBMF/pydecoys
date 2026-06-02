@@ -620,6 +620,13 @@ def register(
     Traceback (most recent call last):
         ...
     ValueError: Strategy key 'randomseq' already defined
+
+    The second argument must be a callable:
+
+    >>> register('randomseq2', 'randomseq2')
+    Traceback (most recent call last):
+        ...
+    TypeError: Strategy function must be a callable
     """
 
     if not isinstance(strategy_key, str):
@@ -653,6 +660,19 @@ def get_contextualized_strategy(
     Returns
     -------
     The correspondent decoy strategy.
+
+    Examples
+    --------
+    >>> database = ['DNIDYKAVYR']
+    >>> strategy = (database, 'randomize')
+    >>> isinstance(strategy, strategies.ContextfulGenerator)
+    True
+    >>> strategy.is_set
+    True
+    >>> strategy = (database, 'reverse')
+    Traceback (most recent call last):
+        ...
+    ValueError: Strategy 'reverse' is not contextful
     """
 
     import copy
@@ -663,7 +683,7 @@ def get_contextualized_strategy(
     strategy = _validate_strategy(strategy_key)
 
     if not isinstance(strategy, strategies.ContextfulGenerator):
-        raise ValueError(f"Strategy '{strategy_key}' is not contextful.")
+        raise ValueError(f"Strategy '{strategy_key}' is not contextful")
 
     strategy = copy.deepcopy(strategy)
     strategy.learn_context(sequences)

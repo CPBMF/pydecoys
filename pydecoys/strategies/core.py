@@ -204,9 +204,9 @@ class EnzymeSpecificGenerator(ABC):
         pattern = rf"([{cut}])"
 
         if nocut is not None:
-            pattern += rf"(?!{nocut})"
+            pattern += rf"(?![{nocut}])"
         if nocut_n is not None:
-            pattern = rf"(?<!{nocut_n})" + pattern
+            pattern = rf"(?<![{nocut_n}])" + pattern
 
         self.__pattern = re.compile(pattern)
 

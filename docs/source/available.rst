@@ -20,20 +20,20 @@ Enzymes
 -------
 For enzyme-specific strategies, the followin enzymes are available:
 
-============== =============== ==== ===== =====
-Enzyme         str key         cut  nocut sense
-============== =============== ==== ===== =====
-Trypsin        \-trypsin       KR   P     C
-Strict trypsin \-stricttrypsin KR   \-    C
-Arg-C          \-argc          R    P     C
-Asp-N          \-aspn          D    \-    N
-Chymotrypsin   \-chymo         FLWY P     C
-Glu-C          \-gluc          DE   P     C
-Lys-C          \-lysc          K    P     C
-Lys-N          \-lysn          K    \-    N
-Pepsin-A       \-pepsina       FL   \-    C
-CNBr           \-cnbr          M    \-    C
-============== =============== ==== ===== =====
+============== =============== ==== ===== ======= ===== ================
+Enzyme         str key         cut  nocut nocut_n sense pattern
+============== =============== ==== ===== ======= ===== ================
+Trypsin        trypsin         KR   P     \-      C     r'([KR])(?!P)'
+Strict trypsin stricttrypsin   KR   \-    \-      C     r'([KR])'
+Arg-C          argc            R    P     \-      C     r'(R)(?!P)'
+Asp-N          aspn            BD   \-    \-      N     r'([BD])'
+Chymotrypsin   chymo           FLWY P     \-      C     r'([FLWY])(?!P)'
+Glu-C          gluc            DE   P     \-      C     r'([DE])(?!P)'
+Lys-C          lysc            K    P     \-      C     r'(K)(?!P)'
+Lys-N          lysn            K    \-    \-      N     r'(K)'
+Pepsin-A       pepsina         FL   \-    \-      C     r'([FL])'
+CNBr           cnbr            M    \-    \-      C     r'(M)'
+============== =============== ==== ===== ======= ===== ================
 
 Terminal-aa options
 -------------------

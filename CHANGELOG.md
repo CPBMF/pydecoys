@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix the version links in this CHANGELOG.
 - Padronize file references in this CHANGELOG.
 - Remove the redundant `[tool.poetry]` table from the pyproject file.
+- Fix the installation guide.
 
 ## [0.2.0] - 2026-06-01
 

@@ -129,13 +129,14 @@ class EnzymeSpecificGenerator(ABC):
     ----------
     cut
         Cleavage sites as a string.
-    sense
-        Whether the enzyme cleaves the C or N bond of the cleavage site.
     nocut
         Aminoacids that stop cleavage as a string, or `None`. If given, the
         enzyme won't cut aminoacids with a C-terminal followed by these.
         The nocut value is always at the C-terminal, even if the sense is N.
+    sense
+        Whether the enzyme cleaves the C or N bond of the cleavage site.
     """
+
     def __init__(
         self,
         cut: str,
@@ -147,25 +148,19 @@ class EnzymeSpecificGenerator(ABC):
             raise TypeError("Cut aminoacids must be string")
         if not cut:
             raise ValueError("Need string for cut aminoacids")
-        for aa in cut:
-            if aa not in EXT_AMINOACIDS:
-                raise ValueError(f"Not a valid aminoacid single-letter code: '{aa}'")
+        self._check_if_aa(cut)
 
         if not isinstance(nocut, str | None):
             raise TypeError("No-cut aminoacids must be string or None")
         if nocut is not None:
             if not nocut:
-                raise ValueError("Need string no-cut aminoacids (or None)")
-            for aa in nocut:
-                if aa not in EXT_AMINOACIDS:
-                    raise ValueError(
-                        f"Not a valid aminoacid single-letter code: '{aa}'"
-                    )
+                raise ValueError("Need string for no-cut aminoacids (or None)")
+            self._check_if_aa(nocut)
 
         if nocut is not None and (shared := set(cut) & set(nocut)):
             raise ValueError(f"Shared cut and nocut aminoacids: {"".join(shared)}")
 
-        if not isinstance(sense, str) or not sense or sense not in {'N', 'C'}:
+        if not isinstance(sense, str) or sense not in {'N', 'C'}:
             raise TypeError("Cleavage sense must be 'N' or 'C'")
 
         pattern = rf"([{cut}])"
@@ -209,6 +204,7 @@ class EnzymeSpecificGenerator(ABC):
         ('R', True)
         ('THQ', False)
         """
+
         for i, frag in enumerate(re.split(self.__pattern, str(sequence))):
             if frag:
                 # Captured values (in this case, cleavage sites) are
@@ -245,6 +241,16 @@ class EnzymeSpecificGenerator(ABC):
     def nocut(self) -> str | None:
         """Aminoacids that stop cleavage as a string."""
         return self.__nocut
+
+    @staticmethod
+    def _check_if_aa(sequence: str):
+        """Raise a ValueError if a given sequence is not composed of
+        :data:`EXT_AMINOACIDS` only.
+        """
+
+        for aa in sequence:
+            if aa not in EXT_AMINOACIDS:
+                raise ValueError(f"Not a valid aminoacid single-letter code: '{aa}'")
 
 
 class ReversePep(EnzymeSpecificGenerator):

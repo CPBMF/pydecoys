@@ -72,7 +72,7 @@ via `pipx`:
 
 ```sh
 # Install current version
-pipx install git+https://github.com/CPBMF/pydecoys@v0.2.0
+pipx install git+https://github.com/CPBMF/pydecoys@v0.2.1
 
 # Uninstall
 pipx uninstall pydecoys
@@ -103,7 +103,7 @@ For API usage, you can use `pip` or other package managers:
 
 ```sh
 # Install
-pip install git+https://github.com/CPBMF/pydecoys@v0.2.0
+pip install git+https://github.com/CPBMF/pydecoys@v0.2.1
 
 # Uninstall
 pip uninstall pydecoys
@@ -114,7 +114,7 @@ pip uninstall pydecoys
 To install PyDecoys without [Biopython], use the ``--no-deps`` flag:
 
 ```sh
-pip install git+https://github.com/CPBMF/pydecoys@v0.2.0 --no-deps
+pip install git+https://github.com/CPBMF/pydecoys@v0.2.1 --no-deps
 ```
 
 If you change your mind later, simply run ``pip install biopython``.

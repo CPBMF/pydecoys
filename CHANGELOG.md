@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-2
+
 ### Fixed
 
 - Fix the version links in this CHANGELOG.
@@ -79,7 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The [documentation](https://cpbmf.github.io/pydecoys/).
 - The [README](https://github.com/CPBMF/pydecoys/blob/main/README.md).
 
-[unreleased]: https://github.com/CPBMF/pydecoys/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/CPBMF/pydecoys/compare/v0.2.1...HEAD
+[0.2.1]: https:/github.com/CPBMF/pydecoys/compare/v0.2.0...v0.2.1
 [0.2.0]: https:/github.com/CPBMF/pydecoys/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CPBMF/pydecoys/releases/tag/v0.1.0
 

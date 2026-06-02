@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   protocol.
 - A `get_contextualized_strategy` function that returns a contextualized
   strategy from a target dataset and strategy key.
-- This changelog file.
+- This CHANGELOG file.
 
 ### Changed
 

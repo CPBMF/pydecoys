@@ -20,7 +20,7 @@ alter terminal aminoacids.
 """
 
 from functools import wraps
-from typing import Iterable
+from typing import Callable, Iterable
 
 from pydecoys.strategies import DecoyGenerator, SeqLike
 from pydecoys.strategies.core import ContextfulGenerator
@@ -28,8 +28,15 @@ from pydecoys.strategies.core import ContextfulGenerator
 
 # Applicative class to hold the closures for ContextfulGenerator fns
 class _FactoryContextful:
-    def __init__(self, strategy: ContextfulGenerator):
+    def __init__(
+        self,
+        strategy: ContextfulGenerator,
+        call: DecoyGenerator,
+        learn_context: Callable[[SeqLike], None]
+    ):
         self._strategy = strategy
+        self._call = call
+        self.learn_context = learn_context
         wraps(strategy)(self)
 
     @property
@@ -42,12 +49,6 @@ class _FactoryContextful:
 
     def __call__[T: SeqLike](self, sequence: T) -> T:
         return self._call(sequence)
-
-    def learn_context(self, sequences: Iterable[SeqLike]):
-        raise NotImplementedError
-
-    def _call[T: SeqLike](self, sequence: T) -> T:
-        raise NotImplementedError
 
 
 def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
@@ -106,7 +107,6 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     metadata are lost.
     """
     if isinstance(fn, ContextfulGenerator):
-        wrapper_class = _FactoryContextful(fn)
 
         @wraps(fn.__call__)
         def call(sequence):
@@ -117,10 +117,7 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
             sequences = (sequence[1:] for sequence in sequences)
             return fn.learn_context(sequences)
 
-        wrapper_class._call = call  # type: ignore
-        wrapper_class.learn_context = learn_context  # type: ignore
-
-        return wrapper_class
+        return _FactoryContextful(fn, call, learn_context)
 
     @wraps(fn)
     def wrapper(sequence):
@@ -185,7 +182,6 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     metadata are lost.
     """
     if isinstance(fn, ContextfulGenerator):
-        wrapper_class = _FactoryContextful(fn)
 
         @wraps(fn.__call__)
         def call(sequence):
@@ -196,10 +192,7 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
             sequences = (sequence[:-1] for sequence in sequences)
             return fn.learn_context(sequences)
 
-        wrapper_class._call = call  # type: ignore
-        wrapper_class.learn_context = learn_context  # type: ignore
-
-        return wrapper_class
+        return _FactoryContextful(fn, call, learn_context)
 
     @wraps(fn)
     def wrapper(sequence):
@@ -264,7 +257,6 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     metadata are lost.
     """
     if isinstance(fn, ContextfulGenerator):
-        wrapper_class = _FactoryContextful(fn)
 
         @wraps(fn.__call__)
         def call(sequence):
@@ -275,10 +267,7 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
             sequences = (sequence[1:-1] for sequence in sequences)
             return fn.learn_context(sequences)
 
-        wrapper_class._call = call  # type: ignore
-        wrapper_class.learn_context = learn_context  # type: ignore
-
-        return wrapper_class
+        return _FactoryContextful(fn, call, learn_context)
 
     @wraps(fn)
     def wrapper(sequence):

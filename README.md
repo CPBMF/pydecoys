@@ -5,6 +5,8 @@
 ![Image](https://img.shields.io/badge/Python-3.12+-FFD43B?logo=python&logoColor=blue)
 [![Image](https://img.shields.io/badge/License-GPLv3+-red?logo=gplv3)](https://github.com/CPBMF/pydecoys/blob/main/LICENSE)
 
+# PyDecoys
+
 Welcome to the GitHub page of PyDecoys:
 Proteomics decoy utilities for Python!
 

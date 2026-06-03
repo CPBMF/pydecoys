@@ -43,7 +43,6 @@ class _FactoryContextful:
     def is_set(self):
         return self._strategy.is_set
 
-    @property
     def reset(self):
         return self._strategy.reset()
 

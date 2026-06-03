@@ -148,16 +148,18 @@ Adding new enzymes
 The :class:`strategies.ReversePep`, :class:`strategies.ShufflePep` and
 :class:`strategies.RandomizePep` classes allow you to set new enzyme
 specifications for `reversepep`, `shufflepep` and `randomizepep`
-strategies. Setting new enzymes is an easy instantiation. Let's set
+strategies. Setting new enzymes is an easy method call. Let's set
 high-specificity chymotrypsin for `reversepep`:
 
 .. code-block:: python
     :linenos:
 
     import pydecoys
-    from pydecoys.strategies import ReversePep, ShufflePep, RandomizePep
+    from pydecoys.strategies import ReversePep
 
-    reversepep_chymohs = ReversePep('FWY', nocut='P', sense='C')
+    reversepep_chymohs = \
+        ReversePep.from_enzyme('FWY', nocut='P', nocut_n=None, sense='C')
+
     pydecoys.register('reversepep-chymohs', reversepep_chymohs)
 
 That's it. Now you can use a `reversepep` strategy with high specificity
@@ -169,7 +171,7 @@ Enzyme-specific strategies
 
 You might want to set your own enzyme-specific strategy. Luckily, there's an
 ABC for that: :class:`strategies.EnzymeSpecificGenerator`. This class sets
-up the :meth:`strategies.EnzymeSpecificGenerator.__init__` method we used
+up the :meth:`strategies.EnzymeSpecificGenerator.from_enzyme` method we used
 earlier to add the new enzyme.
 
 Most importantly, it sets the

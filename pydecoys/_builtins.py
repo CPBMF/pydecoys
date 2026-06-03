@@ -109,43 +109,77 @@ decoy_strategy: dict[str, s.DecoyGenerator] = {
 }
 
 
-# Pre-defined pseudo-reverse and pseudo-shuffle DecoyGenerators
+# Pre-defined enzymes
+# Those specifications were taken from <https://github.com/HUPO-PSI/psi-ms-CV>
 
-type _Enzyme = tuple[str, str | None, str | None, Literal['N', 'C'], str]
+type _Enzyme = tuple[str, str | None, str | None, Literal['N', 'C', 'both'], str]
 
-_TRYPSIN: _Enzyme = ('KR', 'P', None, 'C', 'trypsin')
-_STRICT_TRYPSIN: _Enzyme = ('KR', None, None, 'C', 'stricttrypsin')
+_ALPHA_LP: _Enzyme = ('TASV', None, None, 'C', 'alphalp')
 _ARG_C: _Enzyme = ('R', 'P', None, 'C', 'argc')
 _ASP_N: _Enzyme = ('BD', None, None, 'N', 'aspn')
-_CHYMO: _Enzyme = ('FLWY', 'P', None, 'C', 'chymo')
-_GLU_C: _Enzyme = ('BDEZ', 'P', None, 'C', 'gluc')
+_ASP_N_AMBIC: _Enzyme = ('DE', None, None, 'N', 'aspnambic')
+_CHYMO: _Enzyme = ('FYWL', 'P', None, 'C', 'chymo')
+_CNBR: _Enzyme = ('M', None, None, 'C', 'cnbr')
+_FORMIC_ACID: _Enzyme = ('D', None, None, 'both', 'formicacid')
+_GLUTAMYL_ENDOPEPTIDASE: _Enzyme = ('E', None, 'E', 'C', 'gluc')
+_LEUKOCYTE_ELASTASE: _Enzyme = ('ALIV', 'P', None, 'C', 'elastase')
 _LYS_C: _Enzyme = ('K', 'P', None, 'C', 'lysc')
+_LYS_C_P: _Enzyme = ('K', None, None, 'C', 'lyscp')
 _LYS_N: _Enzyme = ('K', None, None, 'N', 'lysn')
 _PEPSIN_A: _Enzyme = ('FL', None, None, 'C', 'pepsina')
-_CNBR: _Enzyme = ('M', None, None, 'C', 'cnbr')
+_TRYPSIN: _Enzyme = ('KR', 'P', None, 'C', 'trypsin')
+_TRYPSIN_P: _Enzyme = ('KR', None, None, 'C', 'trypsinp')
+_TRYP_CHYMO: _Enzyme = ('FYWLKR', 'P', None, 'C', 'trypchymo')
+_TRYP_N: _Enzyme = ('KR', None, None, 'N', 'trypn')
+_TWO_IODOBENZOATE: _Enzyme = ('W', None, None, 'C', '2iodobenzoate')
+_V8_DE: _Enzyme = ('BDEZ', 'P', None, 'C', 'v8de')
+_V8_E: _Enzyme = ('EZ', 'P', None, 'C', 'v8e')
+
+# Pro-C is the only one that needs a regex pattern
+_PROLINE_ENDOPEPTIDASE = (r'([HKR]P)(?!P)', 'proc')
 
 
 def _register_enzymatic_strategies():
     strategies = itertools.product(
         [s.ReversePep, s.ShufflePep, s.RandomizePep],
         [
-            _TRYPSIN,
-            _STRICT_TRYPSIN,
+            _ALPHA_LP,
             _ARG_C,
             _ASP_N,
+            _ASP_N_AMBIC,
             _CHYMO,
-            _GLU_C,
+            _CNBR,
+            _FORMIC_ACID,
+            _GLUTAMYL_ENDOPEPTIDASE,
+            _LEUKOCYTE_ELASTASE,
             _LYS_C,
+            _LYS_C_P,
             _LYS_N,
             _PEPSIN_A,
-            _CNBR
+            _TRYPSIN,
+            _TRYPSIN_P,
+            _TRYP_CHYMO,
+            _TRYP_N,
+            _TWO_IODOBENZOATE,
+            _V8_DE,
+            _V8_E,
+            None,
         ],
         ['keepsn', 'keepsc', 'keepsterm', None],
     )
 
+    # TODO: Find a better way of coding this
+    # Maybe exposing a function that automatically registers all combinations
+    # of an enzyme/EnzymeSpecificGenerator might be useful for plug-ins?
+    # Not make it automatic so plug-ins can opt out of it?
     for factory, enzyme, term in strategies:
-        key = factory.__name__.lower() + '-' + enzyme[4]
-        generator = factory(enzyme[0], enzyme[1], enzyme[2], enzyme[3])
+        if enzyme is None:
+            key = factory.__name__.lower() + '-' + _PROLINE_ENDOPEPTIDASE[1]
+            generator = factory(_PROLINE_ENDOPEPTIDASE[0])
+        else:
+            key = factory.__name__.lower() + '-' + enzyme[4]
+            generator = factory.from_enzyme(enzyme[0], enzyme[1], enzyme[2], enzyme[3])
+
         match term:
             case 'keepsn':
                 generator = s.keepsn(generator)

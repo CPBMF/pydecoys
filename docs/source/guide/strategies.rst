@@ -170,17 +170,14 @@ Enzyme-specific strategies
 You might want to set your own enzyme-specific strategy. Luckily, there's an
 ABC for that: :class:`strategies.EnzymeSpecificGenerator`. This class sets
 up the :meth:`strategies.EnzymeSpecificGenerator.__init__` method we used
-earlier to add the new enzyme. It also sets
-:attr:`strategies.EnzymeSpecificGenerator.cut`,
-:attr:`strategies.EnzymeSpecificGenerator.nocut` and
-:attr:`strategies.EnzymeSpecificGenerator.sense` get-only properties!
+earlier to add the new enzyme.
 
 Most importantly, it sets the
 :meth:`strategies.EnzymeSpecificGenerator.split_sequence` method. This method
 splits a given sequence into its enzymatic fragments (minus cleavage sites) and
 the cleavage sites themselves. It yields tuples of an enzymatic fragments and
 `False` or a cleavage site and `True`, in the order they appear in the
-sequence. The cleavage sites are guaranteed to only ever be one aminoacid.
+sequence.
 
 Let's redo the naïve randomizer, but this time let's randomize peptides:
 

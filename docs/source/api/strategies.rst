@@ -37,11 +37,31 @@ pydecoys.strategies
       than once in a target dataset, a stochastic method will inflate the decoy
       dataset size.
 
-.. data:: AMINOACIDS
+.. data:: STD_AMINOACIDS
    :type: typing.Final[str]
    :value: 'QWERTYIPASDFGHKLCVNM'
 
    Standard 20 aminoacids single-letter codes, majuscule.
+
+.. data:: EXT_AMINOACIDS
+   :type: typing.Final[str]
+   :value: STD_AMINOACIDS + 'OU' + 'BJZX'
+
+   Extended aminoacids single-letter codes, majuscule.
+
+   Non-standard aminoacids
+   -----------------------
+
+   - O: Pyrrolysine
+   - U: Selenocysteine
+
+   Special codes
+   -------------
+
+   - B: Aspartic acid (D) or Asparagine (N)
+   - J: Leucine (L) or Isoleucine (I)
+   - Z: Glutamic acid (E) or Glutamine (Q)
+   - X: Any aminoacid
 
 .. autoclass:: ContextfulGenerator
    :show-inheritance:
@@ -66,15 +86,6 @@ pydecoys.strategies
    :show-inheritance:
    :special-members: __call__
    :members:
-
-.. note::
-   `EnzymeSpecificGenerator` classes don't have setters and should be treated as
-   immutable.
-
-   Internally, they use a regex pattern to identify cleavage sites. Since the
-   regex pattern is constructed and compiled at initialization, changing a
-   property would just cause a mismatch between the visible specifications and
-   the actual behavior.
 
 .. autofunction:: keepsn
 .. autofunction:: keepsc

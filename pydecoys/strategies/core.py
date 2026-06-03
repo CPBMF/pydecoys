@@ -233,8 +233,7 @@ class EnzymeSpecificGenerator(ABC):
         Yields
         ------
         A tuple containin an enzymatic fragment (minus the clevage site) and
-        `False`, or a cleavage site and `True`. Cleavage sites are guaranteed
-        to be one character only.
+        `False`, or a cleavage site and `True`.
 
         Examples
         --------

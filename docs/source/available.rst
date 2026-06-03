@@ -1,6 +1,6 @@
-.. _available-strategies:
-
 .. Those tables are horrible and need to be reformatted
+
+.. _available-strategies:
 
 Available strategies
 ====================

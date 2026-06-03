@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   site.
 - A `pattern` attribute to `EnzymeSpecificGenerator` that returns the regex
   pattern used by the instance.
+- Case-insensitivity to all decoy strategies.
 
 ### Changed
 

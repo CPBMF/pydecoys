@@ -77,7 +77,7 @@ class TestEnzymeSpecificGenerator:
         with pytest.raises(ValueError):
             DummyEnzymeSpecificGenerator("KR", **param_dict)  # type: ignore
 
-    @pytest.mark.parametrize('sense', ['n', 'NC', 'B', '', 4])
+    @pytest.mark.parametrize('sense', ['NC', 'B', '', 4])
     def test_bad_sense(self, sense):
         with pytest.raises(TypeError):
             DummyEnzymeSpecificGenerator("KR", sense=sense)

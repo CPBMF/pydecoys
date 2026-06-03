@@ -118,7 +118,8 @@ class EnzymeSpecificGenerator(ABC):
     """Abstract base class for enzymatic aware decoy generation.
 
     This class creates a compiled regex pattern at instantiation that captures
-    cleavage sites. A sequence can be split with :meth:`split_sequence`.
+    cleavage sites. A sequence can be split with :meth:`split_sequence`. The
+    class is case-insensitive.
 
     The nocut value is always considered at the C-terminal, even if the sense
     is N.
@@ -144,10 +145,10 @@ class EnzymeSpecificGenerator(ABC):
     ...     def __call__(sequence): raise NotImplementedError
     >>> dummy = DummyEnzymeGenerator("R", sense="N")
     >>> print(dummy.pattern)
-    re.compile('([R])')
+    re.compile('([R])', re.IGNORECASE)
     >>> dummy = DummyEnzymeGenerator("KR", nocut="P")
     >>> print(dummy.pattern)
-    re.compile('([KR])(?![P])')
+    re.compile('([KR])(?![P])', re.IGNORECASE)
 
     Cut argument cannot be an empty string:
 
@@ -174,31 +175,36 @@ class EnzymeSpecificGenerator(ABC):
         # A lot of type-guarding...
         if not isinstance(cut, str):
             raise TypeError("Cut aminoacids must be string")
+        cut = cut.upper()
         if not cut:
             raise ValueError("Need string for cut aminoacids")
         self._check_if_aa(cut)
 
-        if not isinstance(nocut, str | None):
-            raise TypeError("Nocut aminoacids must be string or None")
-        if nocut is not None:
+        if nocut is None:
+            pass
+        elif isinstance(nocut, str):
             if not nocut:
                 raise ValueError("Need string for nocut aminoacids (or None)")
+            nocut = nocut.upper()
             self._check_if_aa(nocut)
+            if shared := set(cut) & set(nocut):
+                raise ValueError(f"Shared cut and nocut aminoacids: {shared}")
+        else:
+            raise TypeError("Nocut aminoacids must be string or None")
 
-        if not isinstance(nocut_n, str | None):
-            raise TypeError("Nocut_n aminoacids must be string or None")
-        if nocut_n is not None:
+        if nocut_n is None:
+            pass
+        elif isinstance(nocut_n, str):
             if not nocut_n:
                 raise ValueError("Need string for nocut_n aminoacids (or None)")
+            nocut_n = nocut_n.upper()
             self._check_if_aa(nocut_n)
+            if shared := set(cut) & set(nocut_n):
+                raise ValueError(f"Shared cut and nocut_n aminoacids: {shared}")
+        else:
+            raise TypeError("Nocut_n aminoacids must be string or None")
 
-        if nocut is not None and (shared := set(cut) & set(nocut)):
-            raise ValueError(f"Shared cut and nocut aminoacids: {"".join(shared)}")
-
-        if nocut_n is not None and (shared := set(cut) & set(nocut_n)):
-            raise ValueError(f"Shared cut and nocut_n aminoacids: {"".join(shared)}")
-
-        if not isinstance(sense, str) or sense not in {'N', 'C'}:
+        if not isinstance(sense, str) or sense.upper() not in {'N', 'C'}:
             raise TypeError("Cleavage sense must be 'N' or 'C'")
 
         pattern = rf"([{cut}])"
@@ -208,7 +214,7 @@ class EnzymeSpecificGenerator(ABC):
         if nocut_n is not None:
             pattern = rf"(?<![{nocut_n}])" + pattern
 
-        self.__pattern = re.compile(pattern)
+        self.__pattern = re.compile(pattern, re.IGNORECASE)
 
     def split_sequence(
         self,
@@ -373,10 +379,14 @@ class ReversePep(EnzymeSpecificGenerator):
         'YSQKQHTRTP'
         """
 
-        # Cleavage sites are guaranteed to always be one letter only,
-        # reverting them is no-op
         fragments = self.split_sequence(sequence)
-        rev_frags = [frag[0][::-1] for frag in fragments]
+        rev_frags = []
+
+        for frag, cleavage in fragments:
+            if not cleavage:
+                frag = frag[::-1]
+            rev_frags.append(frag)
+
         return seq_cast(sequence, "".join(rev_frags))
 
 
@@ -432,10 +442,14 @@ class ShufflePep(EnzymeSpecificGenerator):
         'QYSKTHRPTQ'
         """
 
-        # Cleavage sites are guaranteed to always be one letter only,
-        # shuffling them is no-op
         fragments = self.split_sequence(sequence)
-        shuf_frags = [self._shuffle(frag[0]) for frag in fragments]
+        shuf_frags = []
+
+        for frag, cleavage in fragments:
+            if not cleavage:
+                frag = self._shuffle(frag)
+            shuf_frags.append(frag)
+
         return seq_cast(sequence, "".join(shuf_frags))
 
     @staticmethod
@@ -548,7 +562,7 @@ class RandomizePep(EnzymeSpecificGenerator):
                 if cleavage:
                     continue
                 for aa in frag:
-                    idx = self._AA_TO_INDEX.get(aa)
+                    idx = self._AA_TO_INDEX.get(aa.upper())
                     if idx is not None:
                         self._weights[idx] += 1
 

@@ -70,7 +70,7 @@ class Randomize:
 
         for seq in sequences:
             for aa in seq:
-                idx = self._AA_TO_INDEX.get(aa)
+                idx = self._AA_TO_INDEX.get(aa.upper())
                 if idx is not None:
                     self._weights[idx] += 1
 

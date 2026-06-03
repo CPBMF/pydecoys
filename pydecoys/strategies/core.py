@@ -117,25 +117,19 @@ class ContextfulGenerator(t.Protocol):
 class EnzymeSpecificGenerator(ABC):
     """Abstract base class for enzymatic aware decoy generation.
 
-    This class creates a compiled regex pattern at instantiation that captures
-    cleavage sites. A sequence can be split with :meth:`split_sequence`. The
-    class is case-insensitive.
+    Sequences can be split with :meth:`split_sequence`. The class is
+    case-insensitive.
 
-    The nocut value is always considered at the C-terminal, even if the sense
-    is N.
+    The regex MUST match **only** the cleavage sites that shouldn't be
+    altered. The cleavage sites MUST be captured by the regex pattern. Else,
+    the resulting iterator from :meth:`split_sequence` won't yield all
+    aminoacid residues.
 
     Parameters
     ----------
-    cut
-        Cleavage sites as a string.
-    nocut
-        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids followed by these at
-        the C position.
-    nocut_n
-        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids preceeded by these at
-        the N position.
+    pattern
+        A regex pattern that must capture the desired cleavage sites. For
+        example, for trypsin: ``r'([KR])(?!P)'``.
     sense
         Whether the enzyme cleaves the C-terminal, N-terminal or both termini
         of the cleavage site. This is unused by default, but can be useful for
@@ -145,78 +139,34 @@ class EnzymeSpecificGenerator(ABC):
     --------
     >>> class DummyEnzymeGenerator(EnzymeSpecificGenerator):
     ...     def __call__(sequence): raise NotImplementedError
-    >>> dummy = DummyEnzymeGenerator("R", sense="N")
+    >>> dummy = DummyEnzymeGenerator(r"(R)", sense="N")
     >>> print(dummy.pattern)
-    re.compile('([R])', re.IGNORECASE)
-    >>> dummy = DummyEnzymeGenerator("KR", nocut="P")
+    re.compile('(R)', re.IGNORECASE)
+    >>> dummy = DummyEnzymeGenerator(r"([KR])(?!P)")
     >>> print(dummy.pattern)
-    re.compile('([KR])(?![P])', re.IGNORECASE)
+    re.compile('([KR])(?!P)', re.IGNORECASE)
 
-    Cut argument cannot be an empty string:
+    The pattern argument cannot be an empty string:
 
     >>> dummy = DummyEnzymeGenerator("")
     Traceback (most recent call last):
         ...
-    ValueError: Need string for cut aminoacids
-
-    Aminoacids must be one of the :data:`EXT_AMINOACIDS` single-letter codes:
-
-    >>> dummy = DummyEnzymeGenerator("KR", nocut="7")
-    Traceback (most recent call last):
-        ...
-    ValueError: Not a valid aminoacid single-letter code: '7'
+    ValueError: Need string or re.Pattern for pattern
     """
 
     def __init__(
         self,
-        cut: str,
-        nocut: str | None = None,
-        nocut_n: str | None = None,
-        sense: t.Literal['N', 'C', 'both'] = 'C',
-    ) -> None:
-        # A lot of type-guarding...
-        if not isinstance(cut, str):
-            raise TypeError("Cut aminoacids must be string")
-        cut = cut.upper()
-        if not cut:
-            raise ValueError("Need string for cut aminoacids")
-        self._check_if_aa(cut)
-
-        if nocut is None:
-            pass
-        elif isinstance(nocut, str):
-            if not nocut:
-                raise ValueError("Need string for nocut aminoacids (or None)")
-            nocut = nocut.upper()
-            self._check_if_aa(nocut)
-            if shared := set(cut) & set(nocut):
-                raise ValueError(f"Shared cut and nocut aminoacids: {shared}")
+        pattern: str | re.Pattern[str],
+        sense: t.Literal['N', 'C', 'both'] = 'C'
+    ):
+        if isinstance(pattern, str):
+            if not pattern:
+                raise ValueError('Need string or re.Pattern for pattern')
+            self.__pattern = re.compile(pattern, re.IGNORECASE)
+        elif isinstance(pattern, re.Pattern):
+            self.__pattern = pattern
         else:
-            raise TypeError("Nocut aminoacids must be string or None")
-
-        if nocut_n is None:
-            pass
-        elif isinstance(nocut_n, str):
-            if not nocut_n:
-                raise ValueError("Need string for nocut_n aminoacids (or None)")
-            nocut_n = nocut_n.upper()
-            self._check_if_aa(nocut_n)
-            if shared := set(cut) & set(nocut_n):
-                raise ValueError(f"Shared cut and nocut_n aminoacids: {shared}")
-        else:
-            raise TypeError("Nocut_n aminoacids must be string or None")
-
-        if not isinstance(sense, str) or sense not in {'N', 'C', 'both'}:
-            raise TypeError("Cleavage sense must be 'N', 'C' or 'both'")
-
-        pattern = rf"([{cut}])"
-
-        if nocut is not None:
-            pattern += rf"(?![{nocut}])"
-        if nocut_n is not None:
-            pattern = rf"(?<![{nocut_n}])" + pattern
-
-        self.__pattern = re.compile(pattern, re.IGNORECASE)
+            raise TypeError('The pattern must be a string or a re.Pattern obj')
 
     def split_sequence(
         self,
@@ -277,45 +227,97 @@ class EnzymeSpecificGenerator(ABC):
         return self.__pattern
 
     @classmethod
-    def from_regex(
-        cls, pattern: str | re.Pattern[str],
-        sense: t.Literal['N', 'C', 'both'] = 'C'
+    def from_enzyme(
+        cls,
+        cut: str,
+        nocut: str | None = None,
+        nocut_n: str | None = None,
+        sense: t.Literal['N', 'C', 'both'] = 'C',
     ) -> t.Self:
-        """Return a new instance with a specified regex pattern.
-
-        The regex MUST match **only** the cleavage sites that shouldn't be
-        altered. The cleavage sites MUST be captured by the regex pattern.
-        Else, the resulting iterator from :meth:`split_sequence` won't yield
-        all aminoacid residues.
+        """
+        Create regex pattern from enzyme specifications and return a new
+        instance with this regex pattern.
 
         Parameters
         ----------
-        pattern
-            A regex pattern that must capture the desired cleavage sites. For
-            example, for trypsin: ``r'([KR])(?!P)'``.
+        cut
+            Cleavage sites as a string.
+        nocut
+            Aminoacids that stop cleavage when at C-terminal as a string, or
+            `None`. If given, the enzyme will ignore `cut` aminoacids followed
+            by these at the C-terminal.
+        nocut_n
+            Aminoacids that stop cleavage when at N-terminal as a string, or
+            `None`. If given, the enzyme will ignore `cut` aminoacids
+            preceeded by these at the N-terminal.
         sense
             Whether the enzyme cleaves the C-terminal, N-terminal or both
             termini of the cleavage site. This is unused by default, but can
             be useful for subclasses overriding the class. Case sensitive.
 
-        Returns
-        -------
-        An instance of the class with the specified pattern.
+        Examples
+        --------
+        >>> class DummyEnzymeGenerator(EnzymeSpecificGenerator):
+        ...     def __call__(sequence): raise NotImplementedError
+        >>> dummy = DummyEnzymeGenerator("R", sense="N")
+        >>> print(dummy.pattern)
+        re.compile('([R])', re.IGNORECASE)
+        >>> dummy = DummyEnzymeGenerator("KR", nocut="P")
+        >>> print(dummy.pattern)
+        re.compile('([KR])(?![P])', re.IGNORECASE)
+
+        Cut argument cannot be an empty string:
+
+        >>> dummy = DummyEnzymeGenerator("")
+        Traceback (most recent call last):
+            ...
+        ValueError: Need string for cut aminoacids
+
+        Aminoacids must be one of the :data:`EXT_AMINOACIDS` single-letter
+        codes:
+
+        >>> dummy = DummyEnzymeGenerator("KR", nocut="7")
+        Traceback (most recent call last):
+            ...
+        ValueError: Not a valid aminoacid single-letter code: '7'
         """
 
-        obj = cls.__new__(cls)
+        # A lot of type-guarding...
+        if not isinstance(cut, str):
+            raise TypeError("Cut aminoacids must be string")
+        cut = cut.upper()
+        if not cut:
+            raise ValueError("Need string for cut aminoacids")
+        cls._check_if_aa(cut)
 
-        if not isinstance(sense, str) or sense not in {'N', 'C', 'both'}:
-            raise TypeError("Cleavage sense must be 'N', 'C' or 'both'")
-
-        if isinstance(pattern, str):
-            obj.__pattern = re.compile(pattern)
-        elif isinstance(pattern, re.Pattern):
-            obj.__pattern = pattern
+        if nocut is None:
+            pass
+        elif isinstance(nocut, str):
+            if not nocut:
+                raise ValueError("Need string for nocut aminoacids (or None)")
+            nocut = nocut.upper()
+            cls._check_if_aa(nocut)
         else:
-            raise TypeError('The pattern must be a string or a re.Pattern obj')
+            raise TypeError("Nocut aminoacids must be string or None")
 
-        return obj
+        if nocut_n is None:
+            pass
+        elif isinstance(nocut_n, str):
+            if not nocut_n:
+                raise ValueError("Need string for nocut_n aminoacids (or None)")
+            nocut_n = nocut_n.upper()
+            cls._check_if_aa(nocut_n)
+        else:
+            raise TypeError("Nocut_n aminoacids must be string or None")
+
+        pattern = rf"([{cut}])"
+
+        if nocut is not None:
+            pattern += rf"(?![{nocut}])"
+        if nocut_n is not None:
+            pattern = rf"(?<![{nocut_n}])" + pattern
+
+        return cls(pattern, sense)
 
     @staticmethod
     def _check_if_aa(sequence: str):
@@ -496,12 +498,10 @@ class RandomizePep(EnzymeSpecificGenerator):
     @t.override
     def __init__(
         self,
-        cut: str,
-        nocut: str | None = None,
-        nocut_n: str | None = None,
+        pattern: str | re.Pattern[str],
         sense: t.Literal['N', 'C', 'both'] = 'C',
     ) -> None:
-        super().__init__(cut, nocut, nocut_n, sense)
+        super().__init__(pattern, sense)
         self._weights: list[int] | None = None
 
     @t.override

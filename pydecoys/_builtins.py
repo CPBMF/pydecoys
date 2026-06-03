@@ -175,10 +175,10 @@ def _register_enzymatic_strategies():
     for factory, enzyme, term in strategies:
         if enzyme is None:
             key = factory.__name__.lower() + '-' + _PROLINE_ENDOPEPTIDASE[1]
-            generator = factory.from_regex(_PROLINE_ENDOPEPTIDASE[0])
+            generator = factory(_PROLINE_ENDOPEPTIDASE[0])
         else:
             key = factory.__name__.lower() + '-' + enzyme[4]
-            generator = factory(enzyme[0], enzyme[1], enzyme[2], enzyme[3])
+            generator = factory.from_enzyme(enzyme[0], enzyme[1], enzyme[2], enzyme[3])
 
         match term:
             case 'keepsn':

@@ -373,10 +373,14 @@ class ReversePep(EnzymeSpecificGenerator):
         'YSQKQHTRTP'
         """
 
-        # Cleavage sites are guaranteed to always be one letter only,
-        # reverting them is no-op
         fragments = self.split_sequence(sequence)
-        rev_frags = [frag[0][::-1] for frag in fragments]
+        rev_frags = []
+
+        for frag, cleavage in fragments:
+            if not cleavage:
+                frag = frag[::-1]
+            rev_frags.append(frag)
+
         return seq_cast(sequence, "".join(rev_frags))
 
 
@@ -432,10 +436,14 @@ class ShufflePep(EnzymeSpecificGenerator):
         'QYSKTHRPTQ'
         """
 
-        # Cleavage sites are guaranteed to always be one letter only,
-        # shuffling them is no-op
         fragments = self.split_sequence(sequence)
-        shuf_frags = [self._shuffle(frag[0]) for frag in fragments]
+        shuf_frags = []
+
+        for frag, cleavage in fragments:
+            if not cleavage:
+                frag = frag[::-1]
+            shuf_frags.append(frag)
+
         return seq_cast(sequence, "".join(shuf_frags))
 
     @staticmethod

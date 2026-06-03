@@ -137,7 +137,9 @@ class EnzymeSpecificGenerator(ABC):
         given, the enzyme will ignore `cut` aminoacids preceeded by these at
         the N position.
     sense
-        Whether the enzyme cleaves the C or N bond of the cleavage site.
+        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+        of the cleavage site. This is unused by default, but can be useful for
+        subclasses overriding the class. Case sensitive.
 
     Examples
     --------
@@ -204,7 +206,7 @@ class EnzymeSpecificGenerator(ABC):
         else:
             raise TypeError("Nocut_n aminoacids must be string or None")
 
-        if not isinstance(sense, str) or sense.upper() not in {'N', 'C', 'both'}:
+        if not isinstance(sense, str) or sense not in {'N', 'C', 'both'}:
             raise TypeError("Cleavage sense must be 'N', 'C' or 'both'")
 
         pattern = rf"([{cut}])"
@@ -278,7 +280,7 @@ class EnzymeSpecificGenerator(ABC):
     @classmethod
     def from_regex(
         cls, pattern: str | re.Pattern[str],
-        sense: t.Literal['N', 'C'] = 'C'
+        sense: t.Literal['N', 'C', 'both'] = 'C'
     ) -> t.Self:
         """Return a new instance with a specified regex pattern.
 
@@ -293,9 +295,9 @@ class EnzymeSpecificGenerator(ABC):
             A regex pattern that must capture the desired cleavage sites. For
             example, for trypsin: ``r'([KR])(?!P)'``.
         sense
-            Whether the enzyme cleaves the C or N bond of the cleavage site.
-            This is unused by default, but can be useful for subclasses
-            overriding the class.
+            Whether the enzyme cleaves the C-terminal, N-terminal or both
+            termini of the cleavage site. This is unused by default, but can
+            be useful for subclasses overriding the class. Case sensitive.
 
         Returns
         -------
@@ -304,8 +306,8 @@ class EnzymeSpecificGenerator(ABC):
 
         obj = cls.__new__(cls)
 
-        if not isinstance(sense, str) or sense not in {'N', 'C'}:
-            raise TypeError("Cleavage sense must be 'N' or 'C'")
+        if not isinstance(sense, str) or sense not in {'N', 'C', 'both'}:
+            raise TypeError("Cleavage sense must be 'N', 'C' or 'both'")
 
         if isinstance(pattern, str):
             obj.__pattern = re.compile(pattern)

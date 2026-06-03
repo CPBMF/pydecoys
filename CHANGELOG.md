@@ -16,20 +16,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - J: Leucine (L) or Isoleucine (I)
   - Z: Glutamic acid (E) or Glutamine (Q)
   - X: Unspecified aminoacid
-- A class method `from_regex` to `EnzymeSpecificGenerator` that allows
-  instantiating the class with a specific regex pattern. The regex pattern
-  should capture cleavage sites and shouldn't match anything else.
-- A `nocut_n` parameter to `EnzymeSpecificGenerator`'s `__init__` method that
-  specifies aminoacids that block cleavage when at the N-bond of the cleavage
-  site.
+- New cleavage agents from [PSI MS Ontology](https://github.com/HUPO-PSI/psi-ms-CV):
+  - AlphaLP: `alphalp`
+  - Asp-N_ambic: `aspnambic`
+  - Formic_acid: `formicacid`
+  - leukocyte elastase: `elastase`
+  - Lys-C/P: `lyscp`
+  - proline endopeptidase: `proc`
+  - TrypChymo: `trypchymo`
+  - Tryp-N: `trypn`
+  - 2-iodobenzoate: `2iodobenzoate`
+  - V8-E: `v8e`
+- Regex-based instantiation of `EnzymeSpecificGenerator`. The regex pattern
+  must match only the cleavage sites, and must capture them.
 - A `pattern` attribute to `EnzymeSpecificGenerator` that returns the regex
   pattern used by the instance.
 - Case-insensitivity to all decoy strategies.
 
 ### Changed
 
+- Follow the [PSI MS Ontology](https://github.com/HUPO-PSI/psi-ms-CV) cleavage
+  agent definitions.
 - Add 'B' residue to `cut` specifications of Asp-N.
-- Add 'BZ' residues to `cut` specifications of Glu-C.
+- Add 'BZ' residues to `cut` specifications of Glu-C (now V8-DE).
+- Rename old Glu-C specification to V8-DE (the key `gluc` was changed to
+  `v8de`). A new Glu-C (key `gluc`) specification was added with a slightly
+  different regex pattern.
+- Rename old Strict Trypsin specification to Trypsin/P (the key `stricttrypsin`
+  was changed to `trypsinp`).
+- Rname old Pepsin-A specification to PepsinA (the key is unchanged).
+- Move old `__init__` method of `EnzymeSpecificGenerator` to a new class method
+  `from_enzyme`. The new `from_enzyme` method also accepts a `nocut_n`
+  parameter that determines an aminoacid that stops cleavage when at the
+  N-terminal bond of the cut aminoacid.
 
 ### Fixed
 

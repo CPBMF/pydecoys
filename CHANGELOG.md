@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support to non-standard aminoacids (O, U) and special codes (B, J, Z, X):
+  - O: Pyrrolysine (Pyl)
+  - U: Selenocysteine (Sec)
+  - B: Aspartic acid (D) or Asparagine (N)
+  - J: Leucine (L) or Isoleucine (I)
+  - Z: Glutamic acid (E) or Glutamine (Q)
+  - X: Unspecified aminoacid
+- A class method `from_regex` to `EnzymeSpecificGenerator` that allows
+  instantiating the class with a specific regex pattern. The regex pattern
+  should capture cleavage sites and shouldn't match anything else.
+- A `nocut_n` parameter to `EnzymeSpecificGenerator`'s `__init__` method that
+  specifies aminoacids that block cleavage when at the N-bond of the cleavage
+  site.
+- A `pattern` attribute to `EnzymeSpecificGenerator` that returns the regex
+  pattern used by the instance.
+
+### Changed
+
+- Add 'B' residue to `cut` specifications of Asp-N.
+- Add 'BZ' residues to `cut` specifications of Glu-C.
+
+### Fixed
+
+- Fix the `nocut` parameter of `EnzymeSpecificGenerator` so that the regex will
+  correctly identify any of the aminoacids given (before it treated the
+  parameter as a literal string).
+
+### Removed
+
+- The `cut`, `nocut` and `sense` attributes of `EnzymeSpecificGenerator`.
+
 ## [0.2.1] - 2026-06-2
 
 ### Fixed

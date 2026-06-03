@@ -24,14 +24,14 @@ For enzyme-specific strategies, the followin enzymes are available:
 Enzyme         str key         cut  nocut nocut_n sense pattern
 ============== =============== ==== ===== ======= ===== ================
 Trypsin        trypsin         KR   P     \-      C     r'([KR])(?!P)'
-Strict trypsin stricttrypsin   KR   \-    \-      C     r'([KR])'
+Trypsin/P      trypsinp        KR   \-    \-      C     r'([KR])'
 Arg-C          argc            R    P     \-      C     r'(R)(?!P)'
 Asp-N          aspn            BD   \-    \-      N     r'([BD])'
-Chymotrypsin   chymo           FLWY P     \-      C     r'([FLWY])(?!P)'
-Glu-C          gluc            DE   P     \-      C     r'([DE])(?!P)'
+Chymotrypsin   chymo           FYWL P     \-      C     r'([FYWL])(?!P)'
+V8-DE          v8de            BDEZ P     \-      C     r'([BDEZ])(?!P)'
 Lys-C          lysc            K    P     \-      C     r'(K)(?!P)'
 Lys-N          lysn            K    \-    \-      N     r'(K)'
-Pepsin-A       pepsina         FL   \-    \-      C     r'([FL])'
+PepsinA        pepsina         FL   \-    \-      C     r'([FL])'
 CNBr           cnbr            M    \-    \-      C     r'(M)'
 ============== =============== ==== ===== ======= ===== ================
 

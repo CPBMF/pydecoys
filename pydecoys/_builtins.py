@@ -114,11 +114,11 @@ decoy_strategy: dict[str, s.DecoyGenerator] = {
 type _Enzyme = tuple[str, str | None, str | None, Literal['N', 'C'], str]
 
 _TRYPSIN: _Enzyme = ('KR', 'P', None, 'C', 'trypsin')
-_STRICT_TRYPSIN: _Enzyme = ('KR', None, None, 'C', 'stricttrypsin')
+_TRYPSIN_P: _Enzyme = ('KR', None, None, 'C', 'trypsinp')
 _ARG_C: _Enzyme = ('R', 'P', None, 'C', 'argc')
 _ASP_N: _Enzyme = ('BD', None, None, 'N', 'aspn')
-_CHYMO: _Enzyme = ('FLWY', 'P', None, 'C', 'chymo')
-_GLU_C: _Enzyme = ('BDEZ', 'P', None, 'C', 'gluc')
+_CHYMO: _Enzyme = ('FYWL', 'P', None, 'C', 'chymo')
+_V8_DE: _Enzyme = ('BDEZ', 'P', None, 'C', 'v8de')
 _LYS_C: _Enzyme = ('K', 'P', None, 'C', 'lysc')
 _LYS_N: _Enzyme = ('K', None, None, 'N', 'lysn')
 _PEPSIN_A: _Enzyme = ('FL', None, None, 'C', 'pepsina')
@@ -130,11 +130,11 @@ def _register_enzymatic_strategies():
         [s.ReversePep, s.ShufflePep, s.RandomizePep],
         [
             _TRYPSIN,
-            _STRICT_TRYPSIN,
+            _TRYPSIN_P,
             _ARG_C,
             _ASP_N,
             _CHYMO,
-            _GLU_C,
+            _V8_DE,
             _LYS_C,
             _LYS_N,
             _PEPSIN_A,

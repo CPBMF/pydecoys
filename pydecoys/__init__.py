@@ -46,6 +46,8 @@ Available functionality
     Return a decoy `tuple` from a given `tuple`
 :func:`register`
     Register a custom decoy strategy on the API
+:func:`get_contextualized_strategy`
+    Return an already setup context-dependant strategy from a target dataset
 :mod:`pydecoys.strategies`
     API for custom decoy generation strategies
 

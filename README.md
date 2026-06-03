@@ -41,18 +41,29 @@ The following are the implemented strategies:
 - Shuffle enzymatic peptides
 - Randomize enzymatic peptides
 
-The most used proteases are available:
+The folllowing cleavage agents are available:
 
-- Trypsin
-- Strict trypsin
+- AlphaLP
 - Arg-C
 - Asp-N
-- Glu-C
-- Lys-C
-- Lys-N
+- Asp-N_ambic
 - Chymotrypsin
-- Pepsin-A
 - CNBr
+- Formic_acid
+- Glu-C
+- leukocyte elastase
+- Lys-C
+- Lys-C/P
+- Lys-N
+- PepsinA
+- proline endopeptidase
+- Trypsin
+- Trypsin/P
+- TrypChymo
+- Tryp-N
+- 2-iodobenzoate
+- V8-DE
+- V8-E
 
 A full tutorial on how to set new proteases and decoy strategies can be found
 at the [documentation].

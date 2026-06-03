@@ -170,7 +170,7 @@ class EnzymeSpecificGenerator(ABC):
         cut: str,
         nocut: str | None = None,
         nocut_n: str | None = None,
-        sense: t.Literal['N', 'C'] = 'C',
+        sense: t.Literal['N', 'C', 'both'] = 'C',
     ) -> None:
         # A lot of type-guarding...
         if not isinstance(cut, str):
@@ -204,8 +204,8 @@ class EnzymeSpecificGenerator(ABC):
         else:
             raise TypeError("Nocut_n aminoacids must be string or None")
 
-        if not isinstance(sense, str) or sense.upper() not in {'N', 'C'}:
-            raise TypeError("Cleavage sense must be 'N' or 'C'")
+        if not isinstance(sense, str) or sense.upper() not in {'N', 'C', 'both'}:
+            raise TypeError("Cleavage sense must be 'N', 'C' or 'both'")
 
         pattern = rf"([{cut}])"
 
@@ -498,7 +498,7 @@ class RandomizePep(EnzymeSpecificGenerator):
         cut: str,
         nocut: str | None = None,
         nocut_n: str | None = None,
-        sense: t.Literal['N', 'C'] = 'C',
+        sense: t.Literal['N', 'C', 'both'] = 'C',
     ) -> None:
         super().__init__(cut, nocut, nocut_n, sense)
         self._weights: list[int] | None = None

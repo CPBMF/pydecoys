@@ -189,7 +189,7 @@ class EnzymeSpecificGenerator(ABC):
         --------
         >>> class DummySpecificGenerator(EnzymeSpecificGenerator):
         ...     def __call__(self, sequence): raise NotImplementedError
-        >>> splitter = DummySpecificGenerator('KR')
+        >>> splitter = DummySpecificGenerator.from_enzyme('KR')
         >>> for val in splitter.split_sequence('QSYKPTRTHQ'):
         ...     print(val)
         ('QSY', False)
@@ -259,16 +259,16 @@ class EnzymeSpecificGenerator(ABC):
         --------
         >>> class DummyEnzymeGenerator(EnzymeSpecificGenerator):
         ...     def __call__(sequence): raise NotImplementedError
-        >>> dummy = DummyEnzymeGenerator("R", sense="N")
+        >>> dummy = DummyEnzymeGenerator.from_enzyme("R", sense="N")
         >>> print(dummy.pattern)
         re.compile('([R])', re.IGNORECASE)
-        >>> dummy = DummyEnzymeGenerator("KR", nocut="P")
+        >>> dummy = DummyEnzymeGenerator.from_enzyme("KR", nocut="P")
         >>> print(dummy.pattern)
         re.compile('([KR])(?![P])', re.IGNORECASE)
 
         Cut argument cannot be an empty string:
 
-        >>> dummy = DummyEnzymeGenerator("")
+        >>> dummy = DummyEnzymeGenerator.from_enzyme("")
         Traceback (most recent call last):
             ...
         ValueError: Need string for cut aminoacids
@@ -276,7 +276,7 @@ class EnzymeSpecificGenerator(ABC):
         Aminoacids must be one of the :data:`EXT_AMINOACIDS` single-letter
         codes:
 
-        >>> dummy = DummyEnzymeGenerator("KR", nocut="7")
+        >>> dummy = DummyEnzymeGenerator.from_enzyme("KR", nocut="7")
         Traceback (most recent call last):
             ...
         ValueError: Not a valid aminoacid single-letter code: '7'
@@ -342,20 +342,20 @@ class ReversePep(EnzymeSpecificGenerator):
     This better preserves actual peptide amount and sizes from the targets to
     the decoys.
 
+    The regex MUST match **only** the cleavage sites that shouldn't be
+    altered. The cleavage sites MUST be captured by the regex pattern. Else,
+    the resulting iterator from :meth:`split_sequence` won't yield all
+    aminoacid residues.
+
     Parameters
     ----------
-    cut
-        Cleavage sites as a string.
-    nocut
-        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids followed by these at
-        the C position.
-    nocut_n
-        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids preceeded by these at
-        the N position.
+    pattern
+        A regex pattern that must capture the desired cleavage sites. For
+        example, for trypsin: ``r'([KR])(?!P)'``.
     sense
-        Whether the enzyme cleaves the C or N bond of the cleavage site.
+        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+        of the cleavage site. This is unused by default, but can be useful for
+        subclasses overriding the class. Case sensitive.
     """
 
     @t.override
@@ -374,10 +374,10 @@ class ReversePep(EnzymeSpecificGenerator):
 
         Examples
         --------
-        >>> rev = ReversePep("KR", nocut="P")
+        >>> rev = ReversePep.from_enzyme("KR", nocut="P")
         >>> rev('QSYKPTRTHQ')
         'TPKYSQRQHT'
-        >>> rev = ReversePep("K", sense="N")
+        >>> rev = ReversePep.from_enzyme("K", sense="N")
         >>> rev('QSYKPTRTHQ')
         'YSQKQHTRTP'
         """
@@ -405,20 +405,20 @@ class ShufflePep(EnzymeSpecificGenerator):
     This better preserves actual peptide amount and sizes from the targets to
     the decoys.
 
+    The regex MUST match **only** the cleavage sites that shouldn't be
+    altered. The cleavage sites MUST be captured by the regex pattern. Else,
+    the resulting iterator from :meth:`split_sequence` won't yield all
+    aminoacid residues.
+
     Parameters
     ----------
-    cut
-        Cleavage sites as a string.
-    nocut
-        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids followed by these at
-        the C position.
-    nocut_n
-        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids preceeded by these at
-        the N position.
+    pattern
+        A regex pattern that must capture the desired cleavage sites. For
+        example, for trypsin: ``r'([KR])(?!P)'``.
     sense
-        Whether the enzyme cleaves the C or N bond of the cleavage site.
+        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+        of the cleavage site. This is unused by default, but can be useful for
+        subclasses overriding the class. Case sensitive.
     """
 
     @t.override
@@ -437,10 +437,10 @@ class ShufflePep(EnzymeSpecificGenerator):
 
         Examples
         --------
-        >>> shuf = ShufflePep("KR", nocut="P")
+        >>> shuf = ShufflePep.from_enzyme("KR", nocut="P")
         >>> shuf('QSYKPTRTHQ')
         'YTSKQPRQHT'
-        >>> shuf = ShufflePep("K", sense="N")
+        >>> shuf = ShufflePep.from_enzyme("K", sense="N")
         >>> shuf('QSYKPTRTHQ')
         'QYSKTHRPTQ'
         """
@@ -477,20 +477,20 @@ class RandomizePep(EnzymeSpecificGenerator):
     This better preserves actual peptide amount and sizes from the targets to
     the decoys.
 
+    The regex MUST match **only** the cleavage sites that shouldn't be
+    altered. The cleavage sites MUST be captured by the regex pattern. Else,
+    the resulting iterator from :meth:`split_sequence` won't yield all
+    aminoacid residues.
+
     Parameters
     ----------
-    cut
-        Cleavage sites as a string.
-    nocut
-        Aminoacids that stop cleavage at C-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids followed by these at
-        the C position.
-    nocut_n
-        Aminoacids that stop cleavage at N-bond as a string, or `None`. If
-        given, the enzyme will ignore `cut` aminoacids preceeded by these at
-        the N position.
+    pattern
+        A regex pattern that must capture the desired cleavage sites. For
+        example, for trypsin: ``r'([KR])(?!P)'``.
     sense
-        Whether the enzyme cleaves the C or N bond of the cleavage site.
+        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+        of the cleavage site. This is unused by default, but can be useful for
+        subclasses overriding the class. Case sensitive.
     """
 
     _AA_TO_INDEX = {aa: i for i, aa in enumerate(EXT_AMINOACIDS)}
@@ -520,10 +520,10 @@ class RandomizePep(EnzymeSpecificGenerator):
 
         Examples
         --------
-        >>> rand = RandomizePep("KR", nocut="P")
+        >>> rand = RandomizePep.from_enzyme("KR", nocut="P")
         >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
         'DSDPCCRGIS'
-        >>> rand = ShufflePep("K", sense="N")
+        >>> rand = RandomizePep.from_enzyme("K", sense="N")
         >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
         'PINKMEVDAP'
         """

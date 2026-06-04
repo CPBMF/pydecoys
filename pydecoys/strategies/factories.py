@@ -20,7 +20,7 @@ alter terminal aminoacids.
 """
 
 from functools import wraps
-from typing import Callable, Iterable
+from typing import Callable, Iterable, overload
 
 from pydecoys.strategies import DecoyGenerator, SeqLike
 from pydecoys.strategies.core import ContextfulGenerator
@@ -44,13 +44,23 @@ class _FactoryContextful:
         return self._strategy.is_set
 
     def reset(self):
-        return self._strategy.reset()
+        self._strategy.reset()
 
     def __call__[T: SeqLike](self, sequence: T) -> T:
         return self._call(sequence)
 
 
+@overload
+def keepsn(fn: ContextfulGenerator) -> ContextfulGenerator:
+    ...
+
+
+@overload
 def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
+    ...
+
+
+def keepsn(fn: DecoyGenerator) -> DecoyGenerator:
     """Factory that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the N-terminal aa.
 
@@ -115,7 +125,7 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[1:] for sequence in sequences)
-            return fn.learn_context(sequences)
+            fn.learn_context(sequences)
 
         return _FactoryContextful(fn, call, learn_context)
 
@@ -126,7 +136,17 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     return wrapper
 
 
+@overload
+def keepsc(fn: ContextfulGenerator) -> ContextfulGenerator:
+    ...
+
+
+@overload
 def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
+    ...
+
+
+def keepsc(fn: DecoyGenerator) -> DecoyGenerator:
     """Decorator that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the C-terminal aa.
 
@@ -191,7 +211,7 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[:-1] for sequence in sequences)
-            return fn.learn_context(sequences)
+            fn.learn_context(sequences)
 
         return _FactoryContextful(fn, call, learn_context)
 
@@ -202,7 +222,17 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     return wrapper
 
 
+@overload
+def keepsterm(fn: ContextfulGenerator) -> ContextfulGenerator:
+    ...
+
+
+@overload
 def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
+    ...
+
+
+def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
     """Decorator that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the terminal aas.
 
@@ -267,7 +297,7 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
         @wraps(fn.learn_context)
         def learn_context(sequences: Iterable[SeqLike]):
             sequences = (sequence[1:-1] for sequence in sequences)
-            return fn.learn_context(sequences)
+            fn.learn_context(sequences)
 
         return _FactoryContextful(fn, call, learn_context)
 

@@ -70,7 +70,7 @@ at the [documentation].
 
 ## Getting started
 
-PyDecoys is available at PyPI and can be easily set up.
+PyDecoys can be easily set up with `pip` or other package managers.
 
 ### Dependencies
 

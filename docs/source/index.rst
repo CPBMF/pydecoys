@@ -31,3 +31,4 @@ customizable and easily integratable to existing Proteomics workflows.
    cli
    api/index
    available
+   authorship

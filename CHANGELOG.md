@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   must match only the cleavage sites, and must capture them.
 - A `pattern` attribute to `EnzymeSpecificGenerator` that returns the regex
   pattern used by the instance.
+- Package type-hinting.
 - Case-insensitivity to all decoy strategies.
 
 ### Changed
@@ -55,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix the `nocut` parameter of `EnzymeSpecificGenerator` so that the regex will
   correctly identify any of the aminoacids given (before it treated the
   parameter as a literal string).
+- Fix the type-hinting of the factory functions from `pydecoys.strategies`.
 
 ### Removed
 

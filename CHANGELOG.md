@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   different regex pattern.
 - Rename old Strict Trypsin specification to Trypsin/P (the key `stricttrypsin`
   was changed to `trypsinp`).
-- Rname old Pepsin-A specification to PepsinA (the key is unchanged).
+- Rename old Pepsin-A specification to PepsinA (the key is unchanged).
 - Move old `__init__` method of `EnzymeSpecificGenerator` to a new class method
   `from_enzyme`. The new `from_enzyme` method also accepts a `nocut_n`
   parameter that determines an aminoacid that stops cleavage when at the

@@ -39,7 +39,7 @@ installed via `pip`:
 
     pip install --user pipx
 
-In case `pipx` didn't automatically install [Biopython], run:
+In case `pipx` didn't automatically install `Biopython`, run:
 
 .. code-block:: sh
 
@@ -49,7 +49,7 @@ For API usage, you can use `pip` or other package managers:
 
 .. code-block:: sh
 
-    # Install
+    # Install current version
     pip install git+https://github.com/CPBMF/pydecoys@v0.2.1
 
     # Uninstall

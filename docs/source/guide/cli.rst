@@ -23,7 +23,7 @@ can also specify the output filename of the decoy proteins fasta with the
 Different decoy strategies
 --------------------------
 
-By default, ``pydecoys`` will use the `'reverse'` decoy strategy. To choose
+By default, `pydecoys` will use the ``'reverse'`` decoy strategy. To choose
 another strategy, use the ``-s/--strategy`` flag followed by the strategy key.
 
 .. code-block:: sh
@@ -35,9 +35,9 @@ another strategy, use the ``-s/--strategy`` flag followed by the strategy key.
 `stdin` and `stdout`
 --------------------
 
-Both ``input`` and ``output`` are optional, and by default ``pydecoys`` will
+Both ``input`` and ``output`` are optional, and by default `pydecoys` will
 read from ``stdin`` and write to ``stdout``. As a result, you can pipe from
-and to ``pydecoys``:
+and to `pydecoys`:
 
 .. code-block:: sh
 

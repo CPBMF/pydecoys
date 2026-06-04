@@ -17,7 +17,7 @@ The basic type signature all strategies must follow is
     type SeqLike = 'str | Seq | MutableSeq'
     type DecoyGenerator[T: SeqLike] = Callable[[T], T]
 
-Note that :type:`SeqLike` is a Union type of ``str``, ``Seq`` and
+Note that :type:`strategies.SeqLike` is a Union type of ``str``, ``Seq`` and
 ``MutableSeq``, but it doesn't actually require `Biopython`.
 
 Creating a simple strategy
@@ -25,7 +25,9 @@ Creating a simple strategy
 
 To illustrate how to create custom strategies, let's create a naïve randomizer.
 It takes a target protein and returns a fully random decoy protein of same
-length:
+length. We can use PyDecoy's own RNG :data:`strategies.RAND`. We can also use
+PyDecoy's :data:`strategies.STD_AMINOACIDS` to pool from. This is a ``str``
+containing the 20 standard aminoacid single-letter codes.
 
 .. code-block:: python
     :linenos:
@@ -36,18 +38,18 @@ length:
 
     # PyDecoys also has a str containing all 20 standard aminoacid
     # single-letter codes
-    from pydecoys.strategies import AMINOACIDS
+    from pydecoys.strategies import STD_AMINOACIDS
 
     def random(sequence: str) -> str:
         length = len(sequence)
-        new = RAND.choices(AMINOACIDS, k=length)
+        new = RAND.choices(STD_AMINOACIDS, k=length)
         return "".join(new)
 
 This will work perfectly already, and for most usecases it'll be enough.
-However, it might fire static type checkers: ``random`` doesn't yet implement
+However, it'll fire static type checkers: ``random`` doesn't yet implement
 the correct type signature we saw earlier.
 
-Also, our implementation isn't interfaceable with Biopython, which means it
+Also, our implementation isn't interfaceable with `Biopython`, which means it
 might break (or at least return a ``str``) when it should return ``Seq`` or
 ``MutableSeq``.
 
@@ -56,11 +58,11 @@ Fixing these problems is easy:
 .. code-block:: python
     :linenos:
 
-    from pydecoys.strategies import RAND, AMINOACIDS, SeqLike, seq_cast
+    from pydecoys.strategies import RAND, STD_AMINOACIDS, SeqLike, seq_cast
 
     def random[T: SeqLike](sequence: T) -> T:
         length = len(sequence)
-        new = RAND.choices(AMINOACIDS, k=length)
+        new = RAND.choices(STD_AMINOACIDS, k=length)
         # `seq_cast` handles casting the return value to `sequence`'s type
         return seq_cast(sequence, "".join(new))
 
@@ -88,6 +90,14 @@ We need a :type:`strategies.DecoyGenerator`, so we'll override its
 :meth:`strategies.ContextfulGenerator.reset` methods, and add a
 :attr:`strategies.ContextfulGenerator.is_set` attribute.
 
+Instead of using :data:`strategies.STD_AMINOACIDS`, let's use
+:data:`strategies.EXT_AMINOACIDS`. This ``str`` includes pyrrolysine (Pyl, O)
+and selenocysteine (Sec, U). It also includes the ``B`` (aspartic acid or
+asparagine), ``J`` (leucine or isoleucine), ``Z`` (glutamic acid or glutamine)
+and ``X`` (any aminoacid) codes. Since we'll weight each aminoacid based on its
+proportion on the target dataset, those aminoacids will only show up if they
+are included in the target dataset already.
+
 .. code-block:: python
     :linenos:
 
@@ -95,7 +105,7 @@ We need a :type:`strategies.DecoyGenerator`, so we'll override its
 
     from pydecoys.strategies import (
         RAND,
-        AMINOACIDS,
+        EXT_AMINOACIDS,
         SeqLike,
         seq_cast,
     )
@@ -103,18 +113,18 @@ We need a :type:`strategies.DecoyGenerator`, so we'll override its
     # Since `ContextfulGenerator` is a protocol, no need to inherit it
     class SmartRandomizer:
         def __init__(self):
-            # We'll use a None placeholder until contextualization
+            # `None` placeholder until contextualization
             self._weights = None
 
         def learn_context(self, sequences: Iterable[SeqLike]) -> None:
             # We init weights
-            self._weights = [0] * 20
+            self._weights = [0] * len(EXT_AMINOACIDS)
 
             for seq in sequences:
                 for aa in seq:
                     # The position of each weight must overlap with its aminoacid
                     # pos
-                    pos = AMINOACIDS.find(aa)
+                    pos = EXT_AMINOACIDS.find(aa)
                     self._weights[pos] += 1
 
         def reset(self):
@@ -127,7 +137,7 @@ We need a :type:`strategies.DecoyGenerator`, so we'll override its
 
         def __call__[T: SeqLike](self, sequence: T) -> T:
             length = len(sequence)
-            new = RAND.choices(AMINOACIDS, weights=self._weights, k=length)
+            new = RAND.choices(EXT_AMINOACIDS, weights=self._weights, k=length)
             return seq_cast(sequence, "".join(new))
 
 This gets us a working decoy strategy that correctly implements weights before
@@ -162,6 +172,11 @@ high-specificity chymotrypsin for `reversepep`:
 
     pydecoys.register('reversepep-chymohs', reversepep_chymohs)
 
+Breaking up each paremeter, ``cut`` specifies which aminoacids the enzyme cuts
+at, ``nocut`` specifies aminoacids that stop cleavage when at the C-terminal
+bond of ``cut``, ``nocut_n`` specifies aminoacids that stop cleavage when at
+the N-terminal bond of ``cut``, and ``sense`` specifies the cleavage sense.
+
 That's it. Now you can use a `reversepep` strategy with high specificity
 chymotrypsin by providing ``'reversepep-chymohs'`` or ``reversepep_chymohs``
 as a strategy.
@@ -177,7 +192,7 @@ earlier to add the new enzyme.
 Most importantly, it sets the
 :meth:`strategies.EnzymeSpecificGenerator.split_sequence` method. This method
 splits a given sequence into its enzymatic fragments (minus cleavage sites) and
-the cleavage sites themselves. It yields tuples of an enzymatic fragments and
+the cleavage sites themselves. It yields tuples of an enzymatic fragment and
 `False` or a cleavage site and `True`, in the order they appear in the
 sequence.
 
@@ -190,7 +205,7 @@ Let's redo the naïve randomizer, but this time let's randomize peptides:
 
     from pydecoys.strategies import (
         RAND,
-        AMINOACIDS,
+        EXT_AMINOACIDS,
         SeqLike,
         seq_cast,
         EnzymeSpecificGenerator
@@ -202,7 +217,7 @@ Let's redo the naïve randomizer, but this time let's randomize peptides:
             for frag, cleavage in self.split_sequence(sequence):
                 if not cleavage:
                     length = len(pep)
-                    new = RAND.choices(AMINOACIDS, k=length)
+                    new = RAND.choices(EXT_AMINOACIDS, k=length)
                     frag = "".join(new)
                 decoy_list.append(frag)
 
@@ -215,22 +230,44 @@ Let's redo the naïve randomizer, but this time let's randomize peptides:
 Keeping N- and C-termini
 ------------------------
 
-You might also want to keep the N-, C- or both termini from the target protein
-in the decoy. To accomplish that, use one of the following factories:
-:func:`strategies.keepns`, :func:`strategies.keepsc` and
+You might also want to preserve the N-, C- or both termini from the target
+protein in-place. To accomplish that, you can use one of the following
+factories: :func:`strategies.keepns`, :func:`strategies.keepsc` and
 :func:`strategies.keepsterm`. Each factory returns a new callable
 that preserves the terminal aminoacids from the argument callable.
-
-:py:class:`strategies.ContextfulGenerator` objects will preserve their
-functionality, but will discard the aminoacid that shouldn't be altered from
-each sequence when learning context.
 
 .. code-block:: python
     :linenos:
 
-    from pydecoys.strategies import keepsn
+    from pydecoys.strategies import ContextfulGenerator, keepsn, keepsc
 
     # The `sequence` value is passed directly without the aminoacid that
     # should be preserved. The aa is reinserted after the wrapped function
     # returns.
     random_keepn = keepsn(random)
+
+    class DummyContextfulGenerator:
+        def __init__(self):
+            self.is_set = False
+
+        def learn_context(self, sequences):
+            self.is_set = True
+
+        def reset(self):
+            self.is_set = False
+
+        def __call__(self, sequence):
+            return sequence
+
+    dummy = keepsterm(DummyContextfulGenerator())
+    assert isinstance(dummy, ContextfulGenerator)
+
+.. warning::
+    Those factories cause the original :type:`strategies.DecoyGenerator` to be
+    blind to the terminals they preserve. For example,
+    :py:class:`strategies.ContextfulGenerator` objects will preserve their
+    functionality, but will discard the aminoacids that shouldn't be altered from
+    each sequence when learning context.
+
+    If you need your decoy strategy to still see those aminoacids, you'll need to
+    implement this functionality.

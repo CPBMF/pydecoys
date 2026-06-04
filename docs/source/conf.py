@@ -38,8 +38,7 @@ add_module_names = False
 
 autodoc_typehints = "description"
 
-napoleon_use_rtype = False
-
+napoleon_use_rtype = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

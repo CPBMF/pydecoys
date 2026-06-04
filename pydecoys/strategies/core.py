@@ -109,7 +109,8 @@ class ContextfulGenerator(t.Protocol):
 
         Returns
         -------
-        A decoy version of `sequence`.
+        T
+            A decoy version of `sequence`.
         """
         ...
 
@@ -182,8 +183,9 @@ class EnzymeSpecificGenerator(ABC):
 
         Yields
         ------
-        A tuple containin an enzymatic fragment (minus the clevage site) and
-        `False`, or a cleavage site and `True`.
+        tuple[str, bool]
+            A tuple containin an enzymatic fragment (minus the clevage site)
+            and `False`, or a cleavage site and `True`.
 
         Examples
         --------
@@ -216,8 +218,9 @@ class EnzymeSpecificGenerator(ABC):
 
         Returns
         -------
-        A decoy version of `sequence`, according to the enzyme specifications
-        given at class instantiation.
+        T
+            A decoy version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
         """
         ...
 
@@ -255,16 +258,22 @@ class EnzymeSpecificGenerator(ABC):
             termini of the cleavage site. This is unused by default, but can
             be useful for subclasses overriding the class. Case sensitive.
 
+        Returns
+        -------
+        Self
+            An instance of the class with a regex pattern constructed from the
+            parameters as such: ``rf'(?<![{nocut_n}])([{cut}])(?![{nocut}])'``.
+
         Examples
         --------
         >>> class DummyEnzymeGenerator(EnzymeSpecificGenerator):
         ...     def __call__(sequence): raise NotImplementedError
         >>> dummy = DummyEnzymeGenerator.from_enzyme("R", sense="N")
         >>> print(dummy.pattern)
-        re.compile('([R])', re.IGNORECASE)
+        re.compile('(R)', re.IGNORECASE)
         >>> dummy = DummyEnzymeGenerator.from_enzyme("KR", nocut="P")
         >>> print(dummy.pattern)
-        re.compile('([KR])(?![P])', re.IGNORECASE)
+        re.compile('([KR])(?!P)', re.IGNORECASE)
 
         Cut argument cannot be an empty string:
 
@@ -310,12 +319,19 @@ class EnzymeSpecificGenerator(ABC):
         else:
             raise TypeError("Nocut_n aminoacids must be string or None")
 
-        pattern = rf"([{cut}])"
+        pattern = rf"([{cut}])" if len(cut) > 1 else rf"({cut})"
 
         if nocut is not None:
-            pattern += rf"(?![{nocut}])"
+            pattern += rf"(?![{nocut}])" if len(nocut) > 1 else rf"(?!{nocut})"
         if nocut_n is not None:
-            pattern = rf"(?<![{nocut_n}])" + pattern
+            pattern = (
+                (
+                    rf"(?<![{nocut_n}])"
+                    if len(nocut_n) > 1
+                    else rf"(?<!{nocut_n})"
+                )
+                + pattern
+            )
 
         return cls(pattern, sense)
 
@@ -369,8 +385,9 @@ class ReversePep(EnzymeSpecificGenerator):
 
         Returns
         -------
-        A pseudo-reversed version of `sequence`, according to the enzyme
-        specifications given at class instantiation.
+        T
+            A pseudo-reversed version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
 
         Examples
         --------
@@ -432,8 +449,9 @@ class ShufflePep(EnzymeSpecificGenerator):
 
         Returns
         -------
-        A pseudo-shuffled version of `sequence`, according to the enzyme
-        specifications given at class instantiation.
+        T
+            A pseudo-shuffled version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
 
         Examples
         --------
@@ -515,8 +533,9 @@ class RandomizePep(EnzymeSpecificGenerator):
 
         Returns
         -------
-        A pseudo-randomized version of `sequence`, according to the enzyme
-        specifications given at class instantiation.
+        T
+            A pseudo-randomized version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
 
         Examples
         --------
@@ -589,6 +608,18 @@ def seq_cast[T: SeqLike](obj: T, sequence: str) -> T:
     :type:`SeqLike` representation (through `obj`).
 
     This function doesn't need Biopython installed.
+
+    Parameters
+    ----------
+    obj
+        A ``SeqLike`` object specifying the return type.
+    sequence
+        A str sequence.
+
+    Returns
+    -------
+    T
+        The `sequence` as the type of `obj`.
 
     Examples
     --------

@@ -1,6 +1,6 @@
 [project]
 name = "pydecoys"
-version = "0.2.1"
+version = "0.3.0"
 description = "Proteomics decoy utilities for Python"
 license = "GPL-3.0-or-later"
 authors = [
@@ -29,8 +29,11 @@ classifiers = [
     'Programming Language :: Python :: 3.14',
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Bio-Informatics',
+    'Topic :: Software Development',
     'Topic :: Software Development :: Libraries',
-    'Topic :: Software Development :: Libraries :: Python Modules'
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: Software Development :: User Interfaces',
+    'Typing :: Typed'
 ]
 
 
@@ -84,10 +87,7 @@ pythonCommand = ["${venv:.venv}"]
 
 [tool.doc8]
 ignore = ["D004"]
-ignore-path = [
-    "docs/source/available.rst",
-    "docs/build/*"
-]
+ignore-path = ["docs/build/*"]
 max-line-length = 79
 
 

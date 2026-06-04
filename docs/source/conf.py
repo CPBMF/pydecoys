@@ -38,11 +38,14 @@ add_module_names = False
 
 autodoc_typehints = "description"
 
-napoleon_use_rtype = False
-
+napoleon_use_rtype = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+
+def setup(app):
+    app.add_css_file('theme_overrides.css')

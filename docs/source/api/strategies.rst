@@ -87,6 +87,11 @@ pydecoys.strategies
    :special-members: __call__
    :members:
 
+.. autoclass:: RandomizePep
+   :show-inheritance:
+   :special-members: __call__
+   :members:
+
 .. autofunction:: keepsn
 .. autofunction:: keepsc
 .. autofunction:: keepsterm

@@ -66,7 +66,8 @@ def from_fasta(
 
     Yields
     ------
-    A decoy version of the next SeqRecord in the file.
+    SeqRecord
+        A decoy version of the next SeqRecord in the file.
 
     Notes
     -----
@@ -125,7 +126,8 @@ def to_fasta(
 
     Returns
     -------
-    The number of entries written (as an integer).
+    int
+        The number of entries written (as an integer).
 
     Notes
     -----
@@ -199,7 +201,8 @@ def from_SeqRecords(
 
     Yields
     ------
-    A decoy version of the next SeqRecord in `sequences`.
+    SeqRecord
+        A decoy version of the next SeqRecord in `sequences`.
 
     Examples
     --------
@@ -273,7 +276,8 @@ def from_tuples[T: SeqLike](
 
     Yields
     ------
-    A decoy version of the next tuple in `sequences`.
+    tuple[str, T]
+        A decoy version of the next tuple in `sequences`.
 
     Examples
     --------
@@ -338,7 +342,8 @@ def from_seqs[T: SeqLike](
 
     Yields
     ------
-    A decoy version of the next sequence in `sequences`.
+    T
+        A decoy version of the next sequence in `sequences`.
 
     Examples
     --------
@@ -424,7 +429,8 @@ def SeqRecord_as_decoy(
 
     Returns
     -------
-    A decoy version of `sequence`.
+    SeqRecord
+        A decoy version of `sequence`.
 
     Examples
     --------
@@ -479,7 +485,8 @@ def tuple_as_decoy[T: SeqLike](
 
     Returns
     -------
-    A decoy version of `sequence`.
+    tuple[str, T]
+        A decoy version of `sequence`.
 
     Examples
     --------
@@ -541,7 +548,8 @@ def seq_as_decoy[T: SeqLike](
 
     Returns
     -------
-    A decoy version of `sequence`.
+    T
+        A decoy version of `sequence`.
 
     Examples
     --------
@@ -659,7 +667,8 @@ def get_contextualized_strategy(
 
     Returns
     -------
-    The correspondent decoy strategy.
+    ContextfulGenerator
+        The correspondent decoy strategy.
 
     Examples
     --------

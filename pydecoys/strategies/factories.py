@@ -68,9 +68,10 @@ def keepsn[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
     Returns
     -------
-    A version of `fn` that doesn't alter the N-terminal aminoacid of the target
-    protein. If `fn` is a :class:`strategies.ContextfulGenerator`, the
-    returned function will also be.
+    DecoyGenerator
+        A version of `fn` that doesn't alter the N-terminal aminoacid of the
+        target protein. If `fn` is a :class:`strategies.ContextfulGenerator`,
+        the returned function will also be.
 
     Examples
     --------
@@ -143,9 +144,10 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
     Returns
     -------
-    A version of `fn` that doesn't alter the C-terminal aminoacid of the target
-    protein. If `fn` is a :class:`strategies.ContextfulGenerator`, the
-    returned function will also be.
+    DecoyGenerator
+        A version of `fn` that doesn't alter the C-terminal aminoacid of the
+        target protein. If `fn` is a :class:`strategies.ContextfulGenerator`,
+        the returned function will also be.
 
     Examples
     --------
@@ -218,9 +220,10 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
     Returns
     -------
-    A version of `fn` that doesn't alter the terminal aminoacids of the target
-    protein. If `fn` is a :class:`strategies.ContextfulGenerator`, the
-    returned function will also be.
+    DecoyGenerator
+        A version of `fn` that doesn't alter the terminal aminoacids of the
+        target protein. If `fn` is a :class:`strategies.ContextfulGenerator`,
+        the returned function will also be.
 
     Examples
     --------

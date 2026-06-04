@@ -109,7 +109,8 @@ class ContextfulGenerator(t.Protocol):
 
         Returns
         -------
-        A decoy version of `sequence`.
+        T
+            A decoy version of `sequence`.
         """
         ...
 
@@ -182,8 +183,9 @@ class EnzymeSpecificGenerator(ABC):
 
         Yields
         ------
-        A tuple containin an enzymatic fragment (minus the clevage site) and
-        `False`, or a cleavage site and `True`.
+        tuple[str, bool]
+            A tuple containin an enzymatic fragment (minus the clevage site)
+            and `False`, or a cleavage site and `True`.
 
         Examples
         --------
@@ -216,8 +218,9 @@ class EnzymeSpecificGenerator(ABC):
 
         Returns
         -------
-        A decoy version of `sequence`, according to the enzyme specifications
-        given at class instantiation.
+        T
+            A decoy version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
         """
         ...
 
@@ -254,6 +257,12 @@ class EnzymeSpecificGenerator(ABC):
             Whether the enzyme cleaves the C-terminal, N-terminal or both
             termini of the cleavage site. This is unused by default, but can
             be useful for subclasses overriding the class. Case sensitive.
+
+        Returns
+        -------
+        Self
+            An instance of the class with a regex pattern constructed from the
+            parameters as such: ``rf'(?<![{nocut_n}])([{cut}])(?![{nocut}])'``.
 
         Examples
         --------
@@ -369,8 +378,9 @@ class ReversePep(EnzymeSpecificGenerator):
 
         Returns
         -------
-        A pseudo-reversed version of `sequence`, according to the enzyme
-        specifications given at class instantiation.
+        T
+            A pseudo-reversed version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
 
         Examples
         --------
@@ -432,8 +442,9 @@ class ShufflePep(EnzymeSpecificGenerator):
 
         Returns
         -------
-        A pseudo-shuffled version of `sequence`, according to the enzyme
-        specifications given at class instantiation.
+        T
+            A pseudo-shuffled version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
 
         Examples
         --------
@@ -515,8 +526,9 @@ class RandomizePep(EnzymeSpecificGenerator):
 
         Returns
         -------
-        A pseudo-randomized version of `sequence`, according to the enzyme
-        specifications given at class instantiation.
+        T
+            A pseudo-randomized version of `sequence`, according to the enzyme
+            specifications given at class instantiation.
 
         Examples
         --------
@@ -589,6 +601,18 @@ def seq_cast[T: SeqLike](obj: T, sequence: str) -> T:
     :type:`SeqLike` representation (through `obj`).
 
     This function doesn't need Biopython installed.
+
+    Parameters
+    ----------
+    obj
+        A ``SeqLike`` object specifying the return type.
+    sequence
+        A str sequence.
+
+    Returns
+    -------
+    T
+        The `sequence` as the type of `obj`.
 
     Examples
     --------

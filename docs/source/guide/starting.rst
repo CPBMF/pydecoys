@@ -19,7 +19,7 @@ via `pipx`:
 .. code-block:: sh
 
     # Install current version
-    pipx install git+https://github.com/CPBMF/pydecoys@v0.2.1
+    pipx install git+https://github.com/CPBMF/pydecoys@v0.3.0
 
     # Uninstall
     pipx uninstall pydecoys
@@ -50,7 +50,7 @@ For API usage, you can use `pip` or other package managers:
 .. code-block:: sh
 
     # Install current version
-    pip install git+https://github.com/CPBMF/pydecoys@v0.2.1
+    pip install git+https://github.com/CPBMF/pydecoys@v0.3.0
 
     # Uninstall
     pip uninstall pydecoys
@@ -62,7 +62,7 @@ To install PyDecoys without `Biopython`, use the ``--no-deps`` flag:
 
 .. code-block:: sh
 
-    pip install git+https://github.com/CPBMF/pydecoys@v0.2.1 --no-deps
+    pip install git+https://github.com/CPBMF/pydecoys@v0.3.0 --no-deps
 
 If you change your mind later, simply run ``pip install biopython``.
 `Biopython`'s dependency group is `biopython`.

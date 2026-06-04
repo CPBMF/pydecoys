@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-04
+
 ### Added
 
 - Support to non-standard aminoacids (O, U) and special codes (B, J, Z, X):
@@ -62,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `cut`, `nocut` and `sense` attributes of `EnzymeSpecificGenerator`.
 
-## [0.2.1] - 2026-06-2
+## [0.2.1] - 2026-06-02
 
 ### Fixed
 
@@ -136,7 +138,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The [documentation](https://cpbmf.github.io/pydecoys/).
 - The [README](https://github.com/CPBMF/pydecoys/blob/main/README.md).
 
-[unreleased]: https://github.com/CPBMF/pydecoys/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/CPBMF/pydecoys/compare/v0.3.0...HEAD
+[0.3.0]: https:/github.com/CPBMF/pydecoys/compare/v0.2.1...v0.3.0
 [0.2.1]: https:/github.com/CPBMF/pydecoys/compare/v0.2.0...v0.2.1
 [0.2.0]: https:/github.com/CPBMF/pydecoys/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CPBMF/pydecoys/releases/tag/v0.1.0

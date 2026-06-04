@@ -84,10 +84,7 @@ pythonCommand = ["${venv:.venv}"]
 
 [tool.doc8]
 ignore = ["D004"]
-ignore-path = [
-    "docs/source/available.rst",
-    "docs/build/*"
-]
+ignore-path = ["docs/build/*"]
 max-line-length = 79
 
 

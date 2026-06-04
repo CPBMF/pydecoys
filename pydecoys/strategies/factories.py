@@ -120,6 +120,8 @@ def keepsn(fn: DecoyGenerator) -> DecoyGenerator:
 
         @wraps(fn.__call__)
         def call(sequence):
+            if not sequence:
+                return sequence
             return sequence[0] + fn.__call__(sequence[1:])
 
         @wraps(fn.learn_context)
@@ -206,6 +208,8 @@ def keepsc(fn: DecoyGenerator) -> DecoyGenerator:
 
         @wraps(fn.__call__)
         def call(sequence):
+            if not sequence:
+                return sequence
             return fn.__call__(sequence[:-1]) + sequence[-1]
 
         @wraps(fn.learn_context)
@@ -292,6 +296,8 @@ def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
 
         @wraps(fn.__call__)
         def call(sequence):
+            if not sequence:
+                return sequence
             return sequence[0] + fn.__call__(sequence[1:-1]) + sequence[-1]
 
         @wraps(fn.learn_context)

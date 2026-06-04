@@ -319,12 +319,19 @@ class EnzymeSpecificGenerator(ABC):
         else:
             raise TypeError("Nocut_n aminoacids must be string or None")
 
-        pattern = rf"([{cut}])"
+        pattern = rf"([{cut}])" if len(cut) > 1 else rf"({cut})"
 
         if nocut is not None:
-            pattern += rf"(?![{nocut}])"
+            pattern += rf"(?![{nocut}])" if len(nocut) > 1 else rf"(?!{nocut})"
         if nocut_n is not None:
-            pattern = rf"(?<![{nocut_n}])" + pattern
+            pattern = (
+                (
+                    rf"(?<![{nocut_n}])"
+                    if len(nocut_n) > 1
+                    else rf"(?<!{nocut_n})"
+                )
+                + pattern
+            )
 
         return cls(pattern, sense)
 

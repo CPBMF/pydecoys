@@ -270,10 +270,10 @@ class EnzymeSpecificGenerator(ABC):
         ...     def __call__(sequence): raise NotImplementedError
         >>> dummy = DummyEnzymeGenerator.from_enzyme("R", sense="N")
         >>> print(dummy.pattern)
-        re.compile('([R])', re.IGNORECASE)
+        re.compile('(R)', re.IGNORECASE)
         >>> dummy = DummyEnzymeGenerator.from_enzyme("KR", nocut="P")
         >>> print(dummy.pattern)
-        re.compile('([KR])(?![P])', re.IGNORECASE)
+        re.compile('([KR])(?!P)', re.IGNORECASE)
 
         Cut argument cannot be an empty string:
 

@@ -32,12 +32,13 @@ class _FactoryContextful:
         self,
         strategy: ContextfulGenerator,
         call: DecoyGenerator,
-        learn_context: Callable[[SeqLike], None]
+        learn_context: Callable[[Iterable[SeqLike]], None]
     ):
+        wraps(strategy)(self)
+
         self._strategy = strategy
         self._call = call
         self.learn_context = learn_context
-        wraps(strategy)(self)
 
     @property
     def is_set(self):
@@ -116,6 +117,7 @@ def keepsn(fn: DecoyGenerator) -> DecoyGenerator:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
+
     if isinstance(fn, ContextfulGenerator):
 
         @wraps(fn.__call__)
@@ -204,6 +206,7 @@ def keepsc(fn: DecoyGenerator) -> DecoyGenerator:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
+
     if isinstance(fn, ContextfulGenerator):
 
         @wraps(fn.__call__)
@@ -292,6 +295,7 @@ def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
+
     if isinstance(fn, ContextfulGenerator):
 
         @wraps(fn.__call__)

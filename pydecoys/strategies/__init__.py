@@ -46,6 +46,7 @@ __all__ = [
     'keepsn',
     'keepsc',
     'keepsterm',
+    'fuses',
 ]
 
 
@@ -62,4 +63,4 @@ from pydecoys.strategies.core import (
     ShufflePep,
     seq_cast
 )
-from pydecoys.strategies.factories import keepsc, keepsn, keepsterm
+from pydecoys.strategies.factories import keepsc, keepsn, keepsterm, fuses

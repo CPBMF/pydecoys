@@ -17,6 +17,7 @@
 
 """Internal logic for implemented strategies."""
 
+from itertools import product
 from typing import Callable, Iterable, Literal, cast
 
 from pydecoys import strategies as s
@@ -113,28 +114,42 @@ _ENZYME_STRATEGIES: list[tuple[str, type[s.EnzymeSpecificGenerator]]] = [
 ]
 
 
+# The do-nothing cases allow the code to just loop over those lists blindly
+# registering each factory
 _TERMINAL_FACTORIES: list[
     tuple[str, Callable[[s.DecoyGenerator], s.DecoyGenerator]]
 ] = [
-    ('keepn',    s.keepsn),
-    ('keepc',    s.keepsc),
-    ('keepterm', s.keepsterm)
+    ('',          lambda x: x),  # noqa: E272
+    ('-keepn',    s.keepsn),
+    ('-keepc',    s.keepsc),
+    ('-keepterm', s.keepsterm)
 ]
 
 
+_OTHER_FACTORIES: list[
+    tuple[str, Callable[[s.DecoyGenerator], s.DecoyGenerator]]
+] = [
+    ('',      lambda x: x),  # noqa: E272
+    ('-fuse', s.fuses)
+]
+
+
+# Functional programming hell
 def _register_all() -> None:
+    all_strategies = list(product(_TERMINAL_FACTORIES, _OTHER_FACTORIES))
+
     for base_key, make in _PLAIN_STRATEGIES:
-        decoy_strategy[base_key] = make()
-        for suffix, factory in _TERMINAL_FACTORIES:
-            decoy_strategy[f'{base_key}-{suffix}'] = factory(make())
+        for (suffix, factory), (suffix2, factory2) in all_strategies:
+            key = base_key + suffix + suffix2
+            decoy_strategy[key] = factory2(factory(make()))
 
     for class_key, cls in _ENZYME_STRATEGIES:
         for regex, sense, enzyme_key in _ENZYMES:
             base_key = f'{class_key}-{enzyme_key}'
-            decoy_strategy[base_key] = cls(regex, sense)
 
-            for suffix, factory in _TERMINAL_FACTORIES:
-                decoy_strategy[f'{base_key}-{suffix}'] = factory(cls(regex, sense))
+            for (suffix, factory), (suffix2, factory2) in all_strategies:
+                key = base_key + suffix + suffix2
+                decoy_strategy[key] = factory2(factory(cls(regex, sense)))
 
 
 _register_all()

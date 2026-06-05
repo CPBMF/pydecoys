@@ -312,3 +312,81 @@ def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
         return sequence[0] + fn(sequence[1:-1]) + sequence[-1]
 
     return wrapper
+
+
+@overload
+def fuses(fn: ContextfulGenerator) -> ContextfulGenerator:
+    ...
+
+
+@overload
+def fuses[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
+    ...
+
+
+def fuses(fn: DecoyGenerator) -> DecoyGenerator:
+    """Decorator that transform a :type:`DecoyGenerator` into a new
+    :type:`DecoyGenerator` that fuses the target and decoy proteins.
+
+    The `sequence` value is prepended to the generated decoy.
+
+    Parameters
+    ----------
+    fn
+        A :type:`DecoyGenerator`.
+
+    Returns
+    -------
+    DecoyGenerator
+        A version of `fn` that fuses the target and decoy sequences,
+        prepending the target to the decoy. If `fn` is a
+        :class:`strategies.ContextfulGenerator`, the returned function will
+        also be.
+
+    Examples
+    --------
+    >>> def reverse(sequence): return sequence[::-1]
+    >>> reverse_fuse = fuses(reverse)
+    >>> reverse_fuse('DNIDYKAVYR')
+    'DNIDYKAVYRRYVAKYDIND'
+
+    ContextfulGenerators are preserved:
+
+    >>> class DummyGenerator:
+    ...     def __init__(self):
+    ...         self.is_set = False
+    ...     def learn_context(self, sequences):
+    ...         self.is_set = True
+    ...         for seq in sequences:
+    ...             print(seq)
+    ...     def reset(self):
+    ...         self.is_set = False
+    ...     def __call__(self, sequence):
+    ...         raise NotImplementedError
+    >>> isinstance(DummyGenerator(), ContextfulGenerator)
+    True
+    >>> fuse = fuses(DummyGenerator())
+    >>> isinstance(fuse, ContextfulGenerator)
+    True
+    >>> fuse.learn_context(['QSYKPTRTHQ'])
+    QSYKPTRTHQ
+
+    Notes
+    -----
+    This function returns a new closure, meaning attributes other than
+    metadata are lost.
+    """
+
+    if isinstance(fn, ContextfulGenerator):
+
+        @wraps(fn.__call__)
+        def call(sequence):
+            return sequence + fn.__call__(sequence)
+
+        return _FactoryContextful(fn, call, fn.learn_context)
+
+    @wraps(fn)
+    def wrapper(sequence):
+        return sequence + fn(sequence)
+
+    return wrapper

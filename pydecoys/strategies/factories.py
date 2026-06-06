@@ -15,15 +15,14 @@
 # You should have received a copy of the GNU General Public License along with
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
-"""Factory functions to generate versions of :type:`DecoyGenerator` that don't
-alter terminal aminoacids.
+"""Factory functions to generate new versions of :type:`DecoyGenerator` with
+modified behavior.
 """
 
 from functools import wraps
 from typing import Callable, Iterable, overload
 
-from pydecoys.strategies import DecoyGenerator, SeqLike
-from pydecoys.strategies.core import ContextfulGenerator
+from pydecoys.strategies import ContextfulGenerator, DecoyGenerator, SeqLike
 
 
 # Applicative class to hold the closures for ContextfulGenerator fns
@@ -151,7 +150,7 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
 
 def keepsc(fn: DecoyGenerator) -> DecoyGenerator:
-    """Decorator that transform a :type:`DecoyGenerator` into a new
+    """Factory that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the C-terminal aa.
 
     The `sequence` value is passed directly without the aminoacid that should
@@ -240,7 +239,7 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
 
 def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
-    """Decorator that transform a :type:`DecoyGenerator` into a new
+    """Factory that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the terminal aas.
 
     The `sequence` value is passed directly without the aminoacids that should
@@ -328,8 +327,8 @@ def fuses[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
     ...
 
 
-def fuses(fn: DecoyGenerator) -> DecoyGenerator:
-    """Decorator that transform a :type:`DecoyGenerator` into a new
+def fuses(fn: DecoyGenerator, radical: str = "") -> DecoyGenerator:
+    """Factory that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that fuses the target and decoy proteins.
 
     The `sequence` value is prepended to the generated decoy.
@@ -338,6 +337,8 @@ def fuses(fn: DecoyGenerator) -> DecoyGenerator:
     ----------
     fn
         A :type:`DecoyGenerator`.
+    radical
+        String to be added between the target and decoy sequences.
 
     Returns
     -------
@@ -353,6 +354,9 @@ def fuses(fn: DecoyGenerator) -> DecoyGenerator:
     >>> reverse_fuse = fuses(reverse)
     >>> reverse_fuse('DNIDYKAVYR')
     'DNIDYKAVYRRYVAKYDIND'
+    >>> radical_fuse = fuses(reverse, radical='K')
+    >>> radical_fuse('DNIDYKAVYR')
+    'DNIDYKAVYRKRYVAKYDIND'
 
     ContextfulGenerators are preserved:
 
@@ -385,12 +389,12 @@ def fuses(fn: DecoyGenerator) -> DecoyGenerator:
 
         @wraps(fn.__call__)
         def call(sequence):
-            return sequence + fn.__call__(sequence)
+            return sequence + radical + fn.__call__(sequence)
 
         return _FactoryContextful(fn, call, fn.learn_context)
 
     @wraps(fn)
     def wrapper(sequence):
-        return sequence + fn(sequence)
+        return sequence + radical + fn(sequence)
 
     return wrapper

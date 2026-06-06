@@ -31,6 +31,14 @@ another strategy, use the ``-s/--strategy`` flag followed by the strategy key.
     # Change the strategy with the `-s/--strategy` flag
     pydecoys targets.fasta -o shuf.fasta -s shuffle
 
+    # Shuffle tryptic enzymatic fragments, except cleavage sites
+    pydecoys targets.fasta -o shuf.fasta -s shufflepep-trypsin
+
+    # Except N-terminal aas and cleavage sites
+    pydecoys targets.fasta -o shuf.fasta -s shufflepep-trypsin-keepn
+
+    # Randomize (except N-terminal aas) then prepend each target to its decoy
+    pydecoys targets.fasta -o shuf.fasta -s randomize-keepn-fuse
 
 `stdin` and `stdout`
 --------------------

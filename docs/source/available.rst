@@ -235,6 +235,21 @@ str key    Description
 \-keepterm Preserve the N- and C-terminal aminoacids
 ========== =========================================
 
+Fusing targets and decoys
+-------------------------
+
+To fuse the decoy to the target sequence, use
+the ``-fuse`` suffix str key.
+
+If you want to preserve terminal aminoacids from the target protein, you can
+choose one of the following:
+
+========= =========================================================
+str key   Description
+========= =========================================================
+\-fuse    Prepend the target sequence to the retuned decoy sequence
+========= =========================================================
+
 Examples
 --------
 
@@ -261,5 +276,11 @@ If you want so simply shuffle it:
 >>> seq = 'QSYKPTRTHQ'
 >>> seq_as_decoy(seq, 'suffle')
 'RSTTHKQQYP'
+
+To shuffle it, except the C-terminal, and fuse the target and decoy:
+
+>>> seq = 'QSYKPTRTHQ'
+>>> seq_as_decoy(seq, 'suffle-keepc-fuse')
+'QSYKPTRTHQRSTTHKQYPQ'
 
 .. _PSI MS Ontology: https://github.com/HUPO-PSI/psi-ms-CV

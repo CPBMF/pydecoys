@@ -95,3 +95,4 @@ pydecoys.strategies
 .. autofunction:: keepsn
 .. autofunction:: keepsc
 .. autofunction:: keepsterm
+.. autofunction:: fuses

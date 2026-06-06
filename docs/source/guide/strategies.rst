@@ -271,3 +271,33 @@ that preserves the terminal aminoacids from the argument callable.
 
     If you need your decoy strategy to still see those aminoacids, you'll need to
     implement this functionality.
+
+Fusing targets and decoys
+-------------------------
+
+There's also a factory to fuse the target and decoy sequences into one,
+prepending the target to the decoy: :func:`strategies.fuses`. You can use them
+as the other two:
+
+.. code-block:: python
+    :linenos:
+
+    random_fuse = fuses(random)
+
+    # Stacking them works as well
+    random_keepn_fuse = fuses(keepsn(random))
+
+If you wish to add a radical between the target and the decoy such that the
+result is ``target-radical-decoy``, you can pass it to :func:`fuses`:
+
+.. code-block:: python
+    :linenos:
+
+    # Resulting sequences will be the target and decoy, joined by 'R'
+    random_fuse = fuses(random, radical='R')
+
+For example:
+
+>>> random_fuse = fuses(random, radical='KRI')
+>>> random_fuse('SINDHRRLSG')
+'SINDHRRLSGKRINVGSKSREDI'

@@ -15,15 +15,14 @@
 # You should have received a copy of the GNU General Public License along with
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
-"""Factory functions to generate versions of :type:`DecoyGenerator` that don't
-alter terminal aminoacids.
+"""Factory functions to generate new versions of :type:`DecoyGenerator` with
+modified behavior.
 """
 
 from functools import wraps
 from typing import Callable, Iterable, overload
 
-from pydecoys.strategies import DecoyGenerator, SeqLike
-from pydecoys.strategies.core import ContextfulGenerator
+from pydecoys.strategies import ContextfulGenerator, DecoyGenerator, SeqLike
 
 
 # Applicative class to hold the closures for ContextfulGenerator fns
@@ -32,12 +31,13 @@ class _FactoryContextful:
         self,
         strategy: ContextfulGenerator,
         call: DecoyGenerator,
-        learn_context: Callable[[SeqLike], None]
+        learn_context: Callable[[Iterable[SeqLike]], None]
     ):
+        wraps(strategy)(self)
+
         self._strategy = strategy
         self._call = call
         self.learn_context = learn_context
-        wraps(strategy)(self)
 
     @property
     def is_set(self):
@@ -116,6 +116,7 @@ def keepsn(fn: DecoyGenerator) -> DecoyGenerator:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
+
     if isinstance(fn, ContextfulGenerator):
 
         @wraps(fn.__call__)
@@ -149,7 +150,7 @@ def keepsc[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
 
 def keepsc(fn: DecoyGenerator) -> DecoyGenerator:
-    """Decorator that transform a :type:`DecoyGenerator` into a new
+    """Factory that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the C-terminal aa.
 
     The `sequence` value is passed directly without the aminoacid that should
@@ -204,6 +205,7 @@ def keepsc(fn: DecoyGenerator) -> DecoyGenerator:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
+
     if isinstance(fn, ContextfulGenerator):
 
         @wraps(fn.__call__)
@@ -237,7 +239,7 @@ def keepsterm[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
 
 
 def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
-    """Decorator that transform a :type:`DecoyGenerator` into a new
+    """Factory that transform a :type:`DecoyGenerator` into a new
     :type:`DecoyGenerator` that doesn't alter the terminal aas.
 
     The `sequence` value is passed directly without the aminoacids that should
@@ -292,6 +294,7 @@ def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
     This function returns a new closure, meaning attributes other than
     metadata are lost.
     """
+
     if isinstance(fn, ContextfulGenerator):
 
         @wraps(fn.__call__)
@@ -310,5 +313,88 @@ def keepsterm(fn: DecoyGenerator) -> DecoyGenerator:
     @wraps(fn)
     def wrapper(sequence):
         return sequence[0] + fn(sequence[1:-1]) + sequence[-1]
+
+    return wrapper
+
+
+@overload
+def fuses(fn: ContextfulGenerator) -> ContextfulGenerator:
+    ...
+
+
+@overload
+def fuses[T: SeqLike](fn: DecoyGenerator[T]) -> DecoyGenerator[T]:
+    ...
+
+
+def fuses(fn: DecoyGenerator, radical: str = "") -> DecoyGenerator:
+    """Factory that transform a :type:`DecoyGenerator` into a new
+    :type:`DecoyGenerator` that fuses the target and decoy proteins.
+
+    The `sequence` value is prepended to the generated decoy.
+
+    Parameters
+    ----------
+    fn
+        A :type:`DecoyGenerator`.
+    radical
+        String to be added between the target and decoy sequences.
+
+    Returns
+    -------
+    DecoyGenerator
+        A version of `fn` that fuses the target and decoy sequences,
+        prepending the target to the decoy. If `fn` is a
+        :class:`strategies.ContextfulGenerator`, the returned function will
+        also be.
+
+    Examples
+    --------
+    >>> def reverse(sequence): return sequence[::-1]
+    >>> reverse_fuse = fuses(reverse)
+    >>> reverse_fuse('DNIDYKAVYR')
+    'DNIDYKAVYRRYVAKYDIND'
+    >>> radical_fuse = fuses(reverse, radical='K')
+    >>> radical_fuse('DNIDYKAVYR')
+    'DNIDYKAVYRKRYVAKYDIND'
+
+    ContextfulGenerators are preserved:
+
+    >>> class DummyGenerator:
+    ...     def __init__(self):
+    ...         self.is_set = False
+    ...     def learn_context(self, sequences):
+    ...         self.is_set = True
+    ...         for seq in sequences:
+    ...             print(seq)
+    ...     def reset(self):
+    ...         self.is_set = False
+    ...     def __call__(self, sequence):
+    ...         raise NotImplementedError
+    >>> isinstance(DummyGenerator(), ContextfulGenerator)
+    True
+    >>> fuse = fuses(DummyGenerator())
+    >>> isinstance(fuse, ContextfulGenerator)
+    True
+    >>> fuse.learn_context(['QSYKPTRTHQ'])
+    QSYKPTRTHQ
+
+    Notes
+    -----
+    This function returns a new closure, meaning attributes other than
+    metadata are lost.
+    """
+
+    if isinstance(fn, ContextfulGenerator):
+
+        @wraps(fn.__call__)
+        def call(sequence):
+            return sequence + radical + fn.__call__(sequence)
+
+        return _FactoryContextful(fn, call, fn.learn_context)
+
+    @wraps(fn)
+    def wrapper(sequence):
+        return sequence + radical + fn(sequence)
 
     return wrapper

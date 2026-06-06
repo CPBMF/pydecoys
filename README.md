@@ -34,39 +34,51 @@ integratable to existing Proteomics workflows. It provides:
 
 The following are the implemented strategies:
 
-- Reverse proteins
-- Shuffle proteins
-- Randomize proteins
-- Rerverse enzymatic peptides
-- Shuffle enzymatic peptides
-- Randomize enzymatic peptides
+- Reverse proteins (`reverse`)
+- Shuffle proteins (`shuffle`)
+- Randomize proteins (`randomize`)
+- Rerverse enzymatic peptides (`reversepep`)
+- Shuffle enzymatic peptides (`shufflepep`)
+- Randomize enzymatic peptides (`randomizepep`)
 
-The folllowing cleavage agents are available:
+The folllowing cleavage agents are available (from
+[PSI MS Ontology](https://github.com/hupo-psi/psi-ms-cv)):
 
-- AlphaLP
-- Arg-C
-- Asp-N
-- Asp-N_ambic
-- Chymotrypsin
-- CNBr
-- Formic_acid
-- Glu-C
-- leukocyte elastase
-- Lys-C
-- Lys-C/P
-- Lys-N
-- PepsinA
-- proline endopeptidase
-- Trypsin
-- Trypsin/P
-- TrypChymo
-- Tryp-N
-- 2-iodobenzoate
-- V8-DE
-- V8-E
+- AlphaLP (`alphalp`)
+- Arg-C (`argc`)
+- Asp-N (`aspn`)
+- Asp-N_ambic (`aspn_ambic`)
+- Chymotrypsin (`chymo`)
+- CNBr (`cnbr`)
+- Formic_acid (`formicacid`)
+- Glu-C (`gluc`)
+- leukocyte elastase (`elastase`)
+- Lys-C (`lysc`)
+- Lys-C/P (`lyscp`)
+- Lys-N (`lysn`)
+- PepsinA (`pepsina`)
+- proline endopeptidase (`proc`)
+- Trypsin (`trypsin`)
+- Trypsin/P (`trypsinp`)
+- TrypChymo (`trypchymo`)
+- Tryp-N (`trypn`)
+- 2-iodobenzoate (`2iodobenzoate`)
+- V8-DE (`v8de`)
+- V8-E (`v8e`)
+
+For each combination, you can choose to keep N-, C- or both terminal
+aminoacids:
+
+- `keepn`
+- `keepc`
+- `keepterm`
+
+And to fuse the target and decoy (prepending the target to the
+resulting decoy): `fuse`.
 
 A full tutorial on how to set new proteases and decoy strategies can be found
-at the [documentation].
+at the [documentation]. The full list of already available options (both for
+CLI and API) is [here](https://cpbmf.github.io/pydecoys/available/).
 
 ## Getting started
 
@@ -113,7 +125,7 @@ pipx inject pydecoys biopython
 For API usage, you can use `pip` or other package managers:
 
 ```sh
-# Install
+# Install current version
 pip install git+https://github.com/CPBMF/pydecoys@v0.3.0
 
 # Uninstall
@@ -148,7 +160,17 @@ pydecoys targets.fasta -o rev.fasta
 You can change the decoy strategy with the `-s/--strategy` flag:
 
 ```sh
+# Shuffle the targets
 pydecoys targets.fasta -o shuf.fasta -s shuffle
+
+# Shuffle tryptic enzymatic fragments, except cleavage sites
+pydecoys targets.fasta -o shuf.fasta -s shufflepep-trypsin
+
+# Except N-terminal aas and cleavage sites
+pydecoys targets.fasta -o shuf.fasta -s shufflepep-trypsin-keepn
+
+# Randomize (except N-terminal aas) then prepend each target to its decoy
+pydecoys targets.fasta -o shuf.fasta -s randomize-keepn-fuse
 ```
 
 The `input` defaults to `stdin`, so you can redirect the output of another

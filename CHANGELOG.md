@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A `fuses` factory function that creates DecoyGenerators that fuse targets and
+  decoys.
+- A `-fuse` option to available strategies to prepend targets to decoys.
+
+### Changed
+
+- Refactor strategy registration logic at module initialization so it's cleaner
+  and easier to mantain.
+
+### Fixed
+
+- Stop `_builtins_test` from spilling state to other tests.
+
 ## [0.3.0] - 2026-06-04
 
 ### Added

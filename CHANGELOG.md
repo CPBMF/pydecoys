@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `fuses` factory function that creates DecoyGenerators that fuse targets and
   decoys.
 - A `-fuse` option to available strategies to prepend targets to decoys.
+- Markov-chain models for generating decoy proteins from target proteins and
+  decoy enzymatic fragments from target enzymatic fragments.
 
 ### Changed
 

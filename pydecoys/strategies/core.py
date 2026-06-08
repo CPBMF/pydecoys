@@ -23,6 +23,7 @@ import random
 import re
 import typing as t
 from abc import ABC, abstractmethod
+from collections import Counter, defaultdict
 
 if t.TYPE_CHECKING:
     from Bio.Seq import MutableSeq, Seq
@@ -599,6 +600,146 @@ class RandomizePep(EnzymeSpecificGenerator):
         length = len(frag)
         new = RAND.choices(EXT_AMINOACIDS, weights=self._weights, k=length)
         return "".join(new)
+
+
+class MarkovPep(EnzymeSpecificGenerator):
+    """Apply pseudo-markov-chain decoy generation with the specified enzyme
+    properties.
+
+    Pseudo-markov-chain means that the enzymatic peptides will be randomized
+    using a markov-chain model, except for the cleavage site.
+
+    Cleavage sites aren't counted when computing the probability of going from
+    a previous state to another, but are counted as previous state.
+
+    This better preserves actual peptide amount and sizes from the targets to
+    the decoys.
+
+    The regex MUST match **only** the cleavage sites that shouldn't be
+    altered. The cleavage sites MUST be captured by the regex pattern. Else,
+    the resulting iterator from :meth:`split_sequence` won't yield all
+    aminoacid residues.
+
+    Parameters
+    ----------
+    pattern
+        A regex pattern that must capture the desired cleavage sites. For
+        example, for trypsin: ``r'([KR])(?!P)'``.
+    sense
+        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+        of the cleavage site. This is unused by default, but can be useful for
+        subclasses overriding the class. Case sensitive.
+    k
+        The state-space for the Markov-chain model. The next aminoacid of the
+        sequence will have its probability determined by the `k` aminoacids
+        before.
+    """
+
+    @t.override
+    def __init__(
+        self,
+        pattern: str | re.Pattern[str],
+        sense: t.Literal['N', 'C', 'both'] = 'C',
+        k: int = 1,
+    ) -> None:
+        super().__init__(pattern, sense)
+        self._weights: dict[
+            tuple[str | None, ...],
+            tuple[list[str], list[int]]
+        ] | None = None
+        self._initial_state = (None, ) * k
+
+    @t.override
+    def __call__[T: SeqLike](self, sequence: T) -> T:
+        """Receive a sequence and return a pseudo-markov-chain generated decoy.
+
+        Parameters
+        ----------
+        sequence
+            A single sequence.
+
+        Returns
+        -------
+        T
+            A pseudo-markov-chain generated version of `sequence`, according
+            to the enzyme specifications given at class instantiation.
+
+        Examples
+        --------
+        >>> rand = RandomizePep.from_enzyme("KR", nocut="P")
+        >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
+        'DSDPCCRGIS'
+        >>> rand = RandomizePep.from_enzyme("K", sense="N")
+        >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
+        'PINKMEVDAP'
+        """
+
+        if self._weights is None:
+            raise RuntimeError("The generator has no context.")
+
+        markov_frags = []
+        fragments = self.split_sequence(sequence)
+
+        state = self._initial_state
+        for frag, cleavage in fragments:
+            if cleavage:
+                markov_frags.append(frag)
+                state = (*state[len(frag):], *frag)
+                continue
+            for aa in frag:
+                try:
+                    new = RAND.choices(
+                        self._weights[state][0],
+                        self._weights[state][1],
+                        k=1
+                    )[0]
+                except IndexError:
+                    new = RAND.choices(
+                        self._global_weights[0],
+                        self._global_weights[1],
+                        k=1
+                    )[0]
+                markov_frags.append(new)
+                state = (*state[1:], aa)
+
+        decoy = "".join(markov_frags)
+        return seq_cast(sequence, decoy)
+
+    def learn_context(self, sequences: t.Iterable[SeqLike]):
+        weights = defaultdict(Counter)
+        global_weights = Counter()
+
+        for sequence in sequences:
+            prev = self._initial_state
+
+            fragments = self.split_sequence(sequence)
+            for frag, cleavage in fragments:
+                if cleavage:
+                    prev = (*prev[len(frag):], *frag)
+                    continue
+                for aa in frag:
+                    weights[prev][aa] += 1
+                    global_weights[aa] += 1
+                    prev = (*prev[1:], aa)
+
+        self._weights = {
+            state: (list(counter.keys()), list(counter.values()))
+            for state, counter
+            in weights
+        }
+        self._global_weights = (
+            list(global_weights.keys()),
+            list(global_weights.values())
+        )
+
+    def reset(self) -> None:
+        """Reset the generator, erasing its previous context."""
+        self._weights = None
+
+    @property
+    def is_set(self) -> bool:
+        """Whether the generator has context (`True`) or not (`False`)."""
+        return self._weights is not None
 
 
 # Hackish solution, but it allows the code to always return the correct type

@@ -39,9 +39,6 @@ __all__ = [
     'DecoyGenerator',
     'ContextfulGenerator',
     'EnzymeSpecificGenerator',
-    'RandomizePep',
-    'ReversePep',
-    'ShufflePep',
     'seq_cast',
     'keepsn',
     'keepsc',
@@ -58,9 +55,6 @@ from pydecoys.strategies.core import (
     DecoyGenerator,
     ContextfulGenerator,
     EnzymeSpecificGenerator,
-    RandomizePep,
-    ReversePep,
-    ShufflePep,
     seq_cast
 )
 from pydecoys.strategies.factories import keepsc, keepsn, keepsterm, fuses

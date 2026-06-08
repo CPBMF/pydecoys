@@ -26,12 +26,12 @@ from Bio import SeqIO
 from Bio.Seq import Seq, MutableSeq
 from Bio.SeqRecord import SeqRecord
 
-from pydecoys._builtins import decoy_strategy
+from pydecoys._builtins import DECOY_STRATEGIES
 import pydecoys
 from pydecoys.core import _validate_strategy, _validate_tag
 
 
-KEYS = decoy_strategy.keys()
+KEYS = DECOY_STRATEGIES.keys()
 
 ID = 'test_sequence'
 STR_SEQ = 'DNIDYKAVYR'

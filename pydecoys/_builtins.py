@@ -24,7 +24,7 @@ from typing import Callable, Iterable, Literal, cast
 from pydecoys import strategies as s
 
 
-decoy_strategy: dict[str, s.DecoyGenerator] = {}
+DECOY_STRATEGIES: dict[str, s.DecoyGenerator] = {}
 
 
 def reverse[T: s.SeqLike](sequence: T) -> T:
@@ -210,7 +210,7 @@ def _register_all() -> None:
     for base_key, make in _PLAIN_STRATEGIES:
         for (suffix, factory), (suffix2, factory2) in all_strategies:
             key = base_key + suffix + suffix2
-            decoy_strategy[key] = factory2(factory(make()))
+            DECOY_STRATEGIES[key] = factory2(factory(make()))
 
     for class_key, cls in _ENZYME_STRATEGIES:
         for regex, sense, enzyme_key in _ENZYMES:
@@ -218,7 +218,7 @@ def _register_all() -> None:
 
             for (suffix, factory), (suffix2, factory2) in all_strategies:
                 key = base_key + suffix + suffix2
-                decoy_strategy[key] = factory2(factory(cls(regex, sense)))
+                DECOY_STRATEGIES[key] = factory2(factory(cls(regex, sense)))
 
 
 _register_all()

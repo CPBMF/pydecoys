@@ -20,10 +20,10 @@ import filecmp
 import pytest
 
 from pydecoys.__main__ import main
-from pydecoys._builtins import decoy_strategy
+from pydecoys._builtins import DECOY_STRATEGIES
 
 
-KEYS = decoy_strategy.keys()
+KEYS = DECOY_STRATEGIES.keys()
 PATH = 'tests/data/2026_01_ccp_crap.fasta'
 
 

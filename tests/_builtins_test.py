@@ -22,13 +22,13 @@ from pydecoys.core import _get_contextualized
 from pydecoys import _builtins as _b
 
 
-KEYS = _b.decoy_strategy.keys()
+KEYS = _b.DECOY_STRATEGIES.keys()
 
 
 @pytest.mark.parametrize('key', KEYS)
 def test_builtins(key, root):
     filename = key.replace('-', '_')
-    fn = _b.decoy_strategy[key]
+    fn = _b.DECOY_STRATEGIES[key]
 
     targets = list(SeqIO.parse(root / 'data/2026_01_ccp_crap.fasta', 'fasta'))
     output = root / f'data/out/2026_01_ccp_crap_{filename}.fasta'

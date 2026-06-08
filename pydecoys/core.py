@@ -34,7 +34,7 @@ except ImportError as e:
     warn(f"Module 'Biopython' not found: {str(e)}")
 
 from pydecoys import strategies
-from pydecoys._builtins import decoy_strategy
+from pydecoys._builtins import DECOY_STRATEGIES
 from pydecoys.strategies import SeqLike
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
@@ -644,13 +644,13 @@ def register(
     if not strategy_key.islower():
         raise ValueError(f"Strategy key '{strategy_key}' should be lower case")
 
-    if strategy_key in decoy_strategy:
+    if strategy_key in DECOY_STRATEGIES:
         raise ValueError(f"Strategy key '{strategy_key}' already defined")
 
     if not callable(strategy_fn):
         raise TypeError("Strategy function must be a callable")
 
-    decoy_strategy[strategy_key] = strategy_fn
+    DECOY_STRATEGIES[strategy_key] = strategy_fn
 
 
 def get_contextualized_strategy(
@@ -711,7 +711,7 @@ def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
     if not strategy.islower():
         raise ValueError(f"Strategy string '{strategy}' should be lower case")
 
-    decoy_generator = decoy_strategy.get(strategy)
+    decoy_generator = DECOY_STRATEGIES.get(strategy)
 
     if decoy_generator is None:
         raise ValueError(f"Unknown strategy: '{strategy}'")

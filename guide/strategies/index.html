@@ -1,0 +1,389 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creating custom strategies &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="CLI Reference" href="../../cli/" />
+    <link rel="prev" title="Using the PyDecoys API" href="../pydecoys/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../">Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../starting/">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli/">Running the CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pydecoys/">Using the PyDecoys API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Creating custom strategies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-simple-strategy">Creating a simple strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strategies-with-state">Strategies with state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-new-enzymes">Adding new enzymes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enzyme-specific-strategies">Enzyme-specific strategies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keeping-n-and-c-termini">Keeping N- and C-termini</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fusing-targets-and-decoys">Fusing targets and decoys</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../">Guide</a></li>
+      <li class="breadcrumb-item active">Creating custom strategies</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/guide/strategies.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="creating-custom-strategies">
+<h1>Creating custom strategies<a class="headerlink" href="#creating-custom-strategies" title="Link to this heading"></a></h1>
+<p>The <a class="reference internal" href="../../api/strategies/#module-pydecoys.strategies" title="pydecoys.strategies"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pydecoys.strategies</span></code></a> module exposes the API used for decoy
+strategies.</p>
+<p>The basic type signature all strategies must follow is
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a>. This is as simple type alias:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="nb">type</span> <span class="n">SeqLike</span> <span class="o">=</span> <span class="s1">&#39;str | Seq | MutableSeq&#39;</span>
+<span class="linenos">4</span><span class="nb">type</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">]</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">T</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Note that <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.SeqLike" title="pydecoys.strategies.SeqLike"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.SeqLike</span></code></a> is a Union type of <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">Seq</span></code> and
+<code class="docutils literal notranslate"><span class="pre">MutableSeq</span></code>, but it doesn’t actually require <cite>Biopython</cite>.</p>
+<section id="creating-a-simple-strategy">
+<h2>Creating a simple strategy<a class="headerlink" href="#creating-a-simple-strategy" title="Link to this heading"></a></h2>
+<p>To illustrate how to create custom strategies, let’s create a naïve randomizer.
+It takes a target protein and returns a fully random decoy protein of same
+length. We can use PyDecoy’s own RNG <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.RAND" title="pydecoys.strategies.RAND"><code class="xref py py-data docutils literal notranslate"><span class="pre">strategies.RAND</span></code></a>. We can also use
+PyDecoy’s <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.STD_AMINOACIDS" title="pydecoys.strategies.STD_AMINOACIDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">strategies.STD_AMINOACIDS</span></code></a> to pool from. This is a <code class="docutils literal notranslate"><span class="pre">str</span></code>
+containing the 20 standard aminoacid single-letter codes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Use PyDecoys own RNG or another RNG with a fixed seed to ensure</span>
+<span class="linenos"> 2</span><span class="c1"># reproducibility</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">RAND</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="c1"># PyDecoys also has a str containing all 20 standard aminoacid</span>
+<span class="linenos"> 6</span><span class="c1"># single-letter codes</span>
+<span class="linenos"> 7</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">STD_AMINOACIDS</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="k">def</span><span class="w"> </span><span class="nf">random</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">10</span>    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+<span class="linenos">11</span>    <span class="n">new</span> <span class="o">=</span> <span class="n">RAND</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">STD_AMINOACIDS</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+<span class="linenos">12</span>    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will work perfectly already, and for most usecases it’ll be enough.
+However, it’ll fire static type checkers: <code class="docutils literal notranslate"><span class="pre">random</span></code> doesn’t yet implement
+the correct type signature we saw earlier.</p>
+<p>Also, our implementation isn’t interfaceable with <cite>Biopython</cite>, which means it
+might break (or at least return a <code class="docutils literal notranslate"><span class="pre">str</span></code>) when it should return <code class="docutils literal notranslate"><span class="pre">Seq</span></code> or
+<code class="docutils literal notranslate"><span class="pre">MutableSeq</span></code>.</p>
+<p>Fixing these problems is easy:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">RAND</span><span class="p">,</span> <span class="n">STD_AMINOACIDS</span><span class="p">,</span> <span class="n">SeqLike</span><span class="p">,</span> <span class="n">seq_cast</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="k">def</span><span class="w"> </span><span class="nf">random</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="linenos">4</span>    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+<span class="linenos">5</span>    <span class="n">new</span> <span class="o">=</span> <span class="n">RAND</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">STD_AMINOACIDS</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+<span class="linenos">6</span>    <span class="c1"># `seq_cast` handles casting the return value to `sequence`&#39;s type</span>
+<span class="linenos">7</span>    <span class="k">return</span> <span class="n">seq_cast</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Note that <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.SeqLike" title="pydecoys.strategies.SeqLike"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.SeqLike</span></code></a> and <code class="xref py py-func docutils literal notranslate"><span class="pre">strategies.seq_cast()</span></code> work
+without <cite>Biopython</cite> installed. Although this function correctly interfaces with
+<cite>Biopython</cite>, it doesn’t need <cite>Biopython</cite> to work!</p>
+</section>
+<section id="strategies-with-state">
+<h2>Strategies with state<a class="headerlink" href="#strategies-with-state" title="Link to this heading"></a></h2>
+<p>In the previous example, we implemented a naïve randomizer. In practice, a much
+more useful strategy is to give each aminoacid a weighted likelihood based on
+the proportions of aminoacis from the target database. For this, the generator
+would need some way of gathering context from the database prior to decoy
+generation.</p>
+<p>PyDecoys has a specific protocol for that:
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a>. When a function that takes a set of
+targets receives a <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> as strategy, it
+can pass all of the set database to it beforehand.</p>
+<p>We need a <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a>, so we’ll override its
+<code class="docutils literal notranslate"><span class="pre">__call__</span></code> method. We also need to implement the
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ContextfulGenerator.learn_context" title="pydecoys.strategies.ContextfulGenerator.learn_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator.learn_context()</span></code></a> and
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ContextfulGenerator.reset" title="pydecoys.strategies.ContextfulGenerator.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator.reset()</span></code></a> methods, and add a
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ContextfulGenerator.is_set" title="pydecoys.strategies.ContextfulGenerator.is_set"><code class="xref py py-attr docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator.is_set</span></code></a> attribute.</p>
+<p>Instead of using <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.STD_AMINOACIDS" title="pydecoys.strategies.STD_AMINOACIDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">strategies.STD_AMINOACIDS</span></code></a>, let’s use
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.EXT_AMINOACIDS" title="pydecoys.strategies.EXT_AMINOACIDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">strategies.EXT_AMINOACIDS</span></code></a>. This <code class="docutils literal notranslate"><span class="pre">str</span></code> includes pyrrolysine (Pyl, O)
+and selenocysteine (Sec, U). It also includes the <code class="docutils literal notranslate"><span class="pre">B</span></code> (aspartic acid or
+asparagine), <code class="docutils literal notranslate"><span class="pre">J</span></code> (leucine or isoleucine), <code class="docutils literal notranslate"><span class="pre">Z</span></code> (glutamic acid or glutamine)
+and <code class="docutils literal notranslate"><span class="pre">X</span></code> (any aminoacid) codes. Since we’ll weight each aminoacid based on its
+proportion on the target dataset, those aminoacids will only show up if they
+are included in the target dataset already.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="linenos"> 4</span>    <span class="n">RAND</span><span class="p">,</span>
+<span class="linenos"> 5</span>    <span class="n">EXT_AMINOACIDS</span><span class="p">,</span>
+<span class="linenos"> 6</span>    <span class="n">SeqLike</span><span class="p">,</span>
+<span class="linenos"> 7</span>    <span class="n">seq_cast</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># Since `ContextfulGenerator` is a protocol, no need to inherit it</span>
+<span class="linenos">11</span><span class="k">class</span><span class="w"> </span><span class="nc">SmartRandomizer</span><span class="p">:</span>
+<span class="linenos">12</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">13</span>        <span class="c1"># `None` placeholder until contextualization</span>
+<span class="linenos">14</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">17</span>        <span class="c1"># We init weights</span>
+<span class="linenos">18</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">EXT_AMINOACIDS</span><span class="p">)</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span>        <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+<span class="linenos">21</span>            <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">:</span>
+<span class="linenos">22</span>                <span class="c1"># The position of each weight must overlap with its aminoacid</span>
+<span class="linenos">23</span>                <span class="c1"># pos</span>
+<span class="linenos">24</span>                <span class="n">pos</span> <span class="o">=</span> <span class="n">EXT_AMINOACIDS</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+<span class="linenos">25</span>                <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">28</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span>    <span class="nd">@property</span>
+<span class="linenos">31</span>    <span class="k">def</span><span class="w"> </span><span class="nf">is_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">32</span>        <span class="c1"># We can use a property to ensure is_set is always updated</span>
+<span class="linenos">33</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="linenos">36</span>        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+<span class="linenos">37</span>        <span class="n">new</span> <span class="o">=</span> <span class="n">RAND</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">EXT_AMINOACIDS</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+<span class="linenos">38</span>        <span class="k">return</span> <span class="n">seq_cast</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>This gets us a working decoy strategy that correctly implements weights before
+running! When calling <code class="xref py py-mod docutils literal notranslate"><span class="pre">pydecoys</span></code> IO or Iterable functions, it’ll
+automatically pass the database to the instance if it’s unset, and reset it
+again at the end.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using IO or Iterable functions from PyDecoys with an unset context-dependant
+strategy, the API will handle setting it, generating the decoys and then resetting
+it at the end. For single-data functions, using an unset strategy will raise a
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, since they never receive a full dataset. See
+<a class="reference internal" href="../../api/pydecoys/#pydecoys.get_contextualized_strategy" title="pydecoys.get_contextualized_strategy"><code class="xref py py-func docutils literal notranslate"><span class="pre">pydecoys.get_contextualized_strategy()</span></code></a> to circumvent this.</p>
+</div>
+</section>
+<section id="adding-new-enzymes">
+<h2>Adding new enzymes<a class="headerlink" href="#adding-new-enzymes" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ReversePep" title="pydecoys.strategies.ReversePep"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ReversePep</span></code></a>, <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ShufflePep" title="pydecoys.strategies.ShufflePep"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ShufflePep</span></code></a> and
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.RandomizePep" title="pydecoys.strategies.RandomizePep"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.RandomizePep</span></code></a> classes allow you to set new enzyme
+specifications for <cite>reversepep</cite>, <cite>shufflepep</cite> and <cite>randomizepep</cite>
+strategies. Setting new enzymes is an easy method call. Let’s set
+high-specificity chymotrypsin for <cite>reversepep</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span><span class="w"> </span><span class="nn">pydecoys</span>
+<span class="linenos">2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReversePep</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">reversepep_chymohs</span> <span class="o">=</span> \
+<span class="linenos">5</span>    <span class="n">ReversePep</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s1">&#39;FWY&#39;</span><span class="p">,</span> <span class="n">nocut</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">nocut_n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="n">pydecoys</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;reversepep-chymohs&#39;</span><span class="p">,</span> <span class="n">reversepep_chymohs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Breaking up each paremeter, <code class="docutils literal notranslate"><span class="pre">cut</span></code> specifies which aminoacids the enzyme cuts
+at, <code class="docutils literal notranslate"><span class="pre">nocut</span></code> specifies aminoacids that stop cleavage when at the C-terminal
+bond of <code class="docutils literal notranslate"><span class="pre">cut</span></code>, <code class="docutils literal notranslate"><span class="pre">nocut_n</span></code> specifies aminoacids that stop cleavage when at
+the N-terminal bond of <code class="docutils literal notranslate"><span class="pre">cut</span></code>, and <code class="docutils literal notranslate"><span class="pre">sense</span></code> specifies the cleavage sense.</p>
+<p>That’s it. Now you can use a <cite>reversepep</cite> strategy with high specificity
+chymotrypsin by providing <code class="docutils literal notranslate"><span class="pre">'reversepep-chymohs'</span></code> or <code class="docutils literal notranslate"><span class="pre">reversepep_chymohs</span></code>
+as a strategy.</p>
+</section>
+<section id="enzyme-specific-strategies">
+<h2>Enzyme-specific strategies<a class="headerlink" href="#enzyme-specific-strategies" title="Link to this heading"></a></h2>
+<p>You might want to set your own enzyme-specific strategy. Luckily, there’s an
+ABC for that: <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.EnzymeSpecificGenerator" title="pydecoys.strategies.EnzymeSpecificGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.EnzymeSpecificGenerator</span></code></a>. This class sets
+up the <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.EnzymeSpecificGenerator.from_enzyme" title="pydecoys.strategies.EnzymeSpecificGenerator.from_enzyme"><code class="xref py py-meth docutils literal notranslate"><span class="pre">strategies.EnzymeSpecificGenerator.from_enzyme()</span></code></a> method we used
+earlier to add the new enzyme.</p>
+<p>Most importantly, it sets the
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.EnzymeSpecificGenerator.split_sequence" title="pydecoys.strategies.EnzymeSpecificGenerator.split_sequence"><code class="xref py py-meth docutils literal notranslate"><span class="pre">strategies.EnzymeSpecificGenerator.split_sequence()</span></code></a> method. This method
+splits a given sequence into its enzymatic fragments (minus cleavage sites) and
+the cleavage sites themselves. It yields tuples of an enzymatic fragment and
+<cite>False</cite> or a cleavage site and <cite>True</cite>, in the order they appear in the
+sequence.</p>
+<p>Let’s redo the naïve randomizer, but this time let’s randomize peptides:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="linenos"> 4</span>    <span class="n">RAND</span><span class="p">,</span>
+<span class="linenos"> 5</span>    <span class="n">EXT_AMINOACIDS</span><span class="p">,</span>
+<span class="linenos"> 6</span>    <span class="n">SeqLike</span><span class="p">,</span>
+<span class="linenos"> 7</span>    <span class="n">seq_cast</span><span class="p">,</span>
+<span class="linenos"> 8</span>    <span class="n">EnzymeSpecificGenerator</span>
+<span class="linenos"> 9</span><span class="p">)</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="k">class</span><span class="w"> </span><span class="nc">RandomizePep</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="linenos">12</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="linenos">13</span>        <span class="n">decoy_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">14</span>        <span class="k">for</span> <span class="n">frag</span><span class="p">,</span> <span class="n">cleavage</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+<span class="linenos">15</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">cleavage</span><span class="p">:</span>
+<span class="linenos">16</span>                <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pep</span><span class="p">)</span>
+<span class="linenos">17</span>                <span class="n">new</span> <span class="o">=</span> <span class="n">RAND</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">EXT_AMINOACIDS</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+<span class="linenos">18</span>                <span class="n">frag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+<span class="linenos">19</span>            <span class="n">decoy_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>        <span class="n">decoy</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">decoy_list</span><span class="p">)</span>
+<span class="linenos">22</span>        <span class="k">return</span> <span class="n">seq_cast</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">decoy</span><span class="p">)</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="c1"># We can now create pep randomizers:</span>
+<span class="linenos">25</span><span class="n">randompep_trypsin</span> <span class="o">=</span> <span class="n">RandomPep</span><span class="p">(</span><span class="s1">&#39;KR&#39;</span><span class="p">,</span> <span class="n">nocut</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="keeping-n-and-c-termini">
+<h2>Keeping N- and C-termini<a class="headerlink" href="#keeping-n-and-c-termini" title="Link to this heading"></a></h2>
+<p>You might also want to preserve the N-, C- or both termini from the target
+protein in-place. To accomplish that, you can use one of the following
+factories: <code class="xref py py-func docutils literal notranslate"><span class="pre">strategies.keepns()</span></code>, <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.keepsc" title="pydecoys.strategies.keepsc"><code class="xref py py-func docutils literal notranslate"><span class="pre">strategies.keepsc()</span></code></a> and
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.keepsterm" title="pydecoys.strategies.keepsterm"><code class="xref py py-func docutils literal notranslate"><span class="pre">strategies.keepsterm()</span></code></a>. Each factory returns a new callable
+that preserves the terminal aminoacids from the argument callable.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextfulGenerator</span><span class="p">,</span> <span class="n">keepsn</span><span class="p">,</span> <span class="n">keepsc</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="c1"># The `sequence` value is passed directly without the aminoacid that</span>
+<span class="linenos"> 4</span><span class="c1"># should be preserved. The aa is reinserted after the wrapped function</span>
+<span class="linenos"> 5</span><span class="c1"># returns.</span>
+<span class="linenos"> 6</span><span class="n">random_keepn</span> <span class="o">=</span> <span class="n">keepsn</span><span class="p">(</span><span class="n">random</span><span class="p">)</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">DummyContextfulGenerator</span><span class="p">:</span>
+<span class="linenos"> 9</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">10</span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">):</span>
+<span class="linenos">13</span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">16</span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+<span class="linenos">19</span>        <span class="k">return</span> <span class="n">sequence</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="n">dummy</span> <span class="o">=</span> <span class="n">keepsterm</span><span class="p">(</span><span class="n">DummyContextfulGenerator</span><span class="p">())</span>
+<span class="linenos">22</span><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dummy</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Those factories cause the original <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> to be
+blind to the terminals they preserve. For example,
+<a class="reference internal" href="../../api/strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> objects will preserve their
+functionality, but will discard the aminoacids that shouldn’t be altered from
+each sequence when learning context.</p>
+<p>If you need your decoy strategy to still see those aminoacids, you’ll need to
+implement this functionality.</p>
+</div>
+</section>
+<section id="fusing-targets-and-decoys">
+<h2>Fusing targets and decoys<a class="headerlink" href="#fusing-targets-and-decoys" title="Link to this heading"></a></h2>
+<p>There’s also a factory to fuse the target and decoy sequences into one,
+prepending the target to the decoy: <a class="reference internal" href="../../api/strategies/#pydecoys.strategies.fuses" title="pydecoys.strategies.fuses"><code class="xref py py-func docutils literal notranslate"><span class="pre">strategies.fuses()</span></code></a>. You can use them
+as the other two:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">random_fuse</span> <span class="o">=</span> <span class="n">fuses</span><span class="p">(</span><span class="n">random</span><span class="p">)</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="c1"># Stacking them works as well</span>
+<span class="linenos">4</span><span class="n">random_keepn_fuse</span> <span class="o">=</span> <span class="n">fuses</span><span class="p">(</span><span class="n">keepsn</span><span class="p">(</span><span class="n">random</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If you wish to add a radical between the target and the decoy such that the
+result is <code class="docutils literal notranslate"><span class="pre">target-radical-decoy</span></code>, you can pass it to <code class="xref py py-func docutils literal notranslate"><span class="pre">fuses()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># Resulting sequences will be the target and decoy, joined by &#39;R&#39;</span>
+<span class="linenos">2</span><span class="n">random_fuse</span> <span class="o">=</span> <span class="n">fuses</span><span class="p">(</span><span class="n">random</span><span class="p">,</span> <span class="n">radical</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">random_fuse</span> <span class="o">=</span> <span class="n">fuses</span><span class="p">(</span><span class="n">random</span><span class="p">,</span> <span class="n">radical</span><span class="o">=</span><span class="s1">&#39;KRI&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">random_fuse</span><span class="p">(</span><span class="s1">&#39;SINDHRRLSG&#39;</span><span class="p">)</span>
+<span class="go">&#39;SINDHRRLSGKRINVGSKSREDI&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../pydecoys/" class="btn btn-neutral float-left" title="Using the PyDecoys API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../cli/" class="btn btn-neutral float-right" title="CLI Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

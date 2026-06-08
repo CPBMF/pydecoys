@@ -1,0 +1,618 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydecoys &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="pydecoys.strategies" href="../strategies/" />
+    <link rel="prev" title="API Reference" href="../" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../guide/">Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pydecoys</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.from_fasta"><code class="docutils literal notranslate"><span class="pre">from_fasta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.to_fasta"><code class="docutils literal notranslate"><span class="pre">to_fasta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.from_SeqRecords"><code class="docutils literal notranslate"><span class="pre">from_SeqRecords()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.from_tuples"><code class="docutils literal notranslate"><span class="pre">from_tuples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.from_seqs"><code class="docutils literal notranslate"><span class="pre">from_seqs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.SeqRecord_as_decoy"><code class="docutils literal notranslate"><span class="pre">SeqRecord_as_decoy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.tuple_as_decoy"><code class="docutils literal notranslate"><span class="pre">tuple_as_decoy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.seq_as_decoy"><code class="docutils literal notranslate"><span class="pre">seq_as_decoy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.register"><code class="docutils literal notranslate"><span class="pre">register()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.get_contextualized_strategy"><code class="docutils literal notranslate"><span class="pre">get_contextualized_strategy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../strategies/">pydecoys.strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../">API Reference</a></li>
+      <li class="breadcrumb-item active">pydecoys</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/pydecoys.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pydecoys">
+<h1>pydecoys<a class="headerlink" href="#pydecoys" title="Link to this heading"></a></h1>
+<p>Provides:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>A CLI app to easily generate a decoy fasta file from a target fasta file</p></li>
+<li><p>A comprehensive Python API with IO, Generator and single data functions</p></li>
+<li><p>Easy implementation of custom decoy strategies</p></li>
+<li><p>Full integration with Biopython</p></li>
+</ol>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some functionalities of PyDecoys require Biopython. Those functionalities
+are documented as such.</p>
+</div>
+<p><strong>Functions that perform IO operations:</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.from_fasta">
+<span class="sig-name descname"><span class="pre">from_fasta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoy_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'decoy_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#from_fasta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.from_fasta" title="Link to this definition"></a></dt>
+<dd><p>Apply a decoy generator to entries from a fasta file. Requires
+<cite>Biopython</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<em>_PathOrIO</em>) – Path or handle to a fasta file.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+<li><p><strong>decoy_tag</strong> (<em>str</em>) – An optional tag that is appended to each input’s id. Defaults to
+<cite>‘decoy_’</cite>.</p></li>
+<li><p><strong>prefix</strong> (<em>bool</em>) – If <cite>True</cite>, <cite>decoy_tag</cite> is prefixed, otherwise it’s suffixed. Defaults
+to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>SeqRecord</em> – A decoy version of the next SeqRecord in the file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Iterable</em>[<em>SeqRecord</em>]</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function calls <a class="reference internal" href="#pydecoys.from_SeqRecords" title="pydecoys.from_SeqRecords"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_SeqRecords()</span></code></a> internally, so
+<code class="docutils literal notranslate"><span class="pre">pydecoys.from_fasta(input,</span> <span class="pre">strategy)</span></code> is equivalent to:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqIO</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">targets</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoys</span> <span class="o">=</span> <span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This function will automatically pass the sequences as context to an unset
+<a class="reference internal" href="../strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> strategy and reset it afterwards.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.to_fasta">
+<span class="sig-name descname"><span class="pre">to_fasta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoy_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'decoy_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#to_fasta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.to_fasta" title="Link to this definition"></a></dt>
+<dd><p>Apply a decoy generator to a set of sequences and write them to a file.
+Requires <cite>Biopython</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<em>_PathOrIO</em><em> | </em><em>Iterable</em><em>[</em><em>SeqRecord</em><em>] </em><em>| </em><em>SeqRecord</em>) – A list (or iterator) of <cite>SeqRecord</cite> objects, a single <cite>SeqRecord</cite>, or
+the path or handle to a fasta file.</p></li>
+<li><p><strong>output</strong> (<em>_PathOrIO</em>) – Path or handle to a fasta file.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+<li><p><strong>decoy_tag</strong> (<em>str</em>) – An optional tag that is appended to each input’s id. Defaults to
+<cite>‘decoy_’</cite>.</p></li>
+<li><p><strong>prefix</strong> (<em>bool</em>) – If <cite>True</cite>, <cite>decoy_tag</cite> is prefixed, otherwise it’s suffixed. Defaults
+to <cite>True</cite>.</p></li>
+<li><p><strong>concat</strong> (<em>bool</em>) – If <cite>True</cite>, output fasta will have both target and decoy entries. All
+targets will be first, then all decoys. Defaults to <cite>False</cite>.’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of entries written (as an integer).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>While <cite>_PathOrIO</cite> is defined as
+<code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">os.PathLike[str]</span> <span class="pre">|</span> <span class="pre">typing.TextIO</span></code>, the runtime <code class="docutils literal notranslate"><span class="pre">isinstance</span></code>
+check is done against <code class="docutils literal notranslate"><span class="pre">io.TextIOBase</span></code>.</p>
+<p>This function calls <a class="reference internal" href="#pydecoys.from_SeqRecords" title="pydecoys.from_SeqRecords"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_SeqRecords()</span></code></a> internally, so
+<code class="docutils literal notranslate"><span class="pre">count</span> <span class="pre">=</span> <span class="pre">pydecoys.to_fasta(targets,</span> <span class="pre">output,</span> <span class="pre">strategy)</span></code> where <cite>targets</cite>
+is an <code class="docutils literal notranslate"><span class="pre">Iterable[SeqRecord]</span></code> is equivalent to:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoys</span> <span class="o">=</span> <span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">count</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">decoys</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If <cite>True</cite>, the <cite>concat</cite> flag will cause all sequences to be loaded
+into a list prior to decoy generation to avoid parsing sequences twice.</p>
+<p>This function will automatically pass the sequences as context to an unset
+<a class="reference internal" href="../strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> strategy and reset it afterwards.</p>
+</dd></dl>
+
+<p><strong>Functions that return an iterator of decoy sequences from an interator of
+target sequences:</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.from_SeqRecords">
+<span class="sig-name descname"><span class="pre">from_SeqRecords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoy_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'decoy_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#from_SeqRecords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.from_SeqRecords" title="Link to this definition"></a></dt>
+<dd><p>Apply a decoy generation strategy to a set of sequences. Requires
+<cite>Biopython</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<em>Iterable</em><em>[</em><em>SeqRecord</em><em>] </em><em>| </em><em>SeqRecord</em>) – A list (or iterator) of <cite>SeqRecord</cite> objects, or a single <cite>SeqRecord</cite>.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+<li><p><strong>decoy_tag</strong> (<em>str</em>) – An optional tag that is appended to each input’s id. Defaults to
+<cite>‘decoy_’</cite>.</p></li>
+<li><p><strong>prefix</strong> (<em>bool</em>) – If <cite>True</cite>, <cite>decoy_tag</cite> is prefixed, otherwise it’s suffixed. Defaults
+to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>SeqRecord</em> – A decoy version of the next SeqRecord in <cite>sequences</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Generator</em>[<em>SeqRecord</em>, None, None]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.SeqRecord</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqRecord</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">Seq</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">SeqRecord</span><span class="p">(</span><span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">),</span> <span class="s1">&#39;seq1&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">SeqRecord</span><span class="p">(</span><span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;QSYMCTVTHP&#39;</span><span class="p">),</span> <span class="s1">&#39;seq2&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">SeqRecord</span><span class="p">(</span><span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;CQWSLTEELL&#39;</span><span class="p">),</span> <span class="s1">&#39;seq3&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">decoy</span> <span class="ow">in</span> <span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">decoy</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">decoy</span><span class="o">.</span><span class="n">seq</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">decoy_seq1: RYVAKYDIND</span>
+<span class="go">decoy_seq2: PHTVTCMYSQ</span>
+<span class="go">decoy_seq3: LLEETLSWQC</span>
+</pre></div>
+</div>
+<p>The <cite>sequence</cite> can be a single value:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneratorType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="n">SeqRecord</span><span class="p">(</span><span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">),</span> <span class="s1">&#39;seq1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoy</span> <span class="o">=</span> <span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy</span><span class="p">,</span> <span class="n">GeneratorType</span><span class="p">)</span>  <span class="c1"># Still returns a Generator</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function will automatically pass the sequences as context to an unset
+<a class="reference internal" href="../strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> strategy and reset it afterwards.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.from_tuples">
+<span class="sig-name descname"><span class="pre">from_tuples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoy_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'decoy_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#from_tuples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.from_tuples" title="Link to this definition"></a></dt>
+<dd><p>Apply a decoy generation strategy to a set of tuples.</p>
+<p>Differently from other functions in this module, <cite>from_tuples</cite> cannot
+accept a single tuple. Be sure to always pass an iterable of tuples.
+If you’d like, you can use <a class="reference internal" href="#pydecoys.tuple_as_decoy" title="pydecoys.tuple_as_decoy"><code class="xref py py-func docutils literal notranslate"><span class="pre">tuple_as_decoy()</span></code></a> instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<em>Iterable</em><em>[</em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>T</em><em>]</em><em>]</em>) – A list (or iterator) of <cite>tuple</cite> objects. The first item should be the
+seqid, and the second item should be the sequence.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+<li><p><strong>decoy_tag</strong> (<em>str</em>) – An optional tag that is appended to each input’s id. Defaults to
+<cite>‘decoy_’</cite>.</p></li>
+<li><p><strong>prefix</strong> (<em>bool</em>) – If <cite>True</cite>, <cite>decoy_tag</cite> is prefixed, otherwise it’s suffixed. Defaults
+to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>tuple[str, T]</em> – A decoy version of the next tuple in <cite>sequences</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Generator</em>[tuple[str, T], None, None]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;seq1&#39;</span><span class="p">,</span> <span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;seq2&#39;</span><span class="p">,</span> <span class="s1">&#39;QSYMCTVTHP&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;seq3&#39;</span><span class="p">,</span> <span class="s1">&#39;CQWSLTEELL&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">decoy</span> <span class="ow">in</span> <span class="n">from_tuples</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">decoy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">decoy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">decoy_seq1: RYVAKYDIND</span>
+<span class="go">decoy_seq2: PHTVTCMYSQ</span>
+<span class="go">decoy_seq3: LLEETLSWQC</span>
+</pre></div>
+</div>
+<p>Type is preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">Seq</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;seq1&#39;</span><span class="p">,</span> <span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">)),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;seq2&#39;</span><span class="p">,</span> <span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;QSYMCTVTHP&#39;</span><span class="p">)),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;seq3&#39;</span><span class="p">,</span> <span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;CQWSLTEELL&#39;</span><span class="p">)),</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">decoy</span> <span class="ow">in</span> <span class="n">from_tuples</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Seq</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="go">True</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function will automatically pass the sequences as context to an unset
+<a class="reference internal" href="../strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> strategy and reset it afterwards.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.from_seqs">
+<span class="sig-name descname"><span class="pre">from_seqs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#from_seqs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.from_seqs" title="Link to this definition"></a></dt>
+<dd><p>Apply a decoy generation strategy to a set of sequences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<em>Iterable</em><em> | </em><em>T</em>) – A list (or iterator) of <code class="xref py py-type docutils literal notranslate"><span class="pre">SeqLike</span></code> objects, or a single
+<code class="xref py py-type docutils literal notranslate"><span class="pre">SeqLike</span></code>.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>T</em> – A decoy version of the next sequence in <cite>sequences</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Generator</em>[T, None, None]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;QSYMCTVTHP&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;CQWSLTEELL&#39;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">decoy</span> <span class="ow">in</span> <span class="n">from_seqs</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">decoy</span><span class="p">)</span>
+<span class="go">RYVAKYDIND</span>
+<span class="go">PHTVTCMYSQ</span>
+<span class="go">LLEETLSWQC</span>
+</pre></div>
+</div>
+<p>Type is preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">Seq</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;QSYMCTVTHP&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;CQWSLTEELL&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">decoy</span> <span class="ow">in</span> <span class="n">from_seqs</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy</span><span class="p">,</span> <span class="n">Seq</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="go">True</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>The <cite>sequence</cite> can be a single value:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneratorType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoy</span> <span class="o">=</span> <span class="n">from_seqs</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy</span><span class="p">,</span> <span class="n">GeneratorType</span><span class="p">)</span>  <span class="c1"># Still returns a Generator</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function will automatically pass the sequences as context to an unset
+<a class="reference internal" href="../strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> strategy and reset it afterwards.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Those functions try to be lazy whenver possible, but since
+<code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextulGenerator</span></code> needs prior access to the target
+database, lazily loading targets isn’t possible with context-dependant
+strategies. Thus, target sequences are collected into a list beforehand when
+using a context-dependant strategy.</p>
+<p>Since IO functions all use <a class="reference internal" href="#pydecoys.from_SeqRecords" title="pydecoys.from_SeqRecords"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_SeqRecords()</span></code></a> internally, this is also
+valid for them.</p>
+</div>
+<p><strong>Functions that return a single decoy sequence from a single target
+sequence:</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.SeqRecord_as_decoy">
+<span class="sig-name descname"><span class="pre">SeqRecord_as_decoy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoy_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'decoy_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#SeqRecord_as_decoy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.SeqRecord_as_decoy" title="Link to this definition"></a></dt>
+<dd><p>Get a decoy from a given <cite>SeqRecord</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>SeqRecord</em>) – A single <cite>SeqRecord</cite>.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+<li><p><strong>decoy_tag</strong> (<em>str</em>) – An optional tag that is appended to each input’s id. Defaults to
+<cite>‘decoy_’</cite>.</p></li>
+<li><p><strong>prefix</strong> (<em>bool</em>) – If <cite>True</cite>, <cite>decoy_tag</cite> is prefixed, otherwise it’s suffixed. Defaults
+to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decoy version of <cite>sequence</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SeqRecord</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.SeqRecord</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqRecord</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">Seq</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="n">SeqRecord</span><span class="p">(</span><span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">),</span> <span class="s1">&#39;seq1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoy</span> <span class="o">=</span> <span class="n">SeqRecord_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">decoy</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">decoy</span><span class="o">.</span><span class="n">seq</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">decoy_seq1: RYVAKYDIND</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function won’t give context to <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGerenator</span></code>
+objects. You can get an already set <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGerenator</span></code>
+with <a class="reference internal" href="#pydecoys.get_contextualized_strategy" title="pydecoys.get_contextualized_strategy"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_contextualized_strategy()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.tuple_as_decoy">
+<span class="sig-name descname"><span class="pre">tuple_as_decoy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoy_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'decoy_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#tuple_as_decoy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.tuple_as_decoy" title="Link to this definition"></a></dt>
+<dd><p>Get a decoy from a given <cite>tuple</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>tuple</em><em>[</em><em>str</em><em>, </em><em>T</em><em>]</em>) – A single <cite>tuple</cite>. The first item should be the seqid, and the second
+item should be the sequence.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+<li><p><strong>decoy_tag</strong> (<em>str</em>) – An optional tag that is appended to each input’s id. Defaults to
+<cite>‘decoy_’</cite>.</p></li>
+<li><p><strong>prefix</strong> (<em>bool</em>) – If <cite>True</cite>, <cite>decoy_tag</cite> is prefixed, otherwise it’s suffixed. Defaults
+to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decoy version of <cite>sequence</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, T]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;seq1&#39;</span><span class="p">,</span> <span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoy</span> <span class="o">=</span> <span class="n">tuple_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">decoy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">decoy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">decoy_seq1: RYVAKYDIND</span>
+</pre></div>
+</div>
+<p>The type is preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">Seq</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;seq1&#39;</span><span class="p">,</span> <span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoy</span> <span class="o">=</span> <span class="n">tuple_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Seq</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function won’t give context to <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGerenator</span></code>
+objects. You can get an already set <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGerenator</span></code>
+with <a class="reference internal" href="#pydecoys.get_contextualized_strategy" title="pydecoys.get_contextualized_strategy"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_contextualized_strategy()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.seq_as_decoy">
+<span class="sig-name descname"><span class="pre">seq_as_decoy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#seq_as_decoy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.seq_as_decoy" title="Link to this definition"></a></dt>
+<dd><p>Get a decoy from a given <code class="xref py py-type docutils literal notranslate"><span class="pre">SeqLike</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>T</em>) – A single <code class="xref py py-type docutils literal notranslate"><span class="pre">SeqLike</span></code>.</p></li>
+<li><p><strong>strategy</strong> (<em>_Strategy</em>) – Lower case string specifying the decoy strategy to be used, or a
+<a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decoy version of <cite>sequence</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="go">&#39;RYVAKYDIND&#39;</span>
+</pre></div>
+</div>
+<p>The type is preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">Seq</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">Seq</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">),</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="go">Seq(&#39;RYVAKYDIND&#39;)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function won’t give context to <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGerenator</span></code>
+objects. You can get an already set <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGerenator</span></code>
+with <a class="reference internal" href="#pydecoys.get_contextualized_strategy" title="pydecoys.get_contextualized_strategy"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_contextualized_strategy()</span></code></a>.</p>
+</dd></dl>
+
+<p><strong>Utils:</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.register">
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_fn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.register" title="Link to this definition"></a></dt>
+<dd><p>Register a new decoy strategy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strategy_key</strong> (<em>str</em>) – Lower case string identifying the decoy strategy. Must not be already
+defined.</p></li>
+<li><p><strong>strategy_fn</strong> (<em>DecoyGenerator</em>) – A function following the <a class="reference internal" href="../strategies/#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.DecoyGenerator</span></code></a> signature.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Given a <cite>random_seq</cite> function that takes a sequence and returns a new,
+unrelated sequence of same size:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">random_seq</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span> <span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;randomseq&#39;</span><span class="p">,</span> <span class="n">random_seq</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;DNIDYKAVYR&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;randomseq&#39;</span><span class="p">)</span>
+<span class="go">&#39;LLEETLSWQC&#39;</span>
+</pre></div>
+</div>
+<p>The strategy key must be a lowercase string:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_seq</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">TypeError</span>: <span class="n">Need a string for the decoy strategy (lower case)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;RANDOMSEQ&#39;</span><span class="p">,</span> <span class="n">random_seq</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Strategy key &#39;RANDOMSEQ&#39; should be lower case</span>
+</pre></div>
+</div>
+<p>It must not be already defined:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;randomseq&#39;</span><span class="p">,</span> <span class="n">random_seq</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Strategy key &#39;randomseq&#39; already defined</span>
+</pre></div>
+</div>
+<p>The second argument must be a callable:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;randomseq2&#39;</span><span class="p">,</span> <span class="s1">&#39;randomseq2&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">TypeError</span>: <span class="n">Strategy function must be a callable</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.get_contextualized_strategy">
+<span class="sig-name descname"><span class="pre">get_contextualized_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/core/#get_contextualized_strategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.get_contextualized_strategy" title="Link to this definition"></a></dt>
+<dd><p>Return a bare <a class="reference internal" href="../strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code></a> from a
+context-based strategy key, with added context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strategy_key</strong> (<em>str</em>) – Lower case string identifying the decoy strategy.</p></li>
+<li><p><strong>sequences</strong> (<em>Iterable</em><em>[</em><em>SeqLike</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The correspondent decoy strategy.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../strategies/#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator">ContextfulGenerator</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">database</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strategy</span> <span class="o">=</span> <span class="n">get_contextualized_strategy</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="s1">&#39;randomize&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strategy</span><span class="o">.</span><span class="n">is_set</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strategy</span> <span class="o">=</span> <span class="n">get_contextualized_strategy</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Strategy &#39;reverse&#39; is not contextful</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../strategies/" class="btn btn-neutral float-right" title="pydecoys.strategies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

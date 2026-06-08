@@ -1,0 +1,171 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLI Reference &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="API Reference" href="../api/" />
+    <link rel="prev" title="Creating custom strategies" href="../guide/strategies/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLI Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cli-options">CLI options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#input"><cite>input</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#o-output"><cite>-o/–output</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#s-strategy"><cite>-s/–strategy</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#decoy-tag"><cite>–decoy-tag</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prefix-suffix"><cite>–prefix | –suffix</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concat"><cite>–concat</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#h-help"><cite>-h/–help</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#v-version"><cite>-v/–version</cite></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">CLI Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/cli.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cli-reference">
+<span id="cli"></span><h1>CLI Reference<a class="headerlink" href="#cli-reference" title="Link to this heading"></a></h1>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Requires Python 3.12 or superior.</p></li>
+<li><p>Requires Biopython. This should be automatically installed. If not,
+run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">biopython</span></code>.</p></li>
+</ul>
+</section>
+<section id="cli-options">
+<h2>CLI options<a class="headerlink" href="#cli-options" title="Link to this heading"></a></h2>
+<section id="input">
+<h3><cite>input</cite><a class="headerlink" href="#input" title="Link to this heading"></a></h3>
+<p>input file (default: <cite>stdin</cite>)</p>
+</section>
+<section id="o-output">
+<h3><cite>-o/–output</cite><a class="headerlink" href="#o-output" title="Link to this heading"></a></h3>
+<p>output filename (default: <cite>stdout</cite>)</p>
+</section>
+<section id="s-strategy">
+<h3><cite>-s/–strategy</cite><a class="headerlink" href="#s-strategy" title="Link to this heading"></a></h3>
+<p>decoy generation strategy (default: <cite>‘reverse’</cite>)</p>
+</section>
+<section id="decoy-tag">
+<h3><cite>–decoy-tag</cite><a class="headerlink" href="#decoy-tag" title="Link to this heading"></a></h3>
+<p>decoy tag identifier (default: <cite>‘decoy_’</cite>)</p>
+</section>
+<section id="prefix-suffix">
+<h3><cite>–prefix | –suffix</cite><a class="headerlink" href="#prefix-suffix" title="Link to this heading"></a></h3>
+<p>add <cite>decoy_tag</cite> as prefix (default) or suffix</p>
+</section>
+<section id="concat">
+<h3><cite>–concat</cite><a class="headerlink" href="#concat" title="Link to this heading"></a></h3>
+<p>if specified, output fasta will have both target and decoy entries</p>
+</section>
+<section id="h-help">
+<h3><cite>-h/–help</cite><a class="headerlink" href="#h-help" title="Link to this heading"></a></h3>
+<p>show help message and exit</p>
+</section>
+<section id="v-version">
+<h3><cite>-v/–version</cite><a class="headerlink" href="#v-version" title="Link to this heading"></a></h3>
+<p>show version and exit</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../guide/strategies/" class="btn btn-neutral float-left" title="Creating custom strategies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

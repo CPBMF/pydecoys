@@ -1,0 +1,443 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available strategies &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Authorship and affiliations" href="../authorship/" />
+    <link rel="prev" title="pydecoys.strategies" href="../api/strategies/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli/">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Available strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#enzymes">Enzymes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#terminal-aa-options">Terminal-aa options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fusing-targets-and-decoys">Fusing targets and decoys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Available strategies</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/available.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="available-strategies">
+<span id="id1"></span><h1>Available strategies<a class="headerlink" href="#available-strategies" title="Link to this heading"></a></h1>
+<p>Available strategies for protein generation, that can be used from the CLI or
+API:</p>
+<table class="docutils align-default" style="width: 100%">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>str key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>reverse</p></td>
+<td><p>Reverse the aminoacid order of the target protein.</p></td>
+</tr>
+<tr class="row-odd"><td><p>shuffle</p></td>
+<td><p>Shuffle the target protein’s aminoacids.</p></td>
+</tr>
+<tr class="row-even"><td><p>randomize</p></td>
+<td><p>Randomize the target protein’s aminoanicds. Context-dependat. Each
+aminoacid has a weighted likelihood based on the aminoacid proportions
+of a target dataset. Any character in the target dataset not in
+<a class="reference internal" href="../api/strategies/#pydecoys.strategies.EXT_AMINOACIDS" title="pydecoys.strategies.EXT_AMINOACIDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">pydecoys.strategies.EXT_AMINOACIDS</span></code></a> is silently ignored.</p></td>
+</tr>
+<tr class="row-odd"><td><p>reversepep-&lt;enzyme&gt;</p></td>
+<td><p>Reverse the aminoacid order of the enzymatic fragments, except the
+cleavage sites. The cleavage sites are preserved in-place.</p></td>
+</tr>
+<tr class="row-even"><td><p>shufflepep-&lt;enzyme&gt;</p></td>
+<td><p>Shufflle the enzymatic fragments’ aminoacids in place, except the
+cleavage sites. The cleavage sites are preserved in-place.</p></td>
+</tr>
+<tr class="row-odd"><td><p>randomizepep-&lt;enzyme&gt;</p></td>
+<td><p>Randomize the enzymatic fragments’ aminoacids, except the cleavage
+sites. The cleavage sites are preserved in-place. Context-dependat.
+Each aminoacid has a weighted likelihood based on the aminoacid
+proportions of a target dataset. Any character in the target dataset
+not in <a class="reference internal" href="../api/strategies/#pydecoys.strategies.EXT_AMINOACIDS" title="pydecoys.strategies.EXT_AMINOACIDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">pydecoys.strategies.EXT_AMINOACIDS</span></code></a> is silently ignored.
+The cleavage sites are also ignored in the proportion.</p></td>
+</tr>
+</tbody>
+</table>
+<section id="enzymes">
+<h2>Enzymes<a class="headerlink" href="#enzymes" title="Link to this heading"></a></h2>
+<p>For enzyme-specific strategies, the following enzymes are available:</p>
+<table class="docutils align-default" style="width: 100%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Enzyme</p></th>
+<th class="head"><p>str key</p></th>
+<th class="head"><p>cut</p></th>
+<th class="head"><p>nocut</p></th>
+<th class="head"><p>nocut_n</p></th>
+<th class="head"><p>sense</p></th>
+<th class="head"><p>pattern</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>AlphaLP</p></td>
+<td><p>alphalp</p></td>
+<td><p>TASV</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([TASV])'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Arg-C</p></td>
+<td><p>argc</p></td>
+<td><p>R</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(R)(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Asp-N</p></td>
+<td><p>aspn</p></td>
+<td><p>BD</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>N</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([BD])'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Asp-N_ambic</p></td>
+<td><p>aspnambic</p></td>
+<td><p>DE</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>N</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([DE])'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Chymotrypsin</p></td>
+<td><p>chymo</p></td>
+<td><p>FYWL</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([FYWL])(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>CNBr</p></td>
+<td><p>cnbr</p></td>
+<td><p>M</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(M)'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Formic_acid</p></td>
+<td><p>formicacid</p></td>
+<td><p>D</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>both</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(D)'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>glutamyl endopeptidase</p></td>
+<td><p>gluc</p></td>
+<td><p>E</p></td>
+<td><p>-</p></td>
+<td><p>E</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(?&lt;!E)(E)'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>leukocyte elastase</p></td>
+<td><p>elastase</p></td>
+<td><p>ALIV</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([ALIV])(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Lys-C</p></td>
+<td><p>lysc</p></td>
+<td><p>K</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(K)(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Lys-C/P</p></td>
+<td><p>lyscp</p></td>
+<td><p>K</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(K)'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Lys-N</p></td>
+<td><p>lysn</p></td>
+<td><p>K</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>N</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(K)'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>PepsinA</p></td>
+<td><p>pepsina</p></td>
+<td><p>FL</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([FL])'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>proline endopeptidase</p></td>
+<td><p>proc</p></td>
+<td><p>P</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([HKR]P)(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Trypsin</p></td>
+<td><p>trpysin</p></td>
+<td><p>KR</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([KR])(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Trypsin/P</p></td>
+<td><p>trypsinp</p></td>
+<td><p>KR</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([KR])'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>TrypChymo</p></td>
+<td><p>trypchymo</p></td>
+<td><p>FYWLKR</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([FYWLKR])(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Tryp-N</p></td>
+<td><p>trypn</p></td>
+<td><p>KR</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>N</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([KR])'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>2-iodobenzoate</p></td>
+<td><p>2iodobenzoate</p></td>
+<td><p>W</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'(W)'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>V8-DE</p></td>
+<td><p>v8de</p></td>
+<td><p>BDEZ</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([BDEZ])(?!P)'</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>V8-E</p></td>
+<td><p>v8e</p></td>
+<td><p>EZ</p></td>
+<td><p>P</p></td>
+<td><p>-</p></td>
+<td><p>C</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r'([EZ])(?!P)'</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The enzyme specifications are taken from the <a class="reference external" href="https://github.com/HUPO-PSI/psi-ms-CV">PSI MS Ontology</a>.</p>
+<p>Whenever PyDecoys refers to a ‘cleavage site’, what’s meant is the capture
+group of these regex patterns.</p>
+<p>Since we need to actually capture the aminoacid(s) that induce cleavage to
+preserve the cleavage sites in enzymatic-aware strategies, the patterns
+presented here aren’t the ones in <a class="reference external" href="https://github.com/HUPO-PSI/psi-ms-CV">PSI MS Ontology</a>. For paterns specifically
+meant for splitting peptides, see the <a class="reference external" href="https://github.com/HUPO-PSI/psi-ms-CV">PSI MS Ontology</a>.</p>
+<p>The patterns presented here should generate the same results, with the
+difference that they capture the cleavage site aminoacids instead of
+capturing the cleavage point itself. Another key difference is that, while
+<a class="reference external" href="https://github.com/HUPO-PSI/psi-ms-CV">PSI MS Ontology</a> regexes might not capture a cleavage point if the ‘cut’
+aminoacid is at either end of the protein, the paterns presented here will.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some strategies presented here are redundant (they share the same regex
+pattern). They are separetely included in the case a strategy that needs to
+differentiate them is added (for example, a strategy that actually needs to
+consider cleavage sense), as well as for completeness sake.</p>
+</div>
+</section>
+<section id="terminal-aa-options">
+<h2>Terminal-aa options<a class="headerlink" href="#terminal-aa-options" title="Link to this heading"></a></h2>
+<p>If you want to preserve terminal aminoacids from the target protein, you can
+choose one of the following:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>str key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>-keepn</p></td>
+<td><p>Preserve the N-terminal aminoacid</p></td>
+</tr>
+<tr class="row-odd"><td><p>-keepc</p></td>
+<td><p>Preserve the C-terminal aminoacid</p></td>
+</tr>
+<tr class="row-even"><td><p>-keepterm</p></td>
+<td><p>Preserve the N- and C-terminal aminoacids</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="fusing-targets-and-decoys">
+<h2>Fusing targets and decoys<a class="headerlink" href="#fusing-targets-and-decoys" title="Link to this heading"></a></h2>
+<p>To fuse the decoy to the target sequence, use
+the <code class="docutils literal notranslate"><span class="pre">-fuse</span></code> suffix str key.</p>
+<p>If you want to preserve terminal aminoacids from the target protein, you can
+choose one of the following:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>str key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>-fuse</p></td>
+<td><p>Prepend the target sequence to the retuned decoy sequence</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<p>For example, to reverse tryptic peptides:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;QSYKPTRTHQ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;reversepep-trypsin&#39;</span><span class="p">)</span>
+<span class="go">&#39;TPKYSQRQHT&#39;</span>
+</pre></div>
+</div>
+<p>If you want to reverse the whole protein, except the N-terminal:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;QSYKPTRTHQ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;reverse-keepn&#39;</span><span class="p">)</span>
+<span class="go">&#39;QQHTRTPKYS&#39;</span>
+</pre></div>
+</div>
+<p>You can combine both:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;QSYKPTRTHQ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;reversepep-trypsin-keepn&#39;</span><span class="p">)</span>
+<span class="go">&#39;QTPKYSRQHT&#39;</span>
+</pre></div>
+</div>
+<p>If you want so simply shuffle it:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;QSYKPTRTHQ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;suffle&#39;</span><span class="p">)</span>
+<span class="go">&#39;RSTTHKQQYP&#39;</span>
+</pre></div>
+</div>
+<p>To shuffle it, except the C-terminal, and fuse the target and decoy:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;QSYKPTRTHQ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;suffle-keepc-fuse&#39;</span><span class="p">)</span>
+<span class="go">&#39;QSYKPTRTHQRSTTHKQYPQ&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../api/strategies/" class="btn btn-neutral float-left" title="pydecoys.strategies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../authorship/" class="btn btn-neutral float-right" title="Authorship and affiliations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

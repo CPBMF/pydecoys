@@ -1,0 +1,518 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydecoys.strategies.factories &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/">Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli/">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../">Module code</a></li>
+      <li class="breadcrumb-item active">pydecoys.strategies.factories</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pydecoys.strategies.factories</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2026 CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil</span>
+<span class="c1"># Copyright (C) 2026 Bruno Maestri A Becker</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of PyDecoys.</span>
+<span class="c1">#</span>
+<span class="c1"># PyDecoys is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation, either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># PyDecoys is distributed in the hope that it will be useful, but WITHOUT ANY</span>
+<span class="c1"># WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR</span>
+<span class="c1"># A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># PyDecoys. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;Factory functions to generate new versions of :type:`DecoyGenerator` with</span>
+<span class="sd">modified behavior.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextfulGenerator</span><span class="p">,</span> <span class="n">DecoyGenerator</span><span class="p">,</span> <span class="n">SeqLike</span>
+
+
+<span class="c1"># Applicative class to hold the closures for ContextfulGenerator fns</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_FactoryContextful</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">strategy</span><span class="p">:</span> <span class="n">ContextfulGenerator</span><span class="p">,</span>
+        <span class="n">call</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">,</span>
+        <span class="n">learn_context</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">wraps</span><span class="p">(</span><span class="n">strategy</span><span class="p">)(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">=</span> <span class="n">strategy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_call</span> <span class="o">=</span> <span class="n">call</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learn_context</span> <span class="o">=</span> <span class="n">learn_context</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span><span class="o">.</span><span class="n">is_set</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsn</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">ContextfulGenerator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextfulGenerator</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsn</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+    <span class="o">...</span>
+
+
+<div class="viewcode-block" id="keepsn">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.keepsn">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsn</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory that transform a :type:`DecoyGenerator` into a new</span>
+<span class="sd">    :type:`DecoyGenerator` that doesn&#39;t alter the N-terminal aa.</span>
+
+<span class="sd">    The `sequence` value is passed directly without the aminoacid that should</span>
+<span class="sd">    be preserved. The aa is reinserted after the decorated function returns.</span>
+
+<span class="sd">    :class:`strategies.ContextfulGenerator` objects preserve the</span>
+<span class="sd">    :meth:`strategies.ContextfulGenerator.learn_context` method, but will</span>
+<span class="sd">    receive each sequence without its N-terminal aa.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fn</span>
+<span class="sd">        A :type:`DecoyGenerator`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    DecoyGenerator</span>
+<span class="sd">        A version of `fn` that doesn&#39;t alter the N-terminal aminoacid of the</span>
+<span class="sd">        target protein. If `fn` is a :class:`strategies.ContextfulGenerator`,</span>
+<span class="sd">        the returned function will also be.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; def reverse(sequence): return sequence[::-1]</span>
+<span class="sd">    &gt;&gt;&gt; reverse_keep_n = keepsn(reverse)</span>
+<span class="sd">    &gt;&gt;&gt; reverse_keep_n(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">    &#39;QQHTRTPKYS&#39;</span>
+
+<span class="sd">    ContextfulGenerators are preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; class DummyGenerator:</span>
+<span class="sd">    ...     def __init__(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def learn_context(self, sequences):</span>
+<span class="sd">    ...         self.is_set = True</span>
+<span class="sd">    ...         for seq in sequences:</span>
+<span class="sd">    ...             print(seq)</span>
+<span class="sd">    ...     def reset(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def __call__(self, sequence):</span>
+<span class="sd">    ...         raise NotImplementedError</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(DummyGenerator(), ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; keep_n = keepsn(DummyGenerator())</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(keep_n, ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; keep_n.learn_context([&#39;QSYKPTRTHQ&#39;])</span>
+<span class="sd">    SYKPTRTHQ</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function returns a new closure, meaning attributes other than</span>
+<span class="sd">    metadata are lost.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">):</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sequence</span>
+            <span class="k">return</span> <span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">learn_context</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">]):</span>
+            <span class="n">sequences</span> <span class="o">=</span> <span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">)</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_FactoryContextful</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">call</span><span class="p">,</span> <span class="n">learn_context</span><span class="p">)</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">fn</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsc</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">ContextfulGenerator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextfulGenerator</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsc</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+    <span class="o">...</span>
+
+
+<div class="viewcode-block" id="keepsc">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.keepsc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsc</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory that transform a :type:`DecoyGenerator` into a new</span>
+<span class="sd">    :type:`DecoyGenerator` that doesn&#39;t alter the C-terminal aa.</span>
+
+<span class="sd">    The `sequence` value is passed directly without the aminoacid that should</span>
+<span class="sd">    be preserved. The aa is reinserted after the decorated function returns.</span>
+
+<span class="sd">    :class:`strategies.ContextfulGenerator` objects preserve the</span>
+<span class="sd">    :meth:`strategies.ContextfulGenerator.learn_context` method, but will</span>
+<span class="sd">    receive each sequence without its C-terminal aa.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fn</span>
+<span class="sd">        A :type:`DecoyGenerator`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    DecoyGenerator</span>
+<span class="sd">        A version of `fn` that doesn&#39;t alter the C-terminal aminoacid of the</span>
+<span class="sd">        target protein. If `fn` is a :class:`strategies.ContextfulGenerator`,</span>
+<span class="sd">        the returned function will also be.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; def reverse(sequence): return sequence[::-1]</span>
+<span class="sd">    &gt;&gt;&gt; reverse_keep_c = keepsc(reverse)</span>
+<span class="sd">    &gt;&gt;&gt; reverse_keep_c(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">    &#39;HTRTPKYSQQ&#39;</span>
+
+<span class="sd">    ContextfulGenerators are preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; class DummyGenerator:</span>
+<span class="sd">    ...     def __init__(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def learn_context(self, sequences):</span>
+<span class="sd">    ...         self.is_set = True</span>
+<span class="sd">    ...         for seq in sequences:</span>
+<span class="sd">    ...             print(seq)</span>
+<span class="sd">    ...     def reset(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def __call__(self, sequence):</span>
+<span class="sd">    ...         raise NotImplementedError</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(DummyGenerator(), ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; keep_c = keepsc(DummyGenerator())</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(keep_c, ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; keep_c.learn_context([&#39;QSYKPTRTHQ&#39;])</span>
+<span class="sd">    QSYKPTRTH</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function returns a new closure, meaning attributes other than</span>
+<span class="sd">    metadata are lost.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">):</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sequence</span>
+            <span class="k">return</span> <span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">sequence</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">learn_context</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">]):</span>
+            <span class="n">sequences</span> <span class="o">=</span> <span class="p">(</span><span class="n">sequence</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">)</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_FactoryContextful</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">call</span><span class="p">,</span> <span class="n">learn_context</span><span class="p">)</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="n">sequence</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsterm</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">ContextfulGenerator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextfulGenerator</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsterm</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+    <span class="o">...</span>
+
+
+<div class="viewcode-block" id="keepsterm">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.keepsterm">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">keepsterm</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory that transform a :type:`DecoyGenerator` into a new</span>
+<span class="sd">    :type:`DecoyGenerator` that doesn&#39;t alter the terminal aas.</span>
+
+<span class="sd">    The `sequence` value is passed directly without the aminoacids that should</span>
+<span class="sd">    be preserved. They are reinserted after the decorated function returns.</span>
+
+<span class="sd">    :class:`strategies.ContextfulGenerator` objects preserve the</span>
+<span class="sd">    :meth:`strategies.ContextfulGenerator.learn_context` method, but will</span>
+<span class="sd">    receive each sequence without its terminal aas.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fn</span>
+<span class="sd">        A :type:`DecoyGenerator`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    DecoyGenerator</span>
+<span class="sd">        A version of `fn` that doesn&#39;t alter the terminal aminoacids of the</span>
+<span class="sd">        target protein. If `fn` is a :class:`strategies.ContextfulGenerator`,</span>
+<span class="sd">        the returned function will also be.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; def reverse(sequence): return sequence[::-1]</span>
+<span class="sd">    &gt;&gt;&gt; reverse_keep_term = keepsterm(reverse)</span>
+<span class="sd">    &gt;&gt;&gt; reverse_keep_term(&#39;DNIDYKAVYR&#39;)</span>
+<span class="sd">    &#39;DYVAKYDINR&#39;</span>
+
+<span class="sd">    ContextfulGenerators are preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; class DummyGenerator:</span>
+<span class="sd">    ...     def __init__(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def learn_context(self, sequences):</span>
+<span class="sd">    ...         self.is_set = True</span>
+<span class="sd">    ...         for seq in sequences:</span>
+<span class="sd">    ...             print(seq)</span>
+<span class="sd">    ...     def reset(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def __call__(self, sequence):</span>
+<span class="sd">    ...         raise NotImplementedError</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(DummyGenerator(), ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; keep_term = keepsterm(DummyGenerator())</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(keep_term, ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; keep_term.learn_context([&#39;QSYKPTRTHQ&#39;])</span>
+<span class="sd">    SYKPTRTH</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function returns a new closure, meaning attributes other than</span>
+<span class="sd">    metadata are lost.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">):</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sequence</span>
+            <span class="k">return</span> <span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">learn_context</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">]):</span>
+            <span class="n">sequences</span> <span class="o">=</span> <span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">)</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_FactoryContextful</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">call</span><span class="p">,</span> <span class="n">learn_context</span><span class="p">)</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">fn</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuses</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">ContextfulGenerator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextfulGenerator</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuses</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+    <span class="o">...</span>
+
+
+<div class="viewcode-block" id="fuses">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.fuses">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuses</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">DecoyGenerator</span><span class="p">,</span> <span class="n">radical</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DecoyGenerator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory that transform a :type:`DecoyGenerator` into a new</span>
+<span class="sd">    :type:`DecoyGenerator` that fuses the target and decoy proteins.</span>
+
+<span class="sd">    The `sequence` value is prepended to the generated decoy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fn</span>
+<span class="sd">        A :type:`DecoyGenerator`.</span>
+<span class="sd">    radical</span>
+<span class="sd">        String to be added between the target and decoy sequences.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    DecoyGenerator</span>
+<span class="sd">        A version of `fn` that fuses the target and decoy sequences,</span>
+<span class="sd">        prepending the target to the decoy. If `fn` is a</span>
+<span class="sd">        :class:`strategies.ContextfulGenerator`, the returned function will</span>
+<span class="sd">        also be.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; def reverse(sequence): return sequence[::-1]</span>
+<span class="sd">    &gt;&gt;&gt; reverse_fuse = fuses(reverse)</span>
+<span class="sd">    &gt;&gt;&gt; reverse_fuse(&#39;DNIDYKAVYR&#39;)</span>
+<span class="sd">    &#39;DNIDYKAVYRRYVAKYDIND&#39;</span>
+<span class="sd">    &gt;&gt;&gt; radical_fuse = fuses(reverse, radical=&#39;K&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; radical_fuse(&#39;DNIDYKAVYR&#39;)</span>
+<span class="sd">    &#39;DNIDYKAVYRKRYVAKYDIND&#39;</span>
+
+<span class="sd">    ContextfulGenerators are preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; class DummyGenerator:</span>
+<span class="sd">    ...     def __init__(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def learn_context(self, sequences):</span>
+<span class="sd">    ...         self.is_set = True</span>
+<span class="sd">    ...         for seq in sequences:</span>
+<span class="sd">    ...             print(seq)</span>
+<span class="sd">    ...     def reset(self):</span>
+<span class="sd">    ...         self.is_set = False</span>
+<span class="sd">    ...     def __call__(self, sequence):</span>
+<span class="sd">    ...         raise NotImplementedError</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(DummyGenerator(), ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; fuse = fuses(DummyGenerator())</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(fuse, ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; fuse.learn_context([&#39;QSYKPTRTHQ&#39;])</span>
+<span class="sd">    QSYKPTRTHQ</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function returns a new closure, meaning attributes other than</span>
+<span class="sd">    metadata are lost.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">):</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">sequence</span> <span class="o">+</span> <span class="n">radical</span> <span class="o">+</span> <span class="n">fn</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_FactoryContextful</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">call</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">learn_context</span><span class="p">)</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sequence</span> <span class="o">+</span> <span class="n">radical</span> <span class="o">+</span> <span class="n">fn</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

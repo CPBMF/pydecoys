@@ -1,0 +1,899 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydecoys.core &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/">Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli/">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../">Module code</a></li>
+      <li class="breadcrumb-item active">pydecoys.core</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pydecoys.core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2026 CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil</span>
+<span class="c1"># Copyright (C) 2026 Bruno Maestri A Becker</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of PyDecoys.</span>
+<span class="c1">#</span>
+<span class="c1"># PyDecoys is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation, either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># PyDecoys is distributed in the hope that it will be useful, but WITHOUT ANY</span>
+<span class="c1"># WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR</span>
+<span class="c1"># A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># PyDecoys. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;Internal file to specify the logic of the module&#39;s main API.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">t</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span><span class="p">,</span> <span class="n">nullcontext</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_HAS_BIO</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">Bio</span>  <span class="c1"># noqa: F401</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">Bio.SeqRecord</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqRecord</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">_HAS_BIO</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn</span>
+    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Module &#39;Biopython&#39; not found: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys</span><span class="w"> </span><span class="kn">import</span> <span class="n">strategies</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys._builtins</span><span class="w"> </span><span class="kn">import</span> <span class="n">decoy_strategy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqLike</span>
+
+<span class="nb">type</span> <span class="n">_PathOrIO</span> <span class="o">=</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">TextIO</span>
+<span class="nb">type</span> <span class="n">_Strategy</span> <span class="o">=</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">strategies</span><span class="o">.</span><span class="n">DecoyGenerator</span>
+
+
+<div class="viewcode-block" id="from_fasta">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.from_fasta">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_fasta</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n">_PathOrIO</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+    <span class="n">decoy_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;decoy_&#39;</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply a decoy generator to entries from a fasta file. Requires</span>
+<span class="sd">    `Biopython`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input</span>
+<span class="sd">        Path or handle to a fasta file.</span>
+<span class="sd">    strategy</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+<span class="sd">    decoy_tag</span>
+<span class="sd">        An optional tag that is appended to each input&#39;s id. Defaults to</span>
+<span class="sd">        `&#39;decoy_&#39;`.</span>
+<span class="sd">    prefix</span>
+<span class="sd">        If `True`, `decoy_tag` is prefixed, otherwise it&#39;s suffixed. Defaults</span>
+<span class="sd">        to `True`.</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    SeqRecord</span>
+<span class="sd">        A decoy version of the next SeqRecord in the file.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function calls :func:`from_SeqRecords` internally, so</span>
+<span class="sd">    ``pydecoys.from_fasta(input, strategy)`` is equivalent to:</span>
+
+<span class="sd">    &gt;&gt;&gt; from Bio import SeqIO</span>
+<span class="sd">    &gt;&gt;&gt; targets = SeqIO.parse(input, format=&#39;fasta&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; decoys = from_SeqRecords(targets, strategy)   # doctest: +SKIP</span>
+
+<span class="sd">    This function will automatically pass the sequences as context to an unset</span>
+<span class="sd">    :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_BIO</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;Module &#39;Biopython&#39; necessary for IO operations. &quot;</span>
+            <span class="s2">&quot;Install it with: &#39;pip install biopython&#39;.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">Bio</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqIO</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+    <span class="k">yield from</span> <span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">decoy_tag</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="to_fasta">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.to_fasta">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_fasta</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n">_PathOrIO</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]</span> <span class="o">|</span> <span class="n">SeqRecord</span><span class="p">,</span>
+    <span class="n">output</span><span class="p">:</span> <span class="n">_PathOrIO</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+    <span class="n">decoy_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;decoy_&#39;</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">concat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply a decoy generator to a set of sequences and write them to a file.</span>
+<span class="sd">    Requires `Biopython`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input</span>
+<span class="sd">        A list (or iterator) of `SeqRecord` objects, a single `SeqRecord`, or</span>
+<span class="sd">        the path or handle to a fasta file.</span>
+<span class="sd">    output</span>
+<span class="sd">        Path or handle to a fasta file.</span>
+<span class="sd">    strategy</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+<span class="sd">    decoy_tag</span>
+<span class="sd">        An optional tag that is appended to each input&#39;s id. Defaults to</span>
+<span class="sd">        `&#39;decoy_&#39;`.</span>
+<span class="sd">    prefix</span>
+<span class="sd">        If `True`, `decoy_tag` is prefixed, otherwise it&#39;s suffixed. Defaults</span>
+<span class="sd">        to `True`.</span>
+<span class="sd">    concat</span>
+<span class="sd">        If `True`, output fasta will have both target and decoy entries. All</span>
+<span class="sd">        targets will be first, then all decoys. Defaults to `False`.&#39;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        The number of entries written (as an integer).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    While `_PathOrIO` is defined as</span>
+<span class="sd">    ``str | os.PathLike[str] | typing.TextIO``, the runtime ``isinstance``</span>
+<span class="sd">    check is done against ``io.TextIOBase``.</span>
+
+<span class="sd">    This function calls :func:`from_SeqRecords` internally, so</span>
+<span class="sd">    ``count = pydecoys.to_fasta(targets, output, strategy)`` where `targets`</span>
+<span class="sd">    is an ``Iterable[SeqRecord]`` is equivalent to:</span>
+
+<span class="sd">    &gt;&gt;&gt; decoys = from_SeqRecords(targets, strategy)          # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; count = SeqIO.write(decoys, output, format=&#39;fasta&#39;)  # doctest: +SKIP</span>
+
+<span class="sd">    If `True`, the `concat` flag will cause all sequences to be loaded</span>
+<span class="sd">    into a list prior to decoy generation to avoid parsing sequences twice.</span>
+
+<span class="sd">    This function will automatically pass the sequences as context to an unset</span>
+<span class="sd">    :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_BIO</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;Module &#39;Biopython&#39; necessary for IO operations. &quot;</span>
+            <span class="s2">&quot;Install it with: &#39;pip install biopython&#39;.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">Bio</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqIO</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">Bio.SeqRecord</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqRecord</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span> <span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">TextIOBase</span><span class="p">):</span>
+        <span class="n">sequences</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">SeqRecord</span><span class="p">):</span>
+        <span class="n">sequences</span> <span class="o">=</span> <span class="p">[</span><span class="nb">input</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sequences</span> <span class="o">=</span> <span class="nb">input</span>
+
+    <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span>
+        <span class="n">sequences</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+        <span class="n">decoys</span> <span class="o">=</span> <span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">decoy_tag</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">write</span> <span class="o">=</span> <span class="n">chain</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="n">decoys</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">write</span> <span class="o">=</span> <span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">decoy_tag</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">return</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fasta&#39;</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
+
+
+
+<div class="viewcode-block" id="from_SeqRecords">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.from_SeqRecords">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_SeqRecords</span><span class="p">(</span>
+    <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]</span> <span class="o">|</span> <span class="n">SeqRecord</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+    <span class="n">decoy_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;decoy_&#39;</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">Generator</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply a decoy generation strategy to a set of sequences. Requires</span>
+<span class="sd">    `Biopython`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequences</span>
+<span class="sd">        A list (or iterator) of `SeqRecord` objects, or a single `SeqRecord`.</span>
+<span class="sd">    strategy</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+<span class="sd">    decoy_tag</span>
+<span class="sd">        An optional tag that is appended to each input&#39;s id. Defaults to</span>
+<span class="sd">        `&#39;decoy_&#39;`.</span>
+<span class="sd">    prefix</span>
+<span class="sd">        If `True`, `decoy_tag` is prefixed, otherwise it&#39;s suffixed. Defaults</span>
+<span class="sd">        to `True`.</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    SeqRecord</span>
+<span class="sd">        A decoy version of the next SeqRecord in `sequences`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from Bio.SeqRecord import SeqRecord</span>
+<span class="sd">    &gt;&gt;&gt; from Bio.Seq import Seq</span>
+<span class="sd">    &gt;&gt;&gt; seqs = [</span>
+<span class="sd">    ...     SeqRecord(Seq(&#39;DNIDYKAVYR&#39;), &#39;seq1&#39;),</span>
+<span class="sd">    ...     SeqRecord(Seq(&#39;QSYMCTVTHP&#39;), &#39;seq2&#39;),</span>
+<span class="sd">    ...     SeqRecord(Seq(&#39;CQWSLTEELL&#39;), &#39;seq3&#39;),</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; for decoy in from_SeqRecords(seqs, &#39;reverse&#39;):</span>
+<span class="sd">    ...     print(f&#39;{decoy.id}: {decoy.seq}&#39;)</span>
+<span class="sd">    decoy_seq1: RYVAKYDIND</span>
+<span class="sd">    decoy_seq2: PHTVTCMYSQ</span>
+<span class="sd">    decoy_seq3: LLEETLSWQC</span>
+
+<span class="sd">    The `sequence` can be a single value:</span>
+
+<span class="sd">    &gt;&gt;&gt; from types import GeneratorType</span>
+<span class="sd">    &gt;&gt;&gt; seq = SeqRecord(Seq(&#39;DNIDYKAVYR&#39;), &#39;seq1&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; decoy = from_SeqRecords(seq, &#39;reverse&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(decoy, GeneratorType)  # Still returns a Generator</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function will automatically pass the sequences as context to an unset</span>
+<span class="sd">    :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_BIO</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;Module &#39;Biopython&#39; necessary for SeqRecord operations. &quot;</span>
+            <span class="s2">&quot;Install it with: &#39;pip install biopython&#39;.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys</span><span class="w"> </span><span class="kn">import</span> <span class="n">_bio</span>
+    <span class="n">sequences</span> <span class="o">=</span> <span class="n">_bio</span><span class="o">.</span><span class="n">iter_SeqRecord</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+    <span class="n">tuples</span> <span class="o">=</span> <span class="p">(</span><span class="n">_bio</span><span class="o">.</span><span class="n">SeqRecord_to_tuple</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">)</span>
+    <span class="n">decoys</span> <span class="o">=</span> <span class="n">from_tuples</span><span class="p">(</span><span class="n">tuples</span><span class="p">,</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">decoy_tag</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="p">(</span><span class="n">_bio</span><span class="o">.</span><span class="n">tuple_to_SeqRecord</span><span class="p">(</span><span class="n">decoy</span><span class="p">)</span> <span class="k">for</span> <span class="n">decoy</span> <span class="ow">in</span> <span class="n">decoys</span><span class="p">)</span>
+    <span class="k">yield from</span> <span class="n">records</span></div>
+
+
+
+<div class="viewcode-block" id="from_tuples">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.from_tuples">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_tuples</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span>
+    <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="p">]],</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+    <span class="n">decoy_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;decoy_&#39;</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply a decoy generation strategy to a set of tuples.</span>
+
+<span class="sd">    Differently from other functions in this module, `from_tuples` cannot</span>
+<span class="sd">    accept a single tuple. Be sure to always pass an iterable of tuples.</span>
+<span class="sd">    If you&#39;d like, you can use :func:`tuple_as_decoy` instead.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequences</span>
+<span class="sd">        A list (or iterator) of `tuple` objects. The first item should be the</span>
+<span class="sd">        seqid, and the second item should be the sequence.</span>
+<span class="sd">    strategy</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+<span class="sd">    decoy_tag</span>
+<span class="sd">        An optional tag that is appended to each input&#39;s id. Defaults to</span>
+<span class="sd">        `&#39;decoy_&#39;`.</span>
+<span class="sd">    prefix</span>
+<span class="sd">        If `True`, `decoy_tag` is prefixed, otherwise it&#39;s suffixed. Defaults</span>
+<span class="sd">        to `True`.</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    tuple[str, T]</span>
+<span class="sd">        A decoy version of the next tuple in `sequences`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; seqs = [</span>
+<span class="sd">    ...     (&#39;seq1&#39;, &#39;DNIDYKAVYR&#39;),</span>
+<span class="sd">    ...     (&#39;seq2&#39;, &#39;QSYMCTVTHP&#39;),</span>
+<span class="sd">    ...     (&#39;seq3&#39;, &#39;CQWSLTEELL&#39;),</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; for decoy in from_tuples(seqs, &#39;reverse&#39;):</span>
+<span class="sd">    ...     print(f&#39;{decoy[0]}: {decoy[1]}&#39;)</span>
+<span class="sd">    decoy_seq1: RYVAKYDIND</span>
+<span class="sd">    decoy_seq2: PHTVTCMYSQ</span>
+<span class="sd">    decoy_seq3: LLEETLSWQC</span>
+
+<span class="sd">    Type is preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; from Bio.Seq import Seq</span>
+<span class="sd">    &gt;&gt;&gt; seqs = [</span>
+<span class="sd">    ...     (&#39;seq1&#39;, Seq(&#39;DNIDYKAVYR&#39;)),</span>
+<span class="sd">    ...     (&#39;seq2&#39;, Seq(&#39;QSYMCTVTHP&#39;)),</span>
+<span class="sd">    ...     (&#39;seq3&#39;, Seq(&#39;CQWSLTEELL&#39;)),</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; for decoy in from_tuples(seqs, &#39;reverse&#39;):</span>
+<span class="sd">    ...     print(isinstance(decoy[1], Seq))</span>
+<span class="sd">    True</span>
+<span class="sd">    True</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function will automatically pass the sequences as context to an unset</span>
+<span class="sd">    :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">decoy_generator</span> <span class="o">=</span> <span class="n">_validate_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+
+    <span class="n">_validate_tag</span><span class="p">(</span><span class="n">decoy_tag</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy_generator</span><span class="p">,</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">):</span>
+        <span class="n">sequences</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">_get_contextualized</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">decoy_generator</span><span class="p">)</span> <span class="k">as</span> <span class="n">gen</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Seq not present for sequence &#39;</span><span class="si">{</span><span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">_build_id</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">decoy_tag</span><span class="p">,</span> <span class="n">prefix</span><span class="p">),</span> <span class="n">gen</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="from_seqs">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.from_seqs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_seqs</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span>
+    <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">T</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">Generator</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply a decoy generation strategy to a set of sequences.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequences</span>
+<span class="sd">        A list (or iterator) of :type:`SeqLike` objects, or a single</span>
+<span class="sd">        :type:`SeqLike`.</span>
+<span class="sd">    strategy:</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    T</span>
+<span class="sd">        A decoy version of the next sequence in `sequences`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; seqs = [</span>
+<span class="sd">    ...     &#39;DNIDYKAVYR&#39;,</span>
+<span class="sd">    ...     &#39;QSYMCTVTHP&#39;,</span>
+<span class="sd">    ...     &#39;CQWSLTEELL&#39;,</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; for decoy in from_seqs(seqs, &#39;reverse&#39;):</span>
+<span class="sd">    ...     print(decoy)</span>
+<span class="sd">    RYVAKYDIND</span>
+<span class="sd">    PHTVTCMYSQ</span>
+<span class="sd">    LLEETLSWQC</span>
+
+<span class="sd">    Type is preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; from Bio.Seq import Seq</span>
+<span class="sd">    &gt;&gt;&gt; seqs = [</span>
+<span class="sd">    ...     Seq(&#39;DNIDYKAVYR&#39;),</span>
+<span class="sd">    ...     Seq(&#39;QSYMCTVTHP&#39;),</span>
+<span class="sd">    ...     Seq(&#39;CQWSLTEELL&#39;),</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; for decoy in from_seqs(seqs, &#39;reverse&#39;):</span>
+<span class="sd">    ...     print(isinstance(decoy, Seq))</span>
+<span class="sd">    True</span>
+<span class="sd">    True</span>
+<span class="sd">    True</span>
+
+<span class="sd">    The `sequence` can be a single value:</span>
+
+<span class="sd">    &gt;&gt;&gt; from types import GeneratorType</span>
+<span class="sd">    &gt;&gt;&gt; decoy = from_seqs(&#39;DNIDYKAVYR&#39;, &#39;reverse&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(decoy, GeneratorType)  # Still returns a Generator</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function will automatically pass the sequences as context to an unset</span>
+<span class="sd">    :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">decoy_generator</span> <span class="o">=</span> <span class="n">_validate_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">_HAS_BIO</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutableSeq</span><span class="p">,</span> <span class="n">Seq</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Seq</span> <span class="o">|</span> <span class="n">MutableSeq</span><span class="p">):</span>
+            <span class="n">sequences</span> <span class="o">=</span> <span class="p">[</span><span class="n">sequences</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">sequences</span> <span class="o">=</span> <span class="p">[</span><span class="n">sequences</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy_generator</span><span class="p">,</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">):</span>
+        <span class="n">sequences</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">with</span> <span class="n">_get_contextualized</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">decoy_generator</span><span class="p">)</span> <span class="k">as</span> <span class="n">gen</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">seq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sequences</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">seq</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Seq not present for sequence </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">gen</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
+
+
+
+<div class="viewcode-block" id="SeqRecord_as_decoy">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.SeqRecord_as_decoy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">SeqRecord_as_decoy</span><span class="p">(</span>
+    <span class="n">sequence</span><span class="p">:</span> <span class="n">SeqRecord</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+    <span class="n">decoy_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;decoy_&#39;</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SeqRecord</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a decoy from a given `SeqRecord`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequence</span>
+<span class="sd">        A single `SeqRecord`.</span>
+<span class="sd">    strategy</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+<span class="sd">    decoy_tag</span>
+<span class="sd">        An optional tag that is appended to each input&#39;s id. Defaults to</span>
+<span class="sd">        `&#39;decoy_&#39;`.</span>
+<span class="sd">    prefix</span>
+<span class="sd">        If `True`, `decoy_tag` is prefixed, otherwise it&#39;s suffixed. Defaults</span>
+<span class="sd">        to `True`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    SeqRecord</span>
+<span class="sd">        A decoy version of `sequence`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from Bio.SeqRecord import SeqRecord</span>
+<span class="sd">    &gt;&gt;&gt; from Bio.Seq import Seq</span>
+<span class="sd">    &gt;&gt;&gt; seq = SeqRecord(Seq(&#39;DNIDYKAVYR&#39;), &#39;seq1&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; decoy = SeqRecord_as_decoy(seq, &#39;reverse&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f&#39;{decoy.id}: {decoy.seq}&#39;)</span>
+<span class="sd">    decoy_seq1: RYVAKYDIND</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function won&#39;t give context to :class:`strategies.ContextfulGerenator`</span>
+<span class="sd">    objects. You can get an already set :class:`strategies.ContextfulGerenator`</span>
+<span class="sd">    with :func:`get_contextualized_strategy`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_BIO</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;Module &#39;Biopython&#39; necessary for SeqRecord operations. &quot;</span>
+            <span class="s2">&quot;Install it with: &#39;pip install biopython&#39;.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys</span><span class="w"> </span><span class="kn">import</span> <span class="n">_bio</span>
+    <span class="n">seq_tuple</span> <span class="o">=</span> <span class="n">_bio</span><span class="o">.</span><span class="n">SeqRecord_to_tuple</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+    <span class="n">decoy</span> <span class="o">=</span> <span class="n">tuple_as_decoy</span><span class="p">(</span><span class="n">seq_tuple</span><span class="p">,</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">decoy_tag</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_bio</span><span class="o">.</span><span class="n">tuple_to_SeqRecord</span><span class="p">(</span><span class="n">decoy</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tuple_as_decoy">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.tuple_as_decoy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tuple_as_decoy</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span>
+    <span class="n">sequence</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+    <span class="n">decoy_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;decoy_&#39;</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a decoy from a given `tuple`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequence</span>
+<span class="sd">        A single `tuple`. The first item should be the seqid, and the second</span>
+<span class="sd">        item should be the sequence.</span>
+<span class="sd">    strategy</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+<span class="sd">    decoy_tag</span>
+<span class="sd">        An optional tag that is appended to each input&#39;s id. Defaults to</span>
+<span class="sd">        `&#39;decoy_&#39;`.</span>
+<span class="sd">    prefix</span>
+<span class="sd">        If `True`, `decoy_tag` is prefixed, otherwise it&#39;s suffixed. Defaults</span>
+<span class="sd">        to `True`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[str, T]</span>
+<span class="sd">        A decoy version of `sequence`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; seq = (&#39;seq1&#39;, &#39;DNIDYKAVYR&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; decoy = tuple_as_decoy(seq, &#39;reverse&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f&#39;{decoy[0]}: {decoy[1]}&#39;)</span>
+<span class="sd">    decoy_seq1: RYVAKYDIND</span>
+
+<span class="sd">    The type is preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; from Bio.Seq import Seq</span>
+<span class="sd">    &gt;&gt;&gt; seq = (&#39;seq1&#39;, Seq(&#39;DNIDYKAVYR&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; decoy = tuple_as_decoy(seq, &#39;reverse&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(decoy[1], Seq)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function won&#39;t give context to :class:`strategies.ContextfulGerenator`</span>
+<span class="sd">    objects. You can get an already set :class:`strategies.ContextfulGerenator`</span>
+<span class="sd">    with :func:`get_contextualized_strategy`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">decoy_generator</span> <span class="o">=</span> <span class="n">_validate_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+
+    <span class="n">_validate_tag</span><span class="p">(</span><span class="n">decoy_tag</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Seq not present for sequence &#39;</span><span class="si">{</span><span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy_generator</span><span class="p">,</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">decoy_generator</span><span class="o">.</span><span class="n">is_set</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Strategy &#39;</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">&#39; requires context. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Use: `strategy = get_contextualized_strategy(sequences, </span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">)`&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Seq not present (cannot be empty str)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">_build_id</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">decoy_tag</span><span class="p">,</span> <span class="n">prefix</span><span class="p">),</span> <span class="n">decoy_generator</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="seq_as_decoy">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.seq_as_decoy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">seq_as_decoy</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span>
+    <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a decoy from a given :type:`SeqLike`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequence</span>
+<span class="sd">        A single :type:`SeqLike`.</span>
+<span class="sd">    strategy</span>
+<span class="sd">        Lower case string specifying the decoy strategy to be used, or a</span>
+<span class="sd">        :type:`strategies.DecoyGenerator` function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    T</span>
+<span class="sd">        A decoy version of `sequence`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; seq_as_decoy(&#39;DNIDYKAVYR&#39;, &#39;reverse&#39;)</span>
+<span class="sd">    &#39;RYVAKYDIND&#39;</span>
+
+<span class="sd">    The type is preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; from Bio.Seq import Seq</span>
+<span class="sd">    &gt;&gt;&gt; seq_as_decoy(Seq(&#39;DNIDYKAVYR&#39;), &#39;reverse&#39;)</span>
+<span class="sd">    Seq(&#39;RYVAKYDIND&#39;)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function won&#39;t give context to :class:`strategies.ContextfulGerenator`</span>
+<span class="sd">    objects. You can get an already set :class:`strategies.ContextfulGerenator`</span>
+<span class="sd">    with :func:`get_contextualized_strategy`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">decoy_generator</span> <span class="o">=</span> <span class="n">_validate_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy_generator</span><span class="p">,</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">decoy_generator</span><span class="o">.</span><span class="n">is_set</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Strategy &#39;</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">&#39; requires context. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Use: `strategy = get_contextualized_strategy(sequences, </span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">)`&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Seq not present (cannot be an empty str)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">decoy_generator</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="register">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.register">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span>
+    <span class="n">strategy_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">strategy_fn</span><span class="p">:</span> <span class="n">strategies</span><span class="o">.</span><span class="n">DecoyGenerator</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a new decoy strategy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    strategy_key</span>
+<span class="sd">        Lower case string identifying the decoy strategy. Must not be already</span>
+<span class="sd">        defined.</span>
+<span class="sd">    strategy_fn</span>
+<span class="sd">        A function following the :type:`strategies.DecoyGenerator` signature.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Given a `random_seq` function that takes a sequence and returns a new,</span>
+<span class="sd">    unrelated sequence of same size:</span>
+
+<span class="sd">    &gt;&gt;&gt; def random_seq(sequence): ...</span>
+<span class="sd">    &gt;&gt;&gt; register(&#39;randomseq&#39;, random_seq)</span>
+<span class="sd">    &gt;&gt;&gt; seq = &#39;DNIDYKAVYR&#39;</span>
+<span class="sd">    &gt;&gt;&gt; seq_as_decoy(seq, &#39;randomseq&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &#39;LLEETLSWQC&#39;</span>
+
+<span class="sd">    The strategy key must be a lowercase string:</span>
+
+<span class="sd">    &gt;&gt;&gt; register(5, random_seq)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    TypeError: Need a string for the decoy strategy (lower case)</span>
+<span class="sd">    &gt;&gt;&gt; register(&#39;RANDOMSEQ&#39;, random_seq)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: Strategy key &#39;RANDOMSEQ&#39; should be lower case</span>
+
+<span class="sd">    It must not be already defined:</span>
+
+<span class="sd">    &gt;&gt;&gt; register(&#39;randomseq&#39;, random_seq)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: Strategy key &#39;randomseq&#39; already defined</span>
+
+<span class="sd">    The second argument must be a callable:</span>
+
+<span class="sd">    &gt;&gt;&gt; register(&#39;randomseq2&#39;, &#39;randomseq2&#39;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    TypeError: Strategy function must be a callable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Need a string for the decoy strategy (lower case)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strategy_key</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Strategy required (lower case string)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strategy_key</span><span class="o">.</span><span class="n">islower</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Strategy key &#39;</span><span class="si">{</span><span class="n">strategy_key</span><span class="si">}</span><span class="s2">&#39; should be lower case&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">strategy_key</span> <span class="ow">in</span> <span class="n">decoy_strategy</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Strategy key &#39;</span><span class="si">{</span><span class="n">strategy_key</span><span class="si">}</span><span class="s2">&#39; already defined&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">strategy_fn</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Strategy function must be a callable&quot;</span><span class="p">)</span>
+
+    <span class="n">decoy_strategy</span><span class="p">[</span><span class="n">strategy_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">strategy_fn</span></div>
+
+
+
+<div class="viewcode-block" id="get_contextualized_strategy">
+<a class="viewcode-back" href="../../../api/pydecoys/#pydecoys.get_contextualized_strategy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_contextualized_strategy</span><span class="p">(</span>
+    <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">],</span>
+    <span class="n">strategy_key</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a bare :type:`strategies.ContextfulGenerator` from a</span>
+<span class="sd">    context-based strategy key, with added context.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    strategy_key</span>
+<span class="sd">        Lower case string identifying the decoy strategy.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ContextfulGenerator</span>
+<span class="sd">        The correspondent decoy strategy.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; database = [&#39;DNIDYKAVYR&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; strategy = get_contextualized_strategy(database, &#39;randomize&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(strategy, strategies.ContextfulGenerator)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; strategy.is_set</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; strategy = get_contextualized_strategy(database, &#39;reverse&#39;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: Strategy &#39;reverse&#39; is not contextful</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Need a string for the decoy strategy (lower case)&quot;</span><span class="p">)</span>
+
+    <span class="n">strategy</span> <span class="o">=</span> <span class="n">_validate_strategy</span><span class="p">(</span><span class="n">strategy_key</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Strategy &#39;</span><span class="si">{</span><span class="n">strategy_key</span><span class="si">}</span><span class="s2">&#39; is not contextful&quot;</span><span class="p">)</span>
+
+    <span class="n">strategy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+    <span class="n">strategy</span><span class="o">.</span><span class="n">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">strategy</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">:</span> <span class="n">_Strategy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">strategies</span><span class="o">.</span><span class="n">DecoyGenerator</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">strategy</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">strategy</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Need a string or callable for the decoy strategy (lower case)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strategy</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Strategy required (lower case string or callable)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strategy</span><span class="o">.</span><span class="n">islower</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Strategy string &#39;</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">&#39; should be lower case&quot;</span><span class="p">)</span>
+
+    <span class="n">decoy_generator</span> <span class="o">=</span> <span class="n">decoy_strategy</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">decoy_generator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown strategy: &#39;</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">decoy_generator</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_tag</span><span class="p">(</span><span class="n">decoy_tag</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy_tag</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Need a string for the decoy tag&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_contextualized</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">,</span> <span class="n">U</span><span class="p">](</span>
+    <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">U</span><span class="p">],</span>
+    <span class="n">extract</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">U</span><span class="p">],</span> <span class="n">T</span><span class="p">],</span>
+    <span class="n">decoy_generator</span><span class="p">:</span> <span class="n">strategies</span><span class="o">.</span><span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Utilitary function.</span>
+
+<span class="sd">    Normalizes `decoy_generator` as a ContextManager to ensure proper setup</span>
+<span class="sd">    and cleanup for :clas:`strategies.ContextfulGenerator` instances that</span>
+<span class="sd">    aren&#39;t set-up while avoiding code repetition for other cases.</span>
+
+<span class="sd">    `extract` is just a callable to convert whatever type `U` is into a</span>
+<span class="sd">    SeqLike.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoy_generator</span><span class="p">,</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">decoy_generator</span><span class="o">.</span><span class="n">is_set</span>
+    <span class="p">):</span>
+        <span class="n">extracted</span> <span class="o">=</span> <span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_contextualized</span><span class="p">(</span><span class="n">decoy_generator</span><span class="p">,</span> <span class="n">extracted</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nullcontext</span><span class="p">(</span><span class="n">decoy_generator</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_id</span><span class="p">(</span><span class="n">seq_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">decoy_tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">decoy_tag</span> <span class="o">+</span> <span class="n">seq_id</span> <span class="k">if</span> <span class="n">prefix</span> <span class="k">else</span> <span class="n">seq_id</span> <span class="o">+</span> <span class="n">decoy_tag</span>
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_contextualized</span><span class="p">(</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">strategies</span><span class="o">.</span><span class="n">ContextfulGenerator</span><span class="p">,</span>
+    <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">]</span>
+<span class="p">):</span>
+    <span class="n">strategy</span><span class="o">.</span><span class="n">learn_context</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">strategy</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">strategy</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

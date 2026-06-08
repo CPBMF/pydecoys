@@ -1,0 +1,188 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running the CLI &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Using the PyDecoys API" href="../pydecoys/" />
+    <link rel="prev" title="Quick start" href="../starting/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../">Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../starting/">Quick start</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Running the CLI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#decoy-fasta-from-a-target-fasta">Decoy fasta from a target fasta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#different-decoy-strategies">Different decoy strategies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stdin-and-stdout"><cite>stdin</cite> and <cite>stdout</cite></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concatenating-targets-and-decoys">Concatenating targets and decoys</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pydecoys/">Using the PyDecoys API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../strategies/">Creating custom strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../">Guide</a></li>
+      <li class="breadcrumb-item active">Running the CLI</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/guide/cli.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="running-the-cli">
+<h1>Running the CLI<a class="headerlink" href="#running-the-cli" title="Link to this heading"></a></h1>
+<p>Running <cite>pydecoys</cite> is simple. This section provides an overview of the CLI’s
+functionalities.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See the full list of available strategies at <a class="reference internal" href="../../available/#available-strategies"><span class="std std-ref">Available strategies</span></a>.
+The full list of CLI options is at <a class="reference internal" href="../../cli/#cli"><span class="std std-ref">CLI Reference</span></a>.</p>
+</div>
+<section id="decoy-fasta-from-a-target-fasta">
+<h2>Decoy fasta from a target fasta<a class="headerlink" href="#decoy-fasta-from-a-target-fasta" title="Link to this heading"></a></h2>
+<p>The first argument <cite>pydecoys</cite> takes is an input fasta of target proteins. You
+can also specify the output filename of the decoy proteins fasta with the
+<code class="docutils literal notranslate"><span class="pre">-o/--output</span></code> flag.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># To generate a reversed decoy set from a given `targets.fasta`</span>
+pydecoys<span class="w"> </span>targets.fasta<span class="w"> </span>-o<span class="w"> </span>rev.fasta
+</pre></div>
+</div>
+</section>
+<section id="different-decoy-strategies">
+<h2>Different decoy strategies<a class="headerlink" href="#different-decoy-strategies" title="Link to this heading"></a></h2>
+<p>By default, <cite>pydecoys</cite> will use the <code class="docutils literal notranslate"><span class="pre">'reverse'</span></code> decoy strategy. To choose
+another strategy, use the <code class="docutils literal notranslate"><span class="pre">-s/--strategy</span></code> flag followed by the strategy key.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change the strategy with the `-s/--strategy` flag</span>
+pydecoys<span class="w"> </span>targets.fasta<span class="w"> </span>-o<span class="w"> </span>shuf.fasta<span class="w"> </span>-s<span class="w"> </span>shuffle
+
+<span class="c1"># Shuffle tryptic enzymatic fragments, except cleavage sites</span>
+pydecoys<span class="w"> </span>targets.fasta<span class="w"> </span>-o<span class="w"> </span>shuf.fasta<span class="w"> </span>-s<span class="w"> </span>shufflepep-trypsin
+
+<span class="c1"># Except N-terminal aas and cleavage sites</span>
+pydecoys<span class="w"> </span>targets.fasta<span class="w"> </span>-o<span class="w"> </span>shuf.fasta<span class="w"> </span>-s<span class="w"> </span>shufflepep-trypsin-keepn
+
+<span class="c1"># Randomize (except N-terminal aas) then prepend each target to its decoy</span>
+pydecoys<span class="w"> </span>targets.fasta<span class="w"> </span>-o<span class="w"> </span>shuf.fasta<span class="w"> </span>-s<span class="w"> </span>randomize-keepn-fuse
+</pre></div>
+</div>
+</section>
+<section id="stdin-and-stdout">
+<h2><cite>stdin</cite> and <cite>stdout</cite><a class="headerlink" href="#stdin-and-stdout" title="Link to this heading"></a></h2>
+<p>Both <code class="docutils literal notranslate"><span class="pre">input</span></code> and <code class="docutils literal notranslate"><span class="pre">output</span></code> are optional, and by default <cite>pydecoys</cite> will
+read from <code class="docutils literal notranslate"><span class="pre">stdin</span></code> and write to <code class="docutils literal notranslate"><span class="pre">stdout</span></code>. As a result, you can pipe from
+and to <cite>pydecoys</cite>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># The input defaults to stdin</span>
+cat<span class="w"> </span>fasta_1.fasta<span class="w"> </span>fasta_2.fasta<span class="w"> </span><span class="p">|</span><span class="w"> </span>pydecoys<span class="w"> </span>-o<span class="w"> </span>rev_1_2.fasta
+
+<span class="c1"># And the output, to stdout</span>
+pydecoys<span class="w"> </span>targets.fasta<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>some_seq
+
+<span class="c1"># So you can chain commands</span>
+cat<span class="w"> </span>fasta_1.fasta<span class="w"> </span>fasta_2.fasta<span class="w"> </span><span class="p">|</span><span class="w"> </span>pydecoys<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>some_seq
+</pre></div>
+</div>
+</section>
+<section id="concatenating-targets-and-decoys">
+<h2>Concatenating targets and decoys<a class="headerlink" href="#concatenating-targets-and-decoys" title="Link to this heading"></a></h2>
+<p>Sometimes, you might want one fasta file containing the targets and decoys.
+You can use the <code class="docutils literal notranslate"><span class="pre">--concat</span></code> flag so that the output is a concatenated database
+containing both target and decoy proteins:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># If you want to output a concatenated fasta of targets and decoys:</span>
+pydecoys<span class="w"> </span>targets.fasta<span class="w"> </span>-o<span class="w"> </span>targets_and_decoys.fasta<span class="w"> </span>--concat
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../starting/" class="btn btn-neutral float-left" title="Quick start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../pydecoys/" class="btn btn-neutral float-right" title="Using the PyDecoys API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

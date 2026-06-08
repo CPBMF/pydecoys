@@ -1,0 +1,893 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydecoys.strategies &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Available strategies" href="../../available/" />
+    <link rel="prev" title="pydecoys" href="../pydecoys/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../guide/">Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../pydecoys/">pydecoys</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pydecoys.strategies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.SeqLike"><code class="docutils literal notranslate"><span class="pre">SeqLike</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator"><code class="docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.RAND"><code class="docutils literal notranslate"><span class="pre">RAND</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.STD_AMINOACIDS"><code class="docutils literal notranslate"><span class="pre">STD_AMINOACIDS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.EXT_AMINOACIDS"><code class="docutils literal notranslate"><span class="pre">EXT_AMINOACIDS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator"><code class="docutils literal notranslate"><span class="pre">ContextfulGenerator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator.__call__"><code class="docutils literal notranslate"><span class="pre">ContextfulGenerator.__call__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator.is_set"><code class="docutils literal notranslate"><span class="pre">ContextfulGenerator.is_set</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator.learn_context"><code class="docutils literal notranslate"><span class="pre">ContextfulGenerator.learn_context()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator.reset"><code class="docutils literal notranslate"><span class="pre">ContextfulGenerator.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator"><code class="docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator.__call__"><code class="docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator.__call__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator.from_enzyme"><code class="docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator.from_enzyme()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator.pattern"><code class="docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator.pattern</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator.split_sequence"><code class="docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator.split_sequence()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.ReversePep"><code class="docutils literal notranslate"><span class="pre">ReversePep</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.ReversePep.__call__"><code class="docutils literal notranslate"><span class="pre">ReversePep.__call__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.ShufflePep"><code class="docutils literal notranslate"><span class="pre">ShufflePep</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.ShufflePep.__call__"><code class="docutils literal notranslate"><span class="pre">ShufflePep.__call__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.RandomizePep"><code class="docutils literal notranslate"><span class="pre">RandomizePep</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.RandomizePep.__call__"><code class="docutils literal notranslate"><span class="pre">RandomizePep.__call__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.RandomizePep.is_set"><code class="docutils literal notranslate"><span class="pre">RandomizePep.is_set</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.RandomizePep.learn_context"><code class="docutils literal notranslate"><span class="pre">RandomizePep.learn_context()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pydecoys.strategies.RandomizePep.reset"><code class="docutils literal notranslate"><span class="pre">RandomizePep.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.keepsn"><code class="docutils literal notranslate"><span class="pre">keepsn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.keepsc"><code class="docutils literal notranslate"><span class="pre">keepsc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.keepsterm"><code class="docutils literal notranslate"><span class="pre">keepsterm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pydecoys.strategies.fuses"><code class="docutils literal notranslate"><span class="pre">fuses()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../">API Reference</a></li>
+      <li class="breadcrumb-item active">pydecoys.strategies</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/strategies.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pydecoys.strategies">
+<span id="pydecoys-strategies"></span><h1>pydecoys.strategies<a class="headerlink" href="#module-pydecoys.strategies" title="Link to this heading"></a></h1>
+<p>Decoy-generation logic, as well as API to write new decoy strategies.</p>
+<p>The main API of <cite>strategies</cite> is the <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> type. This is a
+simple type alias that takes a type <code class="docutils literal notranslate"><span class="pre">T:</span> <span class="pre">SeqLike</span></code> target and returns a type
+<code class="docutils literal notranslate"><span class="pre">T</span></code> decoy. The <a class="reference internal" href="#pydecoys.strategies.SeqLike" title="pydecoys.strategies.SeqLike"><code class="xref py py-type docutils literal notranslate"><span class="pre">SeqLike</span></code></a> is an alias for <code class="docutils literal notranslate"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">Seq</span> <span class="pre">|</span> <span class="pre">MutableSeq'</span></code>.</p>
+<p>For decoy strategies that need context from the target database (for example,
+that use a Markov State Model), implement the <a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.ContextfulGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextfulGenerator</span></code></a>
+protocol.</p>
+<p>The <a class="reference internal" href="#pydecoys.strategies.ReversePep" title="pydecoys.strategies.ReversePep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReversePep</span></code></a>, <a class="reference internal" href="#pydecoys.strategies.ShufflePep" title="pydecoys.strategies.ShufflePep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShufflePep</span></code></a> and <a class="reference internal" href="#pydecoys.strategies.RandomizePep" title="pydecoys.strategies.RandomizePep"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomizePep</span></code></a> classes
+allow easy definition of new enzyme specifications for pseudo-decoy
+strategies via instantiation. To define new strategies using enzymatic
+peptides, subclass from <a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator" title="pydecoys.strategies.EnzymeSpecificGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator</span></code></a>.</p>
+<dl class="py type">
+<dt class="sig sig-object py" id="pydecoys.strategies.SeqLike">
+<span class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">SeqLike</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Seq</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MutableSeq</span></span><a class="headerlink" href="#pydecoys.strategies.SeqLike" title="Link to this definition"></a></dt>
+<dd><p><cite>SeqLike</cite> objects can be indexed and spliced; <cite>str</cite> at runtime.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This type doesn’t depend on <cite>Biopython</cite>.</p>
+</div>
+</dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="pydecoys.strategies.DecoyGenerator">
+<span class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">DecoyGenerator</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pydecoys.strategies.DecoyGenerator" title="Link to this definition"></a></dt>
+<dd><p>TypeAlias specifying the signature for decoy strategies.</p>
+<p>A decoy strategy should be a <code class="docutils literal notranslate"><span class="pre">Callable[[T],</span> <span class="pre">T]</span></code> where <code class="docutils literal notranslate"><span class="pre">T</span></code> is a
+<a class="reference internal" href="#pydecoys.strategies.SeqLike" title="pydecoys.strategies.SeqLike"><code class="xref py py-type docutils literal notranslate"><span class="pre">SeqLike</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pydecoys.strategies.RAND">
+<span class="sig-name descname"><span class="pre">RAND</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Final</span><span class="p"><span class="pre">[</span></span><span class="pre">random.Random</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">random.Random(_SEED)</span></span><a class="headerlink" href="#pydecoys.strategies.RAND" title="Link to this definition"></a></dt>
+<dd><p>Random number generator for stochastic decoy strategies.</p>
+<p>This RNG has a fixed seed to guarantee reproducibility and repeatability
+of decoy databases and thus any experiments using them. Custom stochastic
+decoy strategies should use this RNG or other RNG with a fixed seed.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This doesn’t mean that a stochastic decoy generator is deterministic.
+Since using the RNG changes the RNG state itself, the same target protein
+will generate different decoys accross different calls within the same
+Python runtime. This also means that if a protein sequence appears more
+than once in a target dataset, a stochastic method will inflate the decoy
+dataset size.</p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pydecoys.strategies.STD_AMINOACIDS">
+<span class="sig-name descname"><span class="pre">STD_AMINOACIDS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Final</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QWERTYIPASDFGHKLCVNM'</span></span><a class="headerlink" href="#pydecoys.strategies.STD_AMINOACIDS" title="Link to this definition"></a></dt>
+<dd><p>Standard 20 aminoacids single-letter codes, majuscule.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pydecoys.strategies.EXT_AMINOACIDS">
+<span class="sig-name descname"><span class="pre">EXT_AMINOACIDS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Final</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">STD_AMINOACIDS</span> <span class="pre">+</span> <span class="pre">'OU'</span> <span class="pre">+</span> <span class="pre">'BJZX'</span></span><a class="headerlink" href="#pydecoys.strategies.EXT_AMINOACIDS" title="Link to this definition"></a></dt>
+<dd><p>Extended aminoacids single-letter codes, majuscule.</p>
+<section id="non-standard-aminoacids">
+<h2>Non-standard aminoacids<a class="headerlink" href="#non-standard-aminoacids" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>O: Pyrrolysine</p></li>
+<li><p>U: Selenocysteine</p></li>
+</ul>
+</section>
+<section id="special-codes">
+<h2>Special codes<a class="headerlink" href="#special-codes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>B: Aspartic acid (D) or Asparagine (N)</p></li>
+<li><p>J: Leucine (L) or Isoleucine (I)</p></li>
+<li><p>Z: Glutamic acid (E) or Glutamine (Q)</p></li>
+<li><p>X: Any aminoacid</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydecoys.strategies.ContextfulGenerator">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ContextfulGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ContextfulGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ContextfulGenerator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol defining a decoy generator function that uses previously
+learned context.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Functions that don’t pass the targets to <a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator.learn_context" title="pydecoys.strategies.ContextfulGenerator.learn_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">learn_context()</span></code></a> are
+documented as such.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.ContextfulGenerator.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ContextfulGenerator.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ContextfulGenerator.__call__" title="Link to this definition"></a></dt>
+<dd><p>Receive a sequence and return a decoy based on previous context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>T</em>) – A single sequence.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decoy version of <cite>sequence</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydecoys.strategies.ContextfulGenerator.is_set">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_set</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#pydecoys.strategies.ContextfulGenerator.is_set" title="Link to this definition"></a></dt>
+<dd><p>Whether the generator has context (<cite>True</cite>) or not (<cite>False</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.ContextfulGenerator.learn_context">
+<span class="sig-name descname"><span class="pre">learn_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ContextfulGenerator.learn_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ContextfulGenerator.learn_context" title="Link to this definition"></a></dt>
+<dd><p>Receive the target proteins set to generate the necessary context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequences</strong> (<em>Iterable</em><em>[</em><em>SeqLike</em><em>]</em>) – The target dataset.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.ContextfulGenerator.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ContextfulGenerator.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ContextfulGenerator.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the generator, so it holds no context and <a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator.is_set" title="pydecoys.strategies.ContextfulGenerator.is_set"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_set</span></code></a> i
+<cite>False</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydecoys.strategies.EnzymeSpecificGenerator">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">EnzymeSpecificGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#EnzymeSpecificGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.EnzymeSpecificGenerator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for enzymatic aware decoy generation.</p>
+<p>Sequences can be split with <a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator.split_sequence" title="pydecoys.strategies.EnzymeSpecificGenerator.split_sequence"><code class="xref py py-meth docutils literal notranslate"><span class="pre">split_sequence()</span></code></a>. The class is
+case-insensitive.</p>
+<p>The regex MUST match <strong>only</strong> the cleavage sites that shouldn’t be
+altered. The cleavage sites MUST be captured by the regex pattern. Else,
+the resulting iterator from <a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator.split_sequence" title="pydecoys.strategies.EnzymeSpecificGenerator.split_sequence"><code class="xref py py-meth docutils literal notranslate"><span class="pre">split_sequence()</span></code></a> won’t yield all
+aminoacid residues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>str</em><em> | </em><em>re.Pattern</em><em>[</em><em>str</em><em>]</em>) – A regex pattern that must capture the desired cleavage sites. For
+example, for trypsin: <code class="docutils literal notranslate"><span class="pre">r'([KR])(?!P)'</span></code>.</p></li>
+<li><p><strong>sense</strong> (<em>t.Literal</em><em>[</em><em>'N'</em><em>, </em><em>'C'</em><em>, </em><em>'both'</em><em>]</em>) – Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+of the cleavage site. This is unused by default, but can be useful for
+subclasses overriding the class. Case sensitive.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummyEnzymeGenerator</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyEnzymeGenerator</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(R)&quot;</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dummy</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+<span class="go">re.compile(&#39;(R)&#39;, re.IGNORECASE)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyEnzymeGenerator</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([KR])(?!P)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dummy</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+<span class="go">re.compile(&#39;([KR])(?!P)&#39;, re.IGNORECASE)</span>
+</pre></div>
+</div>
+<p>The pattern argument cannot be an empty string:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyEnzymeGenerator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Need string or re.Pattern for pattern</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.EnzymeSpecificGenerator.__call__">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#EnzymeSpecificGenerator.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.EnzymeSpecificGenerator.__call__" title="Link to this definition"></a></dt>
+<dd><p>Receive a sequence and return a decoy based on enzymatic peptides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>T</em>) – A single sequence.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decoy version of <cite>sequence</cite>, according to the enzyme
+specifications given at class instantiation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.EnzymeSpecificGenerator.from_enzyme">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_enzyme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nocut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nocut_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#EnzymeSpecificGenerator.from_enzyme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.EnzymeSpecificGenerator.from_enzyme" title="Link to this definition"></a></dt>
+<dd><p>Create regex pattern from enzyme specifications and return a new
+instance with this regex pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cut</strong> (<em>str</em>) – Cleavage sites as a string.</p></li>
+<li><p><strong>nocut</strong> (<em>str</em><em> | </em><em>None</em>) – Aminoacids that stop cleavage when at C-terminal as a string, or
+<cite>None</cite>. If given, the enzyme will ignore <cite>cut</cite> aminoacids followed
+by these at the C-terminal.</p></li>
+<li><p><strong>nocut_n</strong> (<em>str</em><em> | </em><em>None</em>) – Aminoacids that stop cleavage when at N-terminal as a string, or
+<cite>None</cite>. If given, the enzyme will ignore <cite>cut</cite> aminoacids
+preceeded by these at the N-terminal.</p></li>
+<li><p><strong>sense</strong> (<em>Literal</em><em>[</em><em>'N'</em><em>, </em><em>'C'</em><em>, </em><em>'both'</em><em>]</em>) – Whether the enzyme cleaves the C-terminal, N-terminal or both
+termini of the cleavage site. This is unused by default, but can
+be useful for subclasses overriding the class. Case sensitive.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of the class with a regex pattern constructed from the
+parameters as such: <code class="docutils literal notranslate"><span class="pre">rf'(?&lt;![{nocut_n}])([{cut}])(?![{nocut}])'</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Self</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummyEnzymeGenerator</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyEnzymeGenerator</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dummy</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+<span class="go">re.compile(&#39;(R)&#39;, re.IGNORECASE)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyEnzymeGenerator</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;KR&quot;</span><span class="p">,</span> <span class="n">nocut</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dummy</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+<span class="go">re.compile(&#39;([KR])(?!P)&#39;, re.IGNORECASE)</span>
+</pre></div>
+</div>
+<p>Cut argument cannot be an empty string:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyEnzymeGenerator</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Need string for cut aminoacids</span>
+</pre></div>
+</div>
+<p>Aminoacids must be one of the <a class="reference internal" href="#pydecoys.strategies.EXT_AMINOACIDS" title="pydecoys.strategies.EXT_AMINOACIDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXT_AMINOACIDS</span></code></a> single-letter
+codes:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyEnzymeGenerator</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;KR&quot;</span><span class="p">,</span> <span class="n">nocut</span><span class="o">=</span><span class="s2">&quot;7&quot;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Not a valid aminoacid single-letter code: &#39;7&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydecoys.strategies.EnzymeSpecificGenerator.pattern">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pattern</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Pattern</span></span><a class="headerlink" href="#pydecoys.strategies.EnzymeSpecificGenerator.pattern" title="Link to this definition"></a></dt>
+<dd><p>Regex pattern to capture cleavage sites.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.EnzymeSpecificGenerator.split_sequence">
+<span class="sig-name descname"><span class="pre">split_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#EnzymeSpecificGenerator.split_sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.EnzymeSpecificGenerator.split_sequence" title="Link to this definition"></a></dt>
+<dd><p>Split a given sequence into enzymatic fragments (minus the clevage
+site) and cleavage sites, in the order they appear.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>SeqLike</em>) – Aminoacid sequence to be split.</p>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>tuple[str, bool]</em> – A tuple containin an enzymatic fragment (minus the clevage site)
+and <cite>False</cite>, or a cleavage site and <cite>True</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Generator</em>[tuple[str, bool], None, None]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummySpecificGenerator</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">splitter</span> <span class="o">=</span> <span class="n">DummySpecificGenerator</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s1">&#39;KR&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">splitter</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+<span class="go">(&#39;QSY&#39;, False)</span>
+<span class="go">(&#39;K&#39;, True)</span>
+<span class="go">(&#39;PT&#39;, False)</span>
+<span class="go">(&#39;R&#39;, True)</span>
+<span class="go">(&#39;THQ&#39;, False)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydecoys.strategies.ReversePep">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ReversePep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ReversePep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ReversePep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator" title="pydecoys.strategies.core.EnzymeSpecificGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator</span></code></a></p>
+<p>Apply pseudo-reverse decoy generation with the specified enzyme
+properties.</p>
+<p>Pseudo-reverse (or reverse peptide) means that the enzymatic peptides will
+be reversed, except for the cleavage site. For trypsin:</p>
+<ul class="simple">
+<li><p><cite>QSYKPTRTHQ -&gt; QSYKPTR.THQ -&gt; TPKYSQRQHT</cite></p></li>
+</ul>
+<p>This better preserves actual peptide amount and sizes from the targets to
+the decoys.</p>
+<p>The regex MUST match <strong>only</strong> the cleavage sites that shouldn’t be
+altered. The cleavage sites MUST be captured by the regex pattern. Else,
+the resulting iterator from <code class="xref py py-meth docutils literal notranslate"><span class="pre">split_sequence()</span></code> won’t yield all
+aminoacid residues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>str</em><em> | </em><em>re.Pattern</em><em>[</em><em>str</em><em>]</em>) – A regex pattern that must capture the desired cleavage sites. For
+example, for trypsin: <code class="docutils literal notranslate"><span class="pre">r'([KR])(?!P)'</span></code>.</p></li>
+<li><p><strong>sense</strong> (<em>t.Literal</em><em>[</em><em>'N'</em><em>, </em><em>'C'</em><em>, </em><em>'both'</em><em>]</em>) – Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+of the cleavage site. This is unused by default, but can be useful for
+subclasses overriding the class. Case sensitive.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.ReversePep.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ReversePep.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ReversePep.__call__" title="Link to this definition"></a></dt>
+<dd><p>Receive a sequence and return a pseudo-reversed decoy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>T</em>) – A single sequence.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pseudo-reversed version of <cite>sequence</cite>, according to the enzyme
+specifications given at class instantiation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rev</span> <span class="o">=</span> <span class="n">ReversePep</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;KR&quot;</span><span class="p">,</span> <span class="n">nocut</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rev</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;TPKYSQRQHT&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rev</span> <span class="o">=</span> <span class="n">ReversePep</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rev</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;YSQKQHTRTP&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydecoys.strategies.ShufflePep">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ShufflePep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ShufflePep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ShufflePep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator" title="pydecoys.strategies.core.EnzymeSpecificGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator</span></code></a></p>
+<p>Apply pseudo-shuffle decoy generation with the specified enzyme
+properties.</p>
+<p>Pseudo-shuffle (or shuffle peptide) means that the enzymatic peptides will
+be shuffled, except for the cleavage site. For trypsin:</p>
+<ul class="simple">
+<li><p><cite>QSYKPTRTHQ -&gt; QSYKPTR.THQ -&gt; YTSKQPRQHT</cite></p></li>
+</ul>
+<p>This better preserves actual peptide amount and sizes from the targets to
+the decoys.</p>
+<p>The regex MUST match <strong>only</strong> the cleavage sites that shouldn’t be
+altered. The cleavage sites MUST be captured by the regex pattern. Else,
+the resulting iterator from <code class="xref py py-meth docutils literal notranslate"><span class="pre">split_sequence()</span></code> won’t yield all
+aminoacid residues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>str</em><em> | </em><em>re.Pattern</em><em>[</em><em>str</em><em>]</em>) – A regex pattern that must capture the desired cleavage sites. For
+example, for trypsin: <code class="docutils literal notranslate"><span class="pre">r'([KR])(?!P)'</span></code>.</p></li>
+<li><p><strong>sense</strong> (<em>t.Literal</em><em>[</em><em>'N'</em><em>, </em><em>'C'</em><em>, </em><em>'both'</em><em>]</em>) – Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+of the cleavage site. This is unused by default, but can be useful for
+subclasses overriding the class. Case sensitive.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.ShufflePep.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#ShufflePep.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.ShufflePep.__call__" title="Link to this definition"></a></dt>
+<dd><p>Receive a sequence and return a pseudo-shuffled decoy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>T</em>) – A single sequence.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pseudo-shuffled version of <cite>sequence</cite>, according to the enzyme
+specifications given at class instantiation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shuf</span> <span class="o">=</span> <span class="n">ShufflePep</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;KR&quot;</span><span class="p">,</span> <span class="n">nocut</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shuf</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;YTSKQPRQHT&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shuf</span> <span class="o">=</span> <span class="n">ShufflePep</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shuf</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;QYSKTHRPTQ&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydecoys.strategies.RandomizePep">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">RandomizePep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#RandomizePep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.RandomizePep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydecoys.strategies.EnzymeSpecificGenerator" title="pydecoys.strategies.core.EnzymeSpecificGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnzymeSpecificGenerator</span></code></a></p>
+<p>Apply pseudo-randomize decoy generation with the specified enzyme
+properties.</p>
+<p>Pseudo-randomize (or randomize peptide) means that the enzymatic peptides
+will be randomized, except for the cleavage site. For trypsin:</p>
+<ul class="simple">
+<li><p><cite>QSYKPTRTHQ -&gt; QSYKPTR.THQ -&gt; DSDPCCRGIS</cite></p></li>
+</ul>
+<p>The randomization happens based on aminoacid proportions from the target
+database. Cleavage sites aren’t counted.</p>
+<p>This better preserves actual peptide amount and sizes from the targets to
+the decoys.</p>
+<p>The regex MUST match <strong>only</strong> the cleavage sites that shouldn’t be
+altered. The cleavage sites MUST be captured by the regex pattern. Else,
+the resulting iterator from <code class="xref py py-meth docutils literal notranslate"><span class="pre">split_sequence()</span></code> won’t yield all
+aminoacid residues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>str</em><em> | </em><em>re.Pattern</em><em>[</em><em>str</em><em>]</em>) – A regex pattern that must capture the desired cleavage sites. For
+example, for trypsin: <code class="docutils literal notranslate"><span class="pre">r'([KR])(?!P)'</span></code>.</p></li>
+<li><p><strong>sense</strong> (<em>t.Literal</em><em>[</em><em>'N'</em><em>, </em><em>'C'</em><em>, </em><em>'both'</em><em>]</em>) – Whether the enzyme cleaves the C-terminal, N-terminal or both termini
+of the cleavage site. This is unused by default, but can be useful for
+subclasses overriding the class. Case sensitive.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.RandomizePep.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#RandomizePep.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.RandomizePep.__call__" title="Link to this definition"></a></dt>
+<dd><p>Receive a sequence and return a pseudo-randomized decoy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>T</em>) – A single sequence.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pseudo-randomized version of <cite>sequence</cite>, according to the enzyme
+specifications given at class instantiation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rand</span> <span class="o">=</span> <span class="n">RandomizePep</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;KR&quot;</span><span class="p">,</span> <span class="n">nocut</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rand</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;DSDPCCRGIS&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rand</span> <span class="o">=</span> <span class="n">RandomizePep</span><span class="o">.</span><span class="n">from_enzyme</span><span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rand</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;PINKMEVDAP&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydecoys.strategies.RandomizePep.is_set">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_set</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#pydecoys.strategies.RandomizePep.is_set" title="Link to this definition"></a></dt>
+<dd><p>Whether the generator has context (<cite>True</cite>) or not (<cite>False</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.RandomizePep.learn_context">
+<span class="sig-name descname"><span class="pre">learn_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#RandomizePep.learn_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.RandomizePep.learn_context" title="Link to this definition"></a></dt>
+<dd><p>Receive the target proteins set to learn aminoacid proportions and
+use them as weights during randomization.</p>
+<p>Since cleavage sites are unaltered during randomization, they are
+ignored here, so proportions are kept equal.</p>
+<p>Any character not in <a class="reference internal" href="#pydecoys.strategies.EXT_AMINOACIDS" title="pydecoys.strategies.EXT_AMINOACIDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXT_AMINOACIDS</span></code></a> is ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequences</strong> (<em>Iterable</em><em>[</em><em>SeqLike</em><em>]</em>) – The target dataset.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydecoys.strategies.RandomizePep.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pydecoys/strategies/core/#RandomizePep.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.RandomizePep.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the generator, erasing its previous context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.strategies.keepsn">
+<span class="sig-name descname"><span class="pre">keepsn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></span><a class="reference internal" href="../../_modules/pydecoys/strategies/factories/#keepsn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.keepsn" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">keepsn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Factory that transform a <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> into a new
+<a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> that doesn’t alter the N-terminal aa.</p>
+<p>The <cite>sequence</cite> value is passed directly without the aminoacid that should
+be preserved. The aa is reinserted after the decorated function returns.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code> objects preserve the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator.learn_context()</span></code> method, but will
+receive each sequence without its N-terminal aa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fn</strong> (<em>DecoyGenerator</em>) – A <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A version of <cite>fn</cite> that doesn’t alter the N-terminal aminoacid of the
+target protein. If <cite>fn</cite> is a <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code>,
+the returned function will also be.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator">DecoyGenerator</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">reverse</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span> <span class="k">return</span> <span class="n">sequence</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_keep_n</span> <span class="o">=</span> <span class="n">keepsn</span><span class="p">(</span><span class="n">reverse</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_keep_n</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;QQHTRTPKYS&#39;</span>
+</pre></div>
+</div>
+<p>ContextfulGenerators are preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummyGenerator</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="nb">print</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">(),</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep_n</span> <span class="o">=</span> <span class="n">keepsn</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">keep_n</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep_n</span><span class="o">.</span><span class="n">learn_context</span><span class="p">([</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">])</span>
+<span class="go">SYKPTRTHQ</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function returns a new closure, meaning attributes other than
+metadata are lost.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.strategies.keepsc">
+<span class="sig-name descname"><span class="pre">keepsc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></span><a class="reference internal" href="../../_modules/pydecoys/strategies/factories/#keepsc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.keepsc" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">keepsc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Factory that transform a <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> into a new
+<a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> that doesn’t alter the C-terminal aa.</p>
+<p>The <cite>sequence</cite> value is passed directly without the aminoacid that should
+be preserved. The aa is reinserted after the decorated function returns.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code> objects preserve the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator.learn_context()</span></code> method, but will
+receive each sequence without its C-terminal aa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fn</strong> (<em>DecoyGenerator</em>) – A <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A version of <cite>fn</cite> that doesn’t alter the C-terminal aminoacid of the
+target protein. If <cite>fn</cite> is a <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code>,
+the returned function will also be.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator">DecoyGenerator</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">reverse</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span> <span class="k">return</span> <span class="n">sequence</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_keep_c</span> <span class="o">=</span> <span class="n">keepsc</span><span class="p">(</span><span class="n">reverse</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_keep_c</span><span class="p">(</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">)</span>
+<span class="go">&#39;HTRTPKYSQQ&#39;</span>
+</pre></div>
+</div>
+<p>ContextfulGenerators are preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummyGenerator</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="nb">print</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">(),</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep_c</span> <span class="o">=</span> <span class="n">keepsc</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">keep_c</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep_c</span><span class="o">.</span><span class="n">learn_context</span><span class="p">([</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">])</span>
+<span class="go">QSYKPTRTH</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function returns a new closure, meaning attributes other than
+metadata are lost.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.strategies.keepsterm">
+<span class="sig-name descname"><span class="pre">keepsterm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></span><a class="reference internal" href="../../_modules/pydecoys/strategies/factories/#keepsterm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.keepsterm" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">keepsterm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Factory that transform a <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> into a new
+<a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> that doesn’t alter the terminal aas.</p>
+<p>The <cite>sequence</cite> value is passed directly without the aminoacids that should
+be preserved. They are reinserted after the decorated function returns.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code> objects preserve the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator.learn_context()</span></code> method, but will
+receive each sequence without its terminal aas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fn</strong> (<em>DecoyGenerator</em>) – A <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A version of <cite>fn</cite> that doesn’t alter the terminal aminoacids of the
+target protein. If <cite>fn</cite> is a <code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code>,
+the returned function will also be.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator">DecoyGenerator</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">reverse</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span> <span class="k">return</span> <span class="n">sequence</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_keep_term</span> <span class="o">=</span> <span class="n">keepsterm</span><span class="p">(</span><span class="n">reverse</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_keep_term</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">)</span>
+<span class="go">&#39;DYVAKYDINR&#39;</span>
+</pre></div>
+</div>
+<p>ContextfulGenerators are preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummyGenerator</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="nb">print</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">(),</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep_term</span> <span class="o">=</span> <span class="n">keepsterm</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">keep_term</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep_term</span><span class="o">.</span><span class="n">learn_context</span><span class="p">([</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">])</span>
+<span class="go">SYKPTRTH</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function returns a new closure, meaning attributes other than
+metadata are lost.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydecoys.strategies.fuses">
+<span class="sig-name descname"><span class="pre">fuses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.ContextfulGenerator" title="pydecoys.strategies.core.ContextfulGenerator"><span class="pre">ContextfulGenerator</span></a></span></span><a class="reference internal" href="../../_modules/pydecoys/strategies/factories/#fuses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pydecoys.strategies.fuses" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">fuses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><span class="pre">DecoyGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Factory that transform a <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> into a new
+<a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a> that fuses the target and decoy proteins.</p>
+<p>The <cite>sequence</cite> value is prepended to the generated decoy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> (<em>DecoyGenerator</em>) – A <a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator"><code class="xref py py-type docutils literal notranslate"><span class="pre">DecoyGenerator</span></code></a>.</p></li>
+<li><p><strong>radical</strong> (<em>str</em>) – String to be added between the target and decoy sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A version of <cite>fn</cite> that fuses the target and decoy sequences,
+prepending the target to the decoy. If <cite>fn</cite> is a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">strategies.ContextfulGenerator</span></code>, the returned function will
+also be.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pydecoys.strategies.DecoyGenerator" title="pydecoys.strategies.DecoyGenerator">DecoyGenerator</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">reverse</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span> <span class="k">return</span> <span class="n">sequence</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_fuse</span> <span class="o">=</span> <span class="n">fuses</span><span class="p">(</span><span class="n">reverse</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_fuse</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">)</span>
+<span class="go">&#39;DNIDYKAVYRRYVAKYDIND&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radical_fuse</span> <span class="o">=</span> <span class="n">fuses</span><span class="p">(</span><span class="n">reverse</span><span class="p">,</span> <span class="n">radical</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radical_fuse</span><span class="p">(</span><span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">)</span>
+<span class="go">&#39;DNIDYKAVYRKRYVAKYDIND&#39;</span>
+</pre></div>
+</div>
+<p>ContextfulGenerators are preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummyGenerator</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="nb">print</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">(),</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fuse</span> <span class="o">=</span> <span class="n">fuses</span><span class="p">(</span><span class="n">DummyGenerator</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fuse</span><span class="p">,</span> <span class="n">ContextfulGenerator</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fuse</span><span class="o">.</span><span class="n">learn_context</span><span class="p">([</span><span class="s1">&#39;QSYKPTRTHQ&#39;</span><span class="p">])</span>
+<span class="go">QSYKPTRTHQ</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function returns a new closure, meaning attributes other than
+metadata are lost.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../pydecoys/" class="btn btn-neutral float-left" title="pydecoys" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../available/" class="btn btn-neutral float-right" title="Available strategies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

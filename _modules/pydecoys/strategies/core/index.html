@@ -1,0 +1,932 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydecoys.strategies.core &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/">Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli/">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../">Module code</a></li>
+      <li class="breadcrumb-item active">pydecoys.strategies.core</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pydecoys.strategies.core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2026 CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil</span>
+<span class="c1"># Copyright (C) 2026 Bruno Maestri A Becker</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of PyDecoys.</span>
+<span class="c1">#</span>
+<span class="c1"># PyDecoys is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation, either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># PyDecoys is distributed in the hope that it will be useful, but WITHOUT ANY</span>
+<span class="c1"># WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR</span>
+<span class="c1"># A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># PyDecoys. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;Core API (protocols, ABCs, types and utility) for :mod:`strategies`.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">t</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
+
+<span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutableSeq</span><span class="p">,</span> <span class="n">Seq</span>
+
+
+<span class="nb">type</span> <span class="n">SeqLike</span> <span class="o">=</span> <span class="s1">&#39;str | Seq | MutableSeq&#39;</span>
+<span class="sd">&quot;&quot;&quot;`SeqLike` objects can be indexed and spliced; `str` at runtime.&quot;&quot;&quot;</span>
+
+<span class="nb">type</span> <span class="n">DecoyGenerator</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">T</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;TypeAlias specifying the signature for decoy strategies.</span>
+
+<span class="sd">A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a</span>
+<span class="sd">:type:`SeqLike`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># So shuffled decoys are always reproducible</span>
+<span class="n">RAND</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Final</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Random number generator for stochastic decoy strategies.&quot;&quot;&quot;</span>
+
+<span class="n">STD_AMINOACIDS</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Final</span> <span class="o">=</span> <span class="s1">&#39;QWERTYIPASDFGHKLCVNM&#39;</span>
+<span class="sd">&quot;&quot;&quot;Standard 20 aminoacids single-letter codes, majuscule.&quot;&quot;&quot;</span>
+
+<span class="n">EXT_AMINOACIDS</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Final</span> <span class="o">=</span> <span class="n">STD_AMINOACIDS</span> <span class="o">+</span> <span class="s1">&#39;OU&#39;</span> <span class="o">+</span> <span class="s1">&#39;BJZX&#39;</span>
+<span class="sd">&quot;&quot;&quot;Extended aminoacids single-letter codes, majuscule.</span>
+
+<span class="sd">Non-standard aminoacids</span>
+<span class="sd">-----------------------</span>
+
+<span class="sd">- O: Pyrrolysine</span>
+<span class="sd">- U: Selenocysteine</span>
+
+<span class="sd">Special codes</span>
+<span class="sd">-------------</span>
+
+<span class="sd">- B: Aspartic acid (D) or Asparagine (N)</span>
+<span class="sd">- J: Leucine (L) or Isoleucine (I)</span>
+<span class="sd">- Z: Glutamic acid (E) or Glutamine (Q)</span>
+<span class="sd">- X: Any aminoacid</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+
+<span class="sd">Special letter codes are treated as literal characters when matching against</span>
+<span class="sd">proteins. For example, &#39;B&#39; won&#39;t match against either &#39;D&#39; or &#39;N&#39;. Those are</span>
+<span class="sd">meant as ambiguous stand-ins in fasta protein sequences, not as regex</span>
+<span class="sd">shortcuts.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ContextfulGenerator">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ContextfulGenerator">[docs]</a>
+<span class="nd">@t</span><span class="o">.</span><span class="n">runtime_checkable</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ContextfulGenerator</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol defining a decoy generator function that uses previously</span>
+<span class="sd">    learned context.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ContextfulGenerator.learn_context">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ContextfulGenerator.learn_context">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive the target proteins set to generate the necessary context.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequences</span>
+<span class="sd">            The target dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="ContextfulGenerator.reset">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ContextfulGenerator.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the generator, so it holds no context and :attr:`is_set` i</span>
+<span class="sd">        `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the generator has context (`True`) or not (`False`).&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+<div class="viewcode-block" id="ContextfulGenerator.__call__">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ContextfulGenerator.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a sequence and return a decoy based on previous context.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence</span>
+<span class="sd">            A single sequence.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        T</span>
+<span class="sd">            A decoy version of `sequence`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="EnzymeSpecificGenerator">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.EnzymeSpecificGenerator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EnzymeSpecificGenerator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for enzymatic aware decoy generation.</span>
+
+<span class="sd">    Sequences can be split with :meth:`split_sequence`. The class is</span>
+<span class="sd">    case-insensitive.</span>
+
+<span class="sd">    The regex MUST match **only** the cleavage sites that shouldn&#39;t be</span>
+<span class="sd">    altered. The cleavage sites MUST be captured by the regex pattern. Else,</span>
+<span class="sd">    the resulting iterator from :meth:`split_sequence` won&#39;t yield all</span>
+<span class="sd">    aminoacid residues.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pattern</span>
+<span class="sd">        A regex pattern that must capture the desired cleavage sites. For</span>
+<span class="sd">        example, for trypsin: ``r&#39;([KR])(?!P)&#39;``.</span>
+<span class="sd">    sense</span>
+<span class="sd">        Whether the enzyme cleaves the C-terminal, N-terminal or both termini</span>
+<span class="sd">        of the cleavage site. This is unused by default, but can be useful for</span>
+<span class="sd">        subclasses overriding the class. Case sensitive.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; class DummyEnzymeGenerator(EnzymeSpecificGenerator):</span>
+<span class="sd">    ...     def __call__(sequence): raise NotImplementedError</span>
+<span class="sd">    &gt;&gt;&gt; dummy = DummyEnzymeGenerator(r&quot;(R)&quot;, sense=&quot;N&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(dummy.pattern)</span>
+<span class="sd">    re.compile(&#39;(R)&#39;, re.IGNORECASE)</span>
+<span class="sd">    &gt;&gt;&gt; dummy = DummyEnzymeGenerator(r&quot;([KR])(?!P)&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(dummy.pattern)</span>
+<span class="sd">    re.compile(&#39;([KR])(?!P)&#39;, re.IGNORECASE)</span>
+
+<span class="sd">    The pattern argument cannot be an empty string:</span>
+
+<span class="sd">    &gt;&gt;&gt; dummy = DummyEnzymeGenerator(&quot;&quot;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: Need string or re.Pattern for pattern</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">sense</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need string or re.Pattern for pattern&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pattern</span> <span class="o">=</span> <span class="n">pattern</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The pattern must be a string or a re.Pattern obj&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EnzymeSpecificGenerator.split_sequence">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.EnzymeSpecificGenerator.split_sequence">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split_sequence</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sequence</span><span class="p">:</span> <span class="n">SeqLike</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split a given sequence into enzymatic fragments (minus the clevage</span>
+<span class="sd">        site) and cleavage sites, in the order they appear.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence</span>
+<span class="sd">            Aminoacid sequence to be split.</span>
+
+<span class="sd">        Yields</span>
+<span class="sd">        ------</span>
+<span class="sd">        tuple[str, bool]</span>
+<span class="sd">            A tuple containin an enzymatic fragment (minus the clevage site)</span>
+<span class="sd">            and `False`, or a cleavage site and `True`.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; class DummySpecificGenerator(EnzymeSpecificGenerator):</span>
+<span class="sd">        ...     def __call__(self, sequence): raise NotImplementedError</span>
+<span class="sd">        &gt;&gt;&gt; splitter = DummySpecificGenerator.from_enzyme(&#39;KR&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; for val in splitter.split_sequence(&#39;QSYKPTRTHQ&#39;):</span>
+<span class="sd">        ...     print(val)</span>
+<span class="sd">        (&#39;QSY&#39;, False)</span>
+<span class="sd">        (&#39;K&#39;, True)</span>
+<span class="sd">        (&#39;PT&#39;, False)</span>
+<span class="sd">        (&#39;R&#39;, True)</span>
+<span class="sd">        (&#39;THQ&#39;, False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">frag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pattern</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequence</span><span class="p">))):</span>
+            <span class="k">if</span> <span class="n">frag</span><span class="p">:</span>
+                <span class="c1"># Captured values (in this case, cleavage sites) are</span>
+                <span class="c1"># guaranteed to be in odd indexes</span>
+                <span class="k">yield</span> <span class="n">frag</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="EnzymeSpecificGenerator.__call__">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.EnzymeSpecificGenerator.__call__">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a sequence and return a decoy based on enzymatic peptides.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence</span>
+<span class="sd">            A single sequence.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        T</span>
+<span class="sd">            A decoy version of `sequence`, according to the enzyme</span>
+<span class="sd">            specifications given at class instantiation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Regex pattern to capture cleavage sites.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pattern</span>
+
+<div class="viewcode-block" id="EnzymeSpecificGenerator.from_enzyme">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.EnzymeSpecificGenerator.from_enzyme">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_enzyme</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">cut</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">nocut</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">nocut_n</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sense</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create regex pattern from enzyme specifications and return a new</span>
+<span class="sd">        instance with this regex pattern.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cut</span>
+<span class="sd">            Cleavage sites as a string.</span>
+<span class="sd">        nocut</span>
+<span class="sd">            Aminoacids that stop cleavage when at C-terminal as a string, or</span>
+<span class="sd">            `None`. If given, the enzyme will ignore `cut` aminoacids followed</span>
+<span class="sd">            by these at the C-terminal.</span>
+<span class="sd">        nocut_n</span>
+<span class="sd">            Aminoacids that stop cleavage when at N-terminal as a string, or</span>
+<span class="sd">            `None`. If given, the enzyme will ignore `cut` aminoacids</span>
+<span class="sd">            preceeded by these at the N-terminal.</span>
+<span class="sd">        sense</span>
+<span class="sd">            Whether the enzyme cleaves the C-terminal, N-terminal or both</span>
+<span class="sd">            termini of the cleavage site. This is unused by default, but can</span>
+<span class="sd">            be useful for subclasses overriding the class. Case sensitive.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Self</span>
+<span class="sd">            An instance of the class with a regex pattern constructed from the</span>
+<span class="sd">            parameters as such: ``rf&#39;(?&lt;![{nocut_n}])([{cut}])(?![{nocut}])&#39;``.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; class DummyEnzymeGenerator(EnzymeSpecificGenerator):</span>
+<span class="sd">        ...     def __call__(sequence): raise NotImplementedError</span>
+<span class="sd">        &gt;&gt;&gt; dummy = DummyEnzymeGenerator.from_enzyme(&quot;R&quot;, sense=&quot;N&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; print(dummy.pattern)</span>
+<span class="sd">        re.compile(&#39;(R)&#39;, re.IGNORECASE)</span>
+<span class="sd">        &gt;&gt;&gt; dummy = DummyEnzymeGenerator.from_enzyme(&quot;KR&quot;, nocut=&quot;P&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; print(dummy.pattern)</span>
+<span class="sd">        re.compile(&#39;([KR])(?!P)&#39;, re.IGNORECASE)</span>
+
+<span class="sd">        Cut argument cannot be an empty string:</span>
+
+<span class="sd">        &gt;&gt;&gt; dummy = DummyEnzymeGenerator.from_enzyme(&quot;&quot;)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">        ValueError: Need string for cut aminoacids</span>
+
+<span class="sd">        Aminoacids must be one of the :data:`EXT_AMINOACIDS` single-letter</span>
+<span class="sd">        codes:</span>
+
+<span class="sd">        &gt;&gt;&gt; dummy = DummyEnzymeGenerator.from_enzyme(&quot;KR&quot;, nocut=&quot;7&quot;)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">        ValueError: Not a valid aminoacid single-letter code: &#39;7&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># A lot of type-guarding...</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cut aminoacids must be string&quot;</span><span class="p">)</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">cut</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cut</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Need string for cut aminoacids&quot;</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_check_if_aa</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nocut</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nocut</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nocut</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Need string for nocut aminoacids (or None)&quot;</span><span class="p">)</span>
+            <span class="n">nocut</span> <span class="o">=</span> <span class="n">nocut</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_check_if_aa</span><span class="p">(</span><span class="n">nocut</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Nocut aminoacids must be string or None&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nocut_n</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nocut_n</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nocut_n</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Need string for nocut_n aminoacids (or None)&quot;</span><span class="p">)</span>
+            <span class="n">nocut_n</span> <span class="o">=</span> <span class="n">nocut_n</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_check_if_aa</span><span class="p">(</span><span class="n">nocut_n</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Nocut_n aminoacids must be string or None&quot;</span><span class="p">)</span>
+
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;([</span><span class="si">{</span><span class="n">cut</span><span class="si">}</span><span class="s2">])&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">rf</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">cut</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+        <span class="k">if</span> <span class="n">nocut</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pattern</span> <span class="o">+=</span> <span class="sa">rf</span><span class="s2">&quot;(?![</span><span class="si">{</span><span class="n">nocut</span><span class="si">}</span><span class="s2">])&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nocut</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">rf</span><span class="s2">&quot;(?!</span><span class="si">{</span><span class="n">nocut</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">if</span> <span class="n">nocut_n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="sa">rf</span><span class="s2">&quot;(?&lt;![</span><span class="si">{</span><span class="n">nocut_n</span><span class="si">}</span><span class="s2">])&quot;</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nocut_n</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+                    <span class="k">else</span> <span class="sa">rf</span><span class="s2">&quot;(?&lt;!</span><span class="si">{</span><span class="n">nocut_n</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+                <span class="o">+</span> <span class="n">pattern</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">sense</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_if_aa</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Raise a ValueError if a given sequence is not composed of</span>
+<span class="sd">        :data:`EXT_AMINOACIDS` only.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aa</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">EXT_AMINOACIDS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not a valid aminoacid single-letter code: &#39;</span><span class="si">{</span><span class="n">aa</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ReversePep">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ReversePep">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReversePep</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply pseudo-reverse decoy generation with the specified enzyme</span>
+<span class="sd">    properties.</span>
+
+<span class="sd">    Pseudo-reverse (or reverse peptide) means that the enzymatic peptides will</span>
+<span class="sd">    be reversed, except for the cleavage site. For trypsin:</span>
+
+<span class="sd">    - `QSYKPTRTHQ -&gt; QSYKPTR.THQ -&gt; TPKYSQRQHT`</span>
+
+<span class="sd">    This better preserves actual peptide amount and sizes from the targets to</span>
+<span class="sd">    the decoys.</span>
+
+<span class="sd">    The regex MUST match **only** the cleavage sites that shouldn&#39;t be</span>
+<span class="sd">    altered. The cleavage sites MUST be captured by the regex pattern. Else,</span>
+<span class="sd">    the resulting iterator from :meth:`split_sequence` won&#39;t yield all</span>
+<span class="sd">    aminoacid residues.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pattern</span>
+<span class="sd">        A regex pattern that must capture the desired cleavage sites. For</span>
+<span class="sd">        example, for trypsin: ``r&#39;([KR])(?!P)&#39;``.</span>
+<span class="sd">    sense</span>
+<span class="sd">        Whether the enzyme cleaves the C-terminal, N-terminal or both termini</span>
+<span class="sd">        of the cleavage site. This is unused by default, but can be useful for</span>
+<span class="sd">        subclasses overriding the class. Case sensitive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ReversePep.__call__">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ReversePep.__call__">[docs]</a>
+    <span class="nd">@t</span><span class="o">.</span><span class="n">override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a sequence and return a pseudo-reversed decoy.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence</span>
+<span class="sd">            A single sequence.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        T</span>
+<span class="sd">            A pseudo-reversed version of `sequence`, according to the enzyme</span>
+<span class="sd">            specifications given at class instantiation.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; rev = ReversePep.from_enzyme(&quot;KR&quot;, nocut=&quot;P&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; rev(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">        &#39;TPKYSQRQHT&#39;</span>
+<span class="sd">        &gt;&gt;&gt; rev = ReversePep.from_enzyme(&quot;K&quot;, sense=&quot;N&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; rev(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">        &#39;YSQKQHTRTP&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+        <span class="n">rev_frags</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">frag</span><span class="p">,</span> <span class="n">cleavage</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cleavage</span><span class="p">:</span>
+                <span class="n">frag</span> <span class="o">=</span> <span class="n">frag</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">rev_frags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">seq_cast</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rev_frags</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ShufflePep">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ShufflePep">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShufflePep</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply pseudo-shuffle decoy generation with the specified enzyme</span>
+<span class="sd">    properties.</span>
+
+<span class="sd">    Pseudo-shuffle (or shuffle peptide) means that the enzymatic peptides will</span>
+<span class="sd">    be shuffled, except for the cleavage site. For trypsin:</span>
+
+<span class="sd">    - `QSYKPTRTHQ -&gt; QSYKPTR.THQ -&gt; YTSKQPRQHT`</span>
+
+<span class="sd">    This better preserves actual peptide amount and sizes from the targets to</span>
+<span class="sd">    the decoys.</span>
+
+<span class="sd">    The regex MUST match **only** the cleavage sites that shouldn&#39;t be</span>
+<span class="sd">    altered. The cleavage sites MUST be captured by the regex pattern. Else,</span>
+<span class="sd">    the resulting iterator from :meth:`split_sequence` won&#39;t yield all</span>
+<span class="sd">    aminoacid residues.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pattern</span>
+<span class="sd">        A regex pattern that must capture the desired cleavage sites. For</span>
+<span class="sd">        example, for trypsin: ``r&#39;([KR])(?!P)&#39;``.</span>
+<span class="sd">    sense</span>
+<span class="sd">        Whether the enzyme cleaves the C-terminal, N-terminal or both termini</span>
+<span class="sd">        of the cleavage site. This is unused by default, but can be useful for</span>
+<span class="sd">        subclasses overriding the class. Case sensitive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ShufflePep.__call__">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.ShufflePep.__call__">[docs]</a>
+    <span class="nd">@t</span><span class="o">.</span><span class="n">override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a sequence and return a pseudo-shuffled decoy.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence</span>
+<span class="sd">            A single sequence.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        T</span>
+<span class="sd">            A pseudo-shuffled version of `sequence`, according to the enzyme</span>
+<span class="sd">            specifications given at class instantiation.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; shuf = ShufflePep.from_enzyme(&quot;KR&quot;, nocut=&quot;P&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; shuf(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">        &#39;YTSKQPRQHT&#39;</span>
+<span class="sd">        &gt;&gt;&gt; shuf = ShufflePep.from_enzyme(&quot;K&quot;, sense=&quot;N&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; shuf(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">        &#39;QYSKTHRPTQ&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+        <span class="n">shuf_frags</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">frag</span><span class="p">,</span> <span class="n">cleavage</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cleavage</span><span class="p">:</span>
+                <span class="n">frag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+            <span class="n">shuf_frags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">seq_cast</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">shuf_frags</span><span class="p">))</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_shuffle</span><span class="p">(</span><span class="n">frag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+        <span class="n">RAND</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="RandomizePep">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.RandomizePep">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RandomizePep</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply pseudo-randomize decoy generation with the specified enzyme</span>
+<span class="sd">    properties.</span>
+
+<span class="sd">    Pseudo-randomize (or randomize peptide) means that the enzymatic peptides</span>
+<span class="sd">    will be randomized, except for the cleavage site. For trypsin:</span>
+
+<span class="sd">    - `QSYKPTRTHQ -&gt; QSYKPTR.THQ -&gt; DSDPCCRGIS`</span>
+
+<span class="sd">    The randomization happens based on aminoacid proportions from the target</span>
+<span class="sd">    database. Cleavage sites aren&#39;t counted.</span>
+
+<span class="sd">    This better preserves actual peptide amount and sizes from the targets to</span>
+<span class="sd">    the decoys.</span>
+
+<span class="sd">    The regex MUST match **only** the cleavage sites that shouldn&#39;t be</span>
+<span class="sd">    altered. The cleavage sites MUST be captured by the regex pattern. Else,</span>
+<span class="sd">    the resulting iterator from :meth:`split_sequence` won&#39;t yield all</span>
+<span class="sd">    aminoacid residues.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pattern</span>
+<span class="sd">        A regex pattern that must capture the desired cleavage sites. For</span>
+<span class="sd">        example, for trypsin: ``r&#39;([KR])(?!P)&#39;``.</span>
+<span class="sd">    sense</span>
+<span class="sd">        Whether the enzyme cleaves the C-terminal, N-terminal or both termini</span>
+<span class="sd">        of the cleavage site. This is unused by default, but can be useful for</span>
+<span class="sd">        subclasses overriding the class. Case sensitive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_AA_TO_INDEX</span> <span class="o">=</span> <span class="p">{</span><span class="n">aa</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">aa</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">EXT_AMINOACIDS</span><span class="p">)}</span>
+
+    <span class="nd">@t</span><span class="o">.</span><span class="n">override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">sense</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">sense</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="RandomizePep.__call__">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.RandomizePep.__call__">[docs]</a>
+    <span class="nd">@t</span><span class="o">.</span><span class="n">override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a sequence and return a pseudo-randomized decoy.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence</span>
+<span class="sd">            A single sequence.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        T</span>
+<span class="sd">            A pseudo-randomized version of `sequence`, according to the enzyme</span>
+<span class="sd">            specifications given at class instantiation.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; rand = RandomizePep.from_enzyme(&quot;KR&quot;, nocut=&quot;P&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; rand(&#39;QSYKPTRTHQ&#39;)  # doctest: +SKIP</span>
+<span class="sd">        &#39;DSDPCCRGIS&#39;</span>
+<span class="sd">        &gt;&gt;&gt; rand = RandomizePep.from_enzyme(&quot;K&quot;, sense=&quot;N&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; rand(&#39;QSYKPTRTHQ&#39;)  # doctest: +SKIP</span>
+<span class="sd">        &#39;PINKMEVDAP&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">rand_frags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">frag</span><span class="p">,</span> <span class="n">cleavage</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cleavage</span><span class="p">:</span>
+                <span class="n">frag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_rand</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+            <span class="n">rand_frags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+
+        <span class="n">decoy</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rand_frags</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">seq_cast</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">decoy</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomizePep.learn_context">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.RandomizePep.learn_context">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive the target proteins set to learn aminoacid proportions and</span>
+<span class="sd">        use them as weights during randomization.</span>
+
+<span class="sd">        Since cleavage sites are unaltered during randomization, they are</span>
+<span class="sd">        ignored here, so proportions are kept equal.</span>
+
+<span class="sd">        Any character not in :data:`EXT_AMINOACIDS` is ignored.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequences</span>
+<span class="sd">            The target dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">EXT_AMINOACIDS</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">frag</span><span class="p">,</span> <span class="n">cleavage</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+                <span class="c1"># We don&#39;t count cleavage sites in the weights since they&#39;ll</span>
+                <span class="c1"># be directly preserved</span>
+                <span class="k">if</span> <span class="n">cleavage</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">frag</span><span class="p">:</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_AA_TO_INDEX</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aa</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="RandomizePep.reset">
+<a class="viewcode-back" href="../../../../api/strategies/#pydecoys.strategies.RandomizePep.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the generator, erasing its previous context.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the generator has context (`True`) or not (`False`).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_rand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">RAND</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">EXT_AMINOACIDS</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MarkovPep</span><span class="p">(</span><span class="n">EnzymeSpecificGenerator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply pseudo-markov-chain decoy generation with the specified enzyme</span>
+<span class="sd">    properties.</span>
+
+<span class="sd">    Pseudo-markov-chain means that the enzymatic peptides will be randomized</span>
+<span class="sd">    using a markov-chain model, except for the cleavage site.</span>
+
+<span class="sd">    Cleavage sites aren&#39;t counted when computing the probability of going from</span>
+<span class="sd">    a previous state to another, but are counted as previous state.</span>
+
+<span class="sd">    This better preserves actual peptide amount and sizes from the targets to</span>
+<span class="sd">    the decoys.</span>
+
+<span class="sd">    The regex MUST match **only** the cleavage sites that shouldn&#39;t be</span>
+<span class="sd">    altered. The cleavage sites MUST be captured by the regex pattern. Else,</span>
+<span class="sd">    the resulting iterator from :meth:`split_sequence` won&#39;t yield all</span>
+<span class="sd">    aminoacid residues.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pattern</span>
+<span class="sd">        A regex pattern that must capture the desired cleavage sites. For</span>
+<span class="sd">        example, for trypsin: ``r&#39;([KR])(?!P)&#39;``.</span>
+<span class="sd">    sense</span>
+<span class="sd">        Whether the enzyme cleaves the C-terminal, N-terminal or both termini</span>
+<span class="sd">        of the cleavage site. This is unused by default, but can be useful for</span>
+<span class="sd">        subclasses overriding the class. Case sensitive.</span>
+<span class="sd">    k</span>
+<span class="sd">        The state-space for the Markov-chain model. The next aminoacid of the</span>
+<span class="sd">        sequence will have its probability determined by the `k` aminoacids</span>
+<span class="sd">        before.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@t</span><span class="o">.</span><span class="n">override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">sense</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">sense</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span>
+        <span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">)</span> <span class="o">*</span> <span class="n">k</span>
+
+    <span class="nd">@t</span><span class="o">.</span><span class="n">override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a sequence and return a pseudo-markov-chain generated decoy.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence</span>
+<span class="sd">            A single sequence.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        T</span>
+<span class="sd">            A pseudo-markov-chain generated version of `sequence`, according</span>
+<span class="sd">            to the enzyme specifications given at class instantiation.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; rand = RandomizePep.from_enzyme(&quot;KR&quot;, nocut=&quot;P&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; rand(&#39;QSYKPTRTHQ&#39;)  # doctest: +SKIP</span>
+<span class="sd">        &#39;DSDPCCRGIS&#39;</span>
+<span class="sd">        &gt;&gt;&gt; rand = RandomizePep.from_enzyme(&quot;K&quot;, sense=&quot;N&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; rand(&#39;QSYKPTRTHQ&#39;)  # doctest: +SKIP</span>
+<span class="sd">        &#39;PINKMEVDAP&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The generator has no context.&quot;</span><span class="p">)</span>
+
+        <span class="n">markov_frags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+
+        <span class="n">state</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span>
+        <span class="k">for</span> <span class="n">frag</span><span class="p">,</span> <span class="n">cleavage</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cleavage</span><span class="p">:</span>
+                <span class="n">markov_frags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">state</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">frag</span><span class="p">):],</span> <span class="o">*</span><span class="n">frag</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">frag</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">new</span> <span class="o">=</span> <span class="n">RAND</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">state</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">state</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="n">new</span> <span class="o">=</span> <span class="n">RAND</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_global_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_global_weights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">markov_frags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">aa</span><span class="p">)</span>
+
+        <span class="n">decoy</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">markov_frags</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">seq_cast</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">decoy</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">learn_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">SeqLike</span><span class="p">]):</span>
+        <span class="n">weights</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Counter</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">Counter</span><span class="p">)</span>
+        <span class="n">global_weights</span><span class="p">:</span> <span class="n">Counter</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+            <span class="n">prev</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span>
+
+            <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">frag</span><span class="p">,</span> <span class="n">cleavage</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cleavage</span><span class="p">:</span>
+                    <span class="n">prev</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">prev</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">frag</span><span class="p">):],</span> <span class="o">*</span><span class="n">frag</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">frag</span><span class="p">:</span>
+                    <span class="n">weights</span><span class="p">[</span><span class="n">prev</span><span class="p">][</span><span class="n">aa</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">global_weights</span><span class="p">[</span><span class="n">aa</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">prev</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">prev</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">aa</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">state</span><span class="p">:</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">counter</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">counter</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">counter</span>
+            <span class="ow">in</span> <span class="n">weights</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_weights</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">global_weights</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">global_weights</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the generator, erasing its previous context.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the generator has context (`True`) or not (`False`).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+
+<span class="c1"># Hackish solution, but it allows the code to always return the correct type</span>
+<span class="c1"># without importing Biopython or deferring to another module</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">seq_cast</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">obj</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience function. Transforms a `sequence` str into the correct</span>
+<span class="sd">    :type:`SeqLike` representation (through `obj`).</span>
+
+<span class="sd">    This function doesn&#39;t need Biopython installed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obj</span>
+<span class="sd">        A ``SeqLike`` object specifying the return type.</span>
+<span class="sd">    sequence</span>
+<span class="sd">        A str sequence.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    T</span>
+<span class="sd">        The `sequence` as the type of `obj`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from Bio.Seq import Seq, MutableSeq</span>
+<span class="sd">    &gt;&gt;&gt; str_seq = &#39;QSYKPTRTHQ&#39;</span>
+<span class="sd">    &gt;&gt;&gt; bio_seq = Seq(&#39;YTSKQPRQHT&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; seq_cast(bio_seq, str_seq)</span>
+<span class="sd">    Seq(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; bio_seq = MutableSeq(&#39;YTSKQPRQHT&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; seq_cast(bio_seq, str_seq)</span>
+<span class="sd">    MutableSeq(&#39;QSYKPTRTHQ&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

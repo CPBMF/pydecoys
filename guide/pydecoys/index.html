@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using the PyDecoys API &mdash; pydecoys 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7125ba4f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=b2731ba4"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Creating custom strategies" href="../strategies/" />
+    <link rel="prev" title="Running the CLI" href="../cli/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../" class="icon icon-home">
+            pydecoys
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../">Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../starting/">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli/">Running the CLI</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Using the PyDecoys API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-funcionality">Basic funcionality</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#io-functions">IO functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iterable-functions">Iterable functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#single-data-functions">Single data functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-new-strategies">Adding new strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../strategies/">Creating custom strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../available/">Available strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authorship/">Authorship and affiliations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">pydecoys</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../">Guide</a></li>
+      <li class="breadcrumb-item active">Using the PyDecoys API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/guide/pydecoys.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="using-the-pydecoys-api">
+<h1>Using the PyDecoys API<a class="headerlink" href="#using-the-pydecoys-api" title="Link to this heading"></a></h1>
+<p>PyDecoys has a comprehensive API for integration in Python proteomics
+workflows.</p>
+<p>This section provides some basic examples. Refer to the <a class="reference internal" href="../../api/#api"><span class="std std-ref">API Reference</span></a> for more
+detailed explanations.</p>
+<section id="basic-funcionality">
+<h2>Basic funcionality<a class="headerlink" href="#basic-funcionality" title="Link to this heading"></a></h2>
+<p>PyDecoys’ main API contains useful functions that take a set of target proteins
+and return decoys. Each function uses a different Python <cite>type</cite> as
+representation for targets and decoys.</p>
+<section id="io-functions">
+<h3>IO functions<a class="headerlink" href="#io-functions" title="Link to this heading"></a></h3>
+<p>To read a target fasta file and get decoys from it, use <a class="reference internal" href="../../api/pydecoys/#pydecoys.from_fasta" title="pydecoys.from_fasta"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_fasta()</span></code></a>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqIO</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pydecoys</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoys</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">from_fasta</span><span class="p">(</span><span class="s1">&#39;path/to/targets.fasta&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also use <a class="reference internal" href="../../api/pydecoys/#pydecoys.to_fasta" title="pydecoys.to_fasta"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_fasta()</span></code></a> to write a decoy fasta file using a target
+dataset:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">targets</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;path/to/targets.fasta&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fasta&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># It returns the number of entries written</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pydecoys</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="s1">&#39;path/to/decoys.fasta&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="go">125</span>
+</pre></div>
+</div>
+<p>For convenience, you can directly pass a path or file handle to
+<a class="reference internal" href="../../api/pydecoys/#pydecoys.to_fasta" title="pydecoys.to_fasta"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_fasta()</span></code></a>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pydecoys</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">&#39;path/to/targets.fasta&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;path/to/decoys.fasta&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">125</span>
+</pre></div>
+</div>
+<p>You might want to concatenate the targets and decoys files into a single fasta
+file. For that, simply set the <code class="docutils literal notranslate"><span class="pre">concat</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pydecoys</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">&#39;path/to/targets.fasta&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;path/to/concat.fasta&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="c1"># the resulting fasta will contain both targets and decoys</span>
+<span class="gp">... </span>    <span class="n">concat</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">250</span>
+</pre></div>
+</div>
+</section>
+<section id="iterable-functions">
+<h3>Iterable functions<a class="headerlink" href="#iterable-functions" title="Link to this heading"></a></h3>
+<p>Sometimes you might want to hold your data a bit longer before saving it to a
+file. PyDecoys has dedicated functions to read from and get iterable protein
+sets. For example, to convert a target <code class="docutils literal notranslate"><span class="pre">SeqRecord</span></code> iterable into a decoy
+<code class="docutils literal notranslate"><span class="pre">SeqRecord</span></code> iterable:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqIO</span>
+<span class="linenos">2</span><span class="kn">import</span><span class="w"> </span><span class="nn">pydecoys</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">targets</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;path/to/targets.fasta&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">decoys</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">from_SeqRecords</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Similar functions are also available for <code class="docutils literal notranslate"><span class="pre">tuple</span></code> and <code class="docutils literal notranslate"><span class="pre">str</span></code> objects
+representing a protein (not requiring <cite>Biopython</cite>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span><span class="w"> </span><span class="nn">pydecoys</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="n">tuple_targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos"> 4</span>    <span class="p">(</span><span class="s1">&#39;seq1&#39;</span><span class="p">,</span> <span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">),</span>
+<span class="linenos"> 5</span>    <span class="p">(</span><span class="s1">&#39;seq2&#39;</span><span class="p">,</span> <span class="s1">&#39;QSYMCTVTHP&#39;</span><span class="p">),</span>
+<span class="linenos"> 6</span>    <span class="p">(</span><span class="s1">&#39;seq3&#39;</span><span class="p">,</span> <span class="s1">&#39;CQWSLTEELL&#39;</span><span class="p">),</span>
+<span class="linenos"> 7</span><span class="p">]</span>
+<span class="linenos"> 8</span><span class="c1"># Decoys are a `Generator` of `tuple`</span>
+<span class="linenos"> 9</span><span class="n">decoys</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">tuple_targets</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">str_targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">12</span>    <span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">,</span>
+<span class="linenos">13</span>    <span class="s1">&#39;QSYMCTVTHP&#39;</span><span class="p">,</span>
+<span class="linenos">14</span>    <span class="s1">&#39;CQWSLTEELL&#39;</span><span class="p">,</span>
+<span class="linenos">15</span><span class="p">]</span>
+<span class="linenos">16</span><span class="c1"># Decoys are a `Generator` of `str`</span>
+<span class="linenos">17</span><span class="n">decoys</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">from_seqs</span><span class="p">(</span><span class="n">str_targets</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="single-data-functions">
+<h3>Single data functions<a class="headerlink" href="#single-data-functions" title="Link to this heading"></a></h3>
+<p>PyDecoys also has some functions to convert a single target to a single decoy.
+As with the previous example, there’s a dedicated function for <cite>SeqRecord</cite>
+objects:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqIO</span>
+<span class="linenos">2</span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio.SeqRecord</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqRecord</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="c1"># `Bio.SeqIO.read` returns only one `SeqRecord`</span>
+<span class="linenos">5</span><span class="n">target</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;path/to/target.fasta&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+<span class="linenos">6</span><span class="n">decoy</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">SeqRecord_as_decoy</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="linenos">7</span><span class="k">assert</span> <span class="n">instance</span><span class="p">(</span><span class="n">decoys</span><span class="p">,</span> <span class="n">SeqRecord</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And two more functions for <code class="docutils literal notranslate"><span class="pre">tuple</span></code> and <code class="docutils literal notranslate"><span class="pre">str</span></code> records:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">tuple_target</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;seq1&#39;</span><span class="p">,</span> <span class="s1">&#39;DNIDYKAVYR&#39;</span><span class="p">)</span>
+<span class="linenos">2</span><span class="n">decoy</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">tuple_as_decoy</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="linenos">3</span><span class="k">assert</span> <span class="n">instance</span><span class="p">(</span><span class="n">decoy</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="n">str_target</span> <span class="o">=</span> <span class="s1">&#39;DNIDYKAVYR&#39;</span>
+<span class="linenos">6</span><span class="n">decoy</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">seq_as_decoy</span><span class="p">(</span><span class="n">str_target</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="linenos">7</span><span class="k">assert</span> <span class="n">instance</span><span class="p">(</span><span class="n">decoy</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the examples above use a <code class="docutils literal notranslate"><span class="pre">str</span></code> to represent an aminoacid
+sequence, <a class="reference internal" href="../../api/pydecoys/#pydecoys.from_tuples" title="pydecoys.from_tuples"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_tuples()</span></code></a>, <a class="reference internal" href="../../api/pydecoys/#pydecoys.from_seqs" title="pydecoys.from_seqs"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_seqs()</span></code></a>, <a class="reference internal" href="../../api/pydecoys/#pydecoys.tuple_as_decoy" title="pydecoys.tuple_as_decoy"><code class="xref py py-func docutils literal notranslate"><span class="pre">tuple_as_decoy()</span></code></a>
+and <a class="reference internal" href="../../api/pydecoys/#pydecoys.seq_as_decoy" title="pydecoys.seq_as_decoy"><code class="xref py py-func docutils literal notranslate"><span class="pre">seq_as_decoy()</span></code></a> can take <code class="docutils literal notranslate"><span class="pre">Seq</span></code> or <code class="docutils literal notranslate"><span class="pre">MutableSeq</span></code> objects as aa
+sequences, and will return the correct type.</p>
+</div>
+</section>
+</section>
+<section id="adding-new-strategies">
+<h2>Adding new strategies<a class="headerlink" href="#adding-new-strategies" title="Link to this heading"></a></h2>
+<p>You can register a new decoy strategy using the register function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span><span class="w"> </span><span class="nn">pydecoys</span>
+<span class="linenos">2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqLike</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="k">def</span><span class="w"> </span><span class="nf">custom_decoys</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="linenos">6</span>    <span class="o">...</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">pydecoys</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;custom-decoys&#39;</span><span class="p">,</span> <span class="n">custom_decoys</span><span class="p">)</span>
+<span class="linenos">9</span><span class="n">decoys</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">from_fasta</span><span class="p">(</span><span class="s1">&#39;path/to/targets.fasta&#39;</span><span class="p">,</span> <span class="s1">&#39;custom-decoys&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Custom strategy functions can also be passed directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span><span class="w"> </span><span class="nn">pydecoys</span>
+<span class="linenos">2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydecoys.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeqLike</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="k">def</span><span class="w"> </span><span class="nf">custom_decoys</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">SeqLike</span><span class="p">](</span><span class="n">sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="linenos">6</span>    <span class="o">...</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">decoys</span> <span class="o">=</span> <span class="n">pydecoys</span><span class="o">.</span><span class="n">from_fasta</span><span class="p">(</span><span class="s1">&#39;path/to/targets.fasta&#39;</span><span class="p">,</span> <span class="n">custom_decoys</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../cli/" class="btn btn-neutral float-left" title="Running the CLI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../strategies/" class="btn btn-neutral float-right" title="Creating custom strategies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, CPBMF and INCT-TB, PUCRS, Porto Alegre, Brazil, Bruno Maestri A Becker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

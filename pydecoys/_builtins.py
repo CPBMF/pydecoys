@@ -17,7 +17,7 @@
 
 """Internal logic for implemented strategies."""
 
-from collections import Counter
+from collections import Counter, defaultdict
 from itertools import product
 from typing import Callable, Iterable, Literal, cast
 
@@ -68,29 +68,31 @@ class Randomize:
 
 
 class Markov:
-    def __init__(self):
+    def __init__(self, k: int = 1):
         self._weights = None
+        self._global_weights = ([], [])
+        self._initial_state = (None, ) * k
 
     def learn_context(self, sequences: Iterable[s.SeqLike]):
-        weights = {aa: Counter() for aa in [*s.EXT_AMINOACIDS, None]}
+        weights = defaultdict(Counter)
         global_weights = Counter()
 
         for sequence in sequences:
-            prev = None
+            prev = self._initial_state
             for aa in sequence:
                 aa = aa.upper()
                 if aa not in s.EXT_AMINOACIDS:
                     continue
                 weights[prev][aa] += 1
                 global_weights[aa] += 1
-                prev = aa
+                prev = (*prev[1:], aa)
 
         self._weights = {
-            aa: (list(counter.keys()), list(counter.values()))
-            for aa, counter
+            state: (list(counter.keys()), list(counter.values()))
+            for state, counter
             in weights.items()
         }
-        self._weights['global'] = (
+        self._global_weights = (
             list(global_weights.keys()),
             list(global_weights.values())
         )
@@ -104,9 +106,9 @@ class Markov:
 
     def __call__[T: s.SeqLike](self, sequence: T) -> T:
         if self._weights is None:
-            raise RuntimeError
+            raise RuntimeError("The generator has no context.")
 
-        prev = None
+        prev = self._initial_state
         decoy = []
         for _ in sequence:
             try:
@@ -116,16 +118,16 @@ class Markov:
                     k=1
                 )[0]
             except IndexError:
-                # If we reach an aminoacid that has no following state, we'll
+                # If we reach a state that has no following state, we'll
                 # fallback to global distribution
                 aa = s.RAND.choices(
-                    self._weights['global'][0],
-                    self._weights['global'][1],
+                    self._global_weights[0],
+                    self._global_weights[1],
                     k=1
                 )[0]
 
             decoy.append(aa)
-            prev = aa
+            prev = (*prev[1:], aa)
 
         return s.seq_cast(sequence, "".join(decoy))
 

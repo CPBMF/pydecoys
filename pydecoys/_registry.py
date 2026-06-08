@@ -17,6 +17,7 @@ CLEAVAGE_STRATEGIES: list[
         bool,
         bool,
         bool,
+        dict[str, Any]
     ]
 ] = []
 
@@ -46,17 +47,17 @@ def register_cls(
     keep_n=True,
     keep_c=True,
     keep_term=True,
-    args: list[list[Any]] = []
+    **kwargs: Any,
 ):
     def decorator[C: Callable[[], s.DecoyGenerator]](cls: C) -> C:
         if keep_n:
-            add_callable(f'{str_key}-keepn', s.keepsn(cls()))
+            add_callable(f'{str_key}-keepn', s.keepsn(cls(**kwargs)))
         if keep_c:
-            add_callable(f'{str_key}-keepc', s.keepsc(cls()))
+            add_callable(f'{str_key}-keepc', s.keepsc(cls(**kwargs)))
         if keep_term:
-            add_callable(f'{str_key}-keepterm', s.keepsterm(cls()))
+            add_callable(f'{str_key}-keepterm', s.keepsterm(cls(**kwargs)))
 
-        add_callable(str_key, cls())
+        add_callable(str_key, cls(**kwargs))
 
         return cls
     return decorator
@@ -66,36 +67,53 @@ def register_cleavage_aware(
     str_key: str,
     keep_n=True,
     keep_c=True,
-    keep_term=True
+    keep_term=True,
+    **kwargs: Any
 ):
     def decorator(cls: type[s.EnzymeSpecificGenerator]):
-        CLEAVAGE_STRATEGIES.append((str_key, cls, keep_n, keep_c, keep_term))
+        CLEAVAGE_STRATEGIES.append((
+            str_key,
+            cls,
+            keep_n,
+            keep_c,
+            keep_term,
+            kwargs
+        ))
 
         for agent, (regex, sense) in CLEAVAGE_AGENTS.items():
             key = f'{str_key}-{agent}'
             if keep_n:
-                add_callable(f'{key}-keepn', s.keepsn(cls(regex, sense)))
+                add_callable(
+                    f'{key}-keepn',
+                    s.keepsn(cls(regex, sense, **kwargs))
+                )
             if keep_c:
-                add_callable(f'{key}-keepc', s.keepsc(cls(regex, sense)))
+                add_callable(
+                    f'{key}-keepc',
+                    s.keepsc(cls(regex, sense, **kwargs))
+                )
             if keep_term:
-                add_callable(f'{key}-keepterm', s.keepsterm(cls(regex, sense)))
+                add_callable(
+                    f'{key}-keepterm',
+                    s.keepsterm(cls(regex, sense, **kwargs))
+                )
 
-            add_callable(key, cls(regex, sense))
+            add_callable(key, cls(regex, sense, **kwargs))
         return cls
     return decorator
 
 
 def add_cleavage_agent(str_key: str, pattern: str, sense: Literal['N', 'C', 'both']):
     CLEAVAGE_AGENTS[str_key] = (pattern, sense)
-    for base_key, fn, keep_n, keep_c, keep_term in CLEAVAGE_STRATEGIES:
+    for base_key, fn, keep_n, keep_c, keep_term, kwargs in CLEAVAGE_STRATEGIES:
         key = f'{base_key}-{str_key}'
         if keep_n:
-            add_callable(f'{key}-keepn', s.keepsn(fn(pattern, sense)))
+            add_callable(f'{key}-keepn', s.keepsn(fn(pattern, sense, **kwargs)))
         if keep_c:
-            add_callable(f'{key}-keepc', s.keepsc(fn(pattern, sense)))
+            add_callable(f'{key}-keepc', s.keepsc(fn(pattern, sense, **kwargs)))
         if keep_term:
-            add_callable(f'{key}-keepterm', s.keepsterm(fn(pattern, sense)))
-        add_callable(f'{key}', fn(pattern, sense))
+            add_callable(f'{key}-keepterm', s.keepsterm(fn(pattern, sense, **kwargs)))
+        add_callable(f'{key}', fn(pattern, sense, **kwargs))
 
 
 def add_callable(str_key: str, fn):

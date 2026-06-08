@@ -17,6 +17,7 @@
 
 """Internal logic for implemented strategies."""
 
+from collections import Counter
 from itertools import product
 from typing import Callable, Iterable, Literal, cast
 
@@ -64,6 +65,69 @@ class Randomize:
         length = len(sequence)
         new = s.RAND.choices(s.EXT_AMINOACIDS, weights=self._weights, k=length)
         return s.seq_cast(sequence, "".join(new))
+
+
+class Markov:
+    def __init__(self):
+        self._weights = None
+
+    def learn_context(self, sequences: Iterable[s.SeqLike]):
+        weights = {aa: Counter() for aa in [*s.EXT_AMINOACIDS, None]}
+        global_weights = Counter()
+
+        for sequence in sequences:
+            prev = None
+            for aa in sequence:
+                aa = aa.upper()
+                if aa not in s.EXT_AMINOACIDS:
+                    continue
+                weights[prev][aa] += 1
+                global_weights[aa] += 1
+                prev = aa
+
+        self._weights = {
+            aa: (list(counter.keys()), list(counter.values()))
+            for aa, counter
+            in weights.items()
+        }
+        self._weights['global'] = (
+            list(global_weights.keys()),
+            list(global_weights.values())
+        )
+
+    def reset(self):
+        self._weights = None
+
+    @property
+    def is_set(self) -> bool:
+        return self._weights is not None
+
+    def __call__[T: s.SeqLike](self, sequence: T) -> T:
+        if self._weights is None:
+            raise RuntimeError
+
+        prev = None
+        decoy = []
+        for _ in sequence:
+            try:
+                aa = s.RAND.choices(
+                    self._weights[prev][0],
+                    self._weights[prev][1],
+                    k=1
+                )[0]
+            except IndexError:
+                # If we reach an aminoacid that has no following state, we'll
+                # fallback to global distribution
+                aa = s.RAND.choices(
+                    self._weights['global'][0],
+                    self._weights['global'][1],
+                    k=1
+                )[0]
+
+            decoy.append(aa)
+            prev = aa
+
+        return s.seq_cast(sequence, "".join(decoy))
 
 
 # Pre-defined enzymes

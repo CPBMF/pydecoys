@@ -69,16 +69,19 @@ class Randomize:
 
 class Markov:
     def __init__(self, k: int = 1):
-        self._weights = None
-        self._global_weights = ([], [])
+        self._weights: dict[
+            tuple[str | None, ...],
+            tuple[list[str], list[int]]
+        ] | None = None
+        self._global_weights: tuple[list[str], list[int]] = ([], [])
         self._initial_state = (None, ) * k
 
     def learn_context(self, sequences: Iterable[s.SeqLike]):
-        weights = defaultdict(Counter)
-        global_weights = Counter()
+        weights: dict[tuple[str | None, ...], Counter[str]] = defaultdict(Counter)
+        global_weights: Counter[str] = Counter()
 
         for sequence in sequences:
-            prev = self._initial_state
+            prev: tuple[str | None, ...] = self._initial_state
             for aa in sequence:
                 aa = aa.upper()
                 if aa not in s.EXT_AMINOACIDS:
@@ -108,7 +111,7 @@ class Markov:
         if self._weights is None:
             raise RuntimeError("The generator has no context.")
 
-        prev = self._initial_state
+        prev: tuple[str | None, ...] = self._initial_state
         decoy = []
         for _ in sequence:
             try:

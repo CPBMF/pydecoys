@@ -680,7 +680,7 @@ class MarkovPep(EnzymeSpecificGenerator):
         markov_frags = []
         fragments = self.split_sequence(sequence)
 
-        state = self._initial_state
+        state: tuple[str | None, ...] = self._initial_state
         for frag, cleavage in fragments:
             if cleavage:
                 markov_frags.append(frag)
@@ -706,11 +706,11 @@ class MarkovPep(EnzymeSpecificGenerator):
         return seq_cast(sequence, decoy)
 
     def learn_context(self, sequences: t.Iterable[SeqLike]):
-        weights = defaultdict(Counter)
-        global_weights = Counter()
+        weights: dict[tuple[str | None, ...], Counter[str]] = defaultdict(Counter)
+        global_weights: Counter[str] = Counter()
 
         for sequence in sequences:
-            prev = self._initial_state
+            prev: tuple[str | None, ...] = self._initial_state
 
             fragments = self.split_sequence(sequence)
             for frag, cleavage in fragments:
@@ -725,7 +725,7 @@ class MarkovPep(EnzymeSpecificGenerator):
         self._weights = {
             state: (list(counter.keys()), list(counter.values()))
             for state, counter
-            in weights
+            in weights.items()
         }
         self._global_weights = (
             list(global_weights.keys()),

@@ -24,7 +24,7 @@ def main(arg_list: list[str] | None = None) -> None:
     import argparse
 
     from pydecoys import __version__
-    from pydecoys._builtins import DECOY_STRATEGIES
+    from pydecoys.strategies.registry import DECOY_STRATEGIES
 
     parser = argparse.ArgumentParser(
         prog="pydecoys",

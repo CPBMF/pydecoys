@@ -44,8 +44,6 @@ Available functionality
     Return a decoy :type:`SeqLike` from a given :type:`SeqLike`
 :func:`tuple_as_decoy`
     Return a decoy `tuple` from a given `tuple`
-:func:`register`
-    Register a custom decoy strategy on the API
 :func:`get_contextualized_strategy`
     Return an already setup context-dependant strategy from a target dataset
 :mod:`pydecoys.strategies`
@@ -102,6 +100,8 @@ __all__ = [
     'tuple_as_decoy',
     'get_contextualized_strategy',
     'strategies',
+    'view_strategies',
+    'view_cleavage_agents'
 ]
 
 
@@ -117,3 +117,5 @@ from pydecoys.core import (
     tuple_as_decoy,
     get_contextualized_strategy
 )
+# Re-exposing these functions
+from pydecoys.strategies import view_strategies, view_cleavage_agents

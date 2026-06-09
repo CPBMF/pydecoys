@@ -21,19 +21,18 @@ import re
 from collections import Counter, defaultdict
 from typing import Iterable, Literal, cast, override
 
-from pydecoys import _registry as r
+from pydecoys.strategies import registry as r
 from pydecoys import strategies as s
-from pydecoys._registry import DECOY_STRATEGIES  # noqa: F401
 
 
-@r.register_fn('reverse')
+@r.register_function('reverse')
 def reverse[T: s.SeqLike](sequence: T) -> T:
     """Return the reversed `sequence`, inverting C- and N-terminal positions.
     """
     return cast(T, sequence[::-1])
 
 
-@r.register_fn('shuffle')
+@r.register_function('shuffle')
 def shuffle[T: s.SeqLike](sequence: T) -> T:
     """Return the shuffled `sequence`, shuffling the aminoacids in place."""
     new = list(sequence)
@@ -41,7 +40,7 @@ def shuffle[T: s.SeqLike](sequence: T) -> T:
     return s.seq_cast(sequence, "".join(new))
 
 
-@r.register_cls('randomize')
+@r.register_class('randomize')
 class Randomize:
     _AA_TO_INDEX = {aa: i for i, aa in enumerate(s.EXT_AMINOACIDS)}
 

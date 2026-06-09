@@ -22,7 +22,7 @@ CLEAVAGE_STRATEGIES: list[
 ] = []
 
 
-def register_fn(
+def register_function(
     str_key: str,
     keep_n=True,
     keep_c=True,
@@ -42,7 +42,7 @@ def register_fn(
     return decorator
 
 
-def register_cls(
+def register_class(
     str_key: str,
     keep_n=True,
     keep_c=True,

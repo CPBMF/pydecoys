@@ -33,7 +33,7 @@ except ImportError as e:
     warn(f"Module 'Biopython' not found: {e}")
 
 from pydecoys import strategies
-from pydecoys._builtins import DECOY_STRATEGIES
+from pydecoys.strategies.registry import DECOY_STRATEGIES
 from pydecoys.strategies import SeqLike
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
@@ -567,7 +567,7 @@ def tuple_as_decoy[T: SeqLike](
     ):
         raise ValueError(
             f"Strategy '{strategy}' requires context. "
-            f"Use: `strategy = get_contextualized_strategy(sequences, {strategy})`"
+            f"Use: `strategy = get_contextualized_strategy(sequences, '{strategy}')`"
         )
 
     if not sequence[1]:
@@ -630,7 +630,7 @@ def seq_as_decoy[T: SeqLike](
     ):
         raise ValueError(
             f"Strategy '{strategy}' requires context. "
-            f"Use: `strategy = get_contextualized_strategy(sequences, {strategy})`"
+            f"Use: `strategy = get_contextualized_strategy(sequences, '{strategy}')`"
         )
 
     if not sequence:

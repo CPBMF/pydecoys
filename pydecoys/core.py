@@ -26,12 +26,11 @@ from contextlib import contextmanager, nullcontext
 
 try:
     _HAS_BIO = True
-    import Bio  # noqa: F401
     from Bio.SeqRecord import SeqRecord
 except ImportError as e:
     _HAS_BIO = False
     from warnings import warn
-    warn(f"Module 'Biopython' not found: {str(e)}")
+    warn(f"Module 'Biopython' not found: {e}")
 
 from pydecoys import strategies
 from pydecoys._builtins import DECOY_STRATEGIES
@@ -46,6 +45,7 @@ def from_fasta(
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    fuse: str | None = None,
 ) -> t.Iterable[SeqRecord]:
     """Apply a decoy generator to entries from a fasta file. Requires
     `Biopython`.
@@ -63,6 +63,9 @@ def from_fasta(
     prefix
         If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
         to `True`.
+    fuse
+        If a value is provided, target proteins are prepended to their
+        respective decoys, using the given value as the intermediate linker.
 
     Yields
     ------
@@ -90,7 +93,7 @@ def from_fasta(
 
     from Bio import SeqIO
     targets = SeqIO.parse(input, format='fasta')
-    yield from from_SeqRecords(targets, strategy, decoy_tag, prefix)
+    yield from from_SeqRecords(targets, strategy, decoy_tag, prefix, fuse)
 
 
 def to_fasta(
@@ -99,7 +102,8 @@ def to_fasta(
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
-    concat: bool = False
+    keep_targets: bool = False,
+    fuse: str | None = None
 ) -> int:
     """Apply a decoy generator to a set of sequences and write them to a file.
     Requires `Biopython`.
@@ -120,9 +124,12 @@ def to_fasta(
     prefix
         If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
         to `True`.
-    concat
+    keep_targets
         If `True`, output fasta will have both target and decoy entries. All
         targets will be first, then all decoys. Defaults to `False`.'
+    fuse
+        If a value is provided, target proteins are prepended to their
+        respective decoys, using the given value as the intermediate linker.
 
     Returns
     -------
@@ -165,13 +172,25 @@ def to_fasta(
     else:
         sequences = input
 
-    if concat:
+    if keep_targets:
         from itertools import chain
         sequences = list(sequences)
-        decoys = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
+        decoys = from_SeqRecords(
+            sequences,  # type: ignore
+            strategy,
+            decoy_tag,
+            prefix,
+            fuse
+        )
         write = chain(sequences, decoys)
     else:
-        write = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
+        write = from_SeqRecords(
+            sequences,  # type: ignore
+            strategy,
+            decoy_tag,
+            prefix,
+            fuse
+        )
 
     return SeqIO.write(write, output, format='fasta')  # type: ignore
 
@@ -181,6 +200,7 @@ def from_SeqRecords(
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    fuse: str | None = None
 ) -> t.Generator[SeqRecord, None, None]:
     """Apply a decoy generation strategy to a set of sequences. Requires
     `Biopython`.
@@ -198,6 +218,9 @@ def from_SeqRecords(
     prefix
         If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
         to `True`.
+    fuse
+        If a value is provided, target proteins are prepended to their
+        respective decoys, using the given value as the intermediate linker.
 
     Yields
     ------
@@ -242,7 +265,7 @@ def from_SeqRecords(
     from pydecoys import _bio
     sequences = _bio.iter_SeqRecord(sequences)
     tuples = (_bio.SeqRecord_to_tuple(record) for record in sequences)
-    decoys = from_tuples(tuples, strategy, decoy_tag, prefix)
+    decoys = from_tuples(tuples, strategy, decoy_tag, prefix, fuse)
     records = (_bio.tuple_to_SeqRecord(decoy) for decoy in decoys)
     yield from records
 
@@ -252,6 +275,7 @@ def from_tuples[T: SeqLike](
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    fuse: T | None = None
 ) -> t.Generator[tuple[str, T], None, None]:
     """Apply a decoy generation strategy to a set of tuples.
 
@@ -273,6 +297,9 @@ def from_tuples[T: SeqLike](
     prefix
         If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
         to `True`.
+    fuse
+        If a value is provided, target proteins are prepended to their
+        respective decoys, using the given value as the intermediate linker.
 
     Yields
     ------
@@ -319,15 +346,19 @@ def from_tuples[T: SeqLike](
         sequences = list(sequences)
 
     with _get_contextualized(sequences, lambda x: x[1], decoy_generator) as gen:
+        appl = gen
+        if fuse is not None:
+            appl = lambda x: fuse.join((x, gen(x)))  # noqa: E731 # type: ignore
         for seq in sequences:
             if not seq[1]:
                 raise ValueError(f"Seq not present for sequence '{seq[0]}'")
-            yield (_build_id(seq[0], decoy_tag, prefix), gen(seq[1]))
+            yield (_build_id(seq[0], decoy_tag, prefix), appl(seq[1]))  # type: ignore
 
 
 def from_seqs[T: SeqLike](
     sequences: t.Iterable[T] | T,
     strategy: _Strategy,
+    fuse: T | None = None
 ) -> t.Generator[T, None, None]:
     """Apply a decoy generation strategy to a set of sequences.
 
@@ -339,6 +370,9 @@ def from_seqs[T: SeqLike](
     strategy:
         Lower case string specifying the decoy strategy to be used, or a
         :type:`strategies.DecoyGenerator` function.
+    fuse
+        If a value is provided, target proteins are prepended to their
+        respective decoys, using the given value as the intermediate linker.
 
     Yields
     ------
@@ -399,10 +433,13 @@ def from_seqs[T: SeqLike](
         sequences = list(sequences)  # type: ignore
 
     with _get_contextualized(sequences, lambda x: x, decoy_generator) as gen:
+        appl = gen
+        if fuse is not None:
+            appl = lambda x: fuse.join((x, gen(x)))  # noqa: E731 # type: ignore
         for i, seq in enumerate(sequences):
             if not seq:
                 raise ValueError(f'Seq not present for sequence {i}')
-            yield gen(seq)  # type: ignore
+            yield appl(seq)  # type: ignore
 
 
 def SeqRecord_as_decoy(
@@ -410,6 +447,7 @@ def SeqRecord_as_decoy(
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    fuse: str | None = None,
 ) -> SeqRecord:
     """Get a decoy from a given `SeqRecord`.
 
@@ -426,6 +464,9 @@ def SeqRecord_as_decoy(
     prefix
         If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
         to `True`.
+    fuse
+        If a value is provided, the target protein is prepended to the decoy,
+        using the given value as the intermediate linker.
 
     Returns
     -------
@@ -446,7 +487,6 @@ def SeqRecord_as_decoy(
     This function won't give context to :class:`strategies.ContextfulGerenator`
     objects. You can get an already set :class:`strategies.ContextfulGerenator`
     with :func:`get_contextualized_strategy`.
-
     """
     if not _HAS_BIO:
         raise ImportError(
@@ -456,7 +496,7 @@ def SeqRecord_as_decoy(
 
     from pydecoys import _bio
     seq_tuple = _bio.SeqRecord_to_tuple(sequence)
-    decoy = tuple_as_decoy(seq_tuple, strategy, decoy_tag, prefix)
+    decoy = tuple_as_decoy(seq_tuple, strategy, decoy_tag, prefix, fuse)
     return _bio.tuple_to_SeqRecord(decoy)
 
 
@@ -465,6 +505,7 @@ def tuple_as_decoy[T: SeqLike](
     strategy: _Strategy,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    fuse: T | None = None,
 ) -> tuple[str, T]:
     """Get a decoy from a given `tuple`.
 
@@ -482,6 +523,9 @@ def tuple_as_decoy[T: SeqLike](
     prefix
         If `True`, `decoy_tag` is prefixed, otherwise it's suffixed. Defaults
         to `True`.
+    fuse
+        If a value is provided, target proteins are prepended to their
+        respective decoys, using the given value as the intermediate linker.
 
     Returns
     -------
@@ -529,12 +573,18 @@ def tuple_as_decoy[T: SeqLike](
     if not sequence[1]:
         raise ValueError('Seq not present (cannot be empty str)')
 
-    return (_build_id(sequence[0], decoy_tag, prefix), decoy_generator(sequence[1]))
+    if fuse is None:
+        return (_build_id(sequence[0], decoy_tag, prefix), decoy_generator(sequence[1]))
+    return (
+        _build_id(sequence[0], decoy_tag, prefix),
+        fuse.join((sequence[1], decoy_generator(sequence[1])))  # type: ignore
+    )
 
 
 def seq_as_decoy[T: SeqLike](
     sequence: T,
     strategy: _Strategy,
+    fuse: T | None = None,
 ) -> T:
     """Get a decoy from a given :type:`SeqLike`.
 
@@ -545,6 +595,9 @@ def seq_as_decoy[T: SeqLike](
     strategy
         Lower case string specifying the decoy strategy to be used, or a
         :type:`strategies.DecoyGenerator` function.
+    fuse
+        If a value is provided, the target protein is prepended to the decoy,
+        using the given value as the intermediate linker.
 
     Returns
     -------
@@ -583,7 +636,9 @@ def seq_as_decoy[T: SeqLike](
     if not sequence:
         raise ValueError('Seq not present (cannot be an empty str)')
 
-    return decoy_generator(sequence)
+    if fuse is None:
+        return decoy_generator(sequence)
+    return fuse.join((sequence, decoy_generator(sequence)))  # type: ignore
 
 
 def register(

@@ -43,7 +43,6 @@ __all__ = [
     'keepsn',
     'keepsc',
     'keepsterm',
-    'fuses',
 ]
 
 
@@ -57,4 +56,4 @@ from pydecoys.strategies.core import (
     EnzymeSpecificGenerator,
     seq_cast
 )
-from pydecoys.strategies.factories import keepsc, keepsn, keepsterm, fuses
+from pydecoys.strategies.factories import keepsc, keepsn, keepsterm

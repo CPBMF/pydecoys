@@ -218,7 +218,7 @@ def test_from_fasta(input, fasta_correct, request):
 
 # Testing IO inputs
 @pytest.mark.parametrize(
-    ['input', 'concat'],
+    ['input', 'keep_targets'],
     itertools.product(
         ['fasta_path', 'fasta_handle'],
         [True, False]
@@ -227,7 +227,7 @@ def test_from_fasta(input, fasta_correct, request):
 def test_to_fasta_path(
     input,
     tmp_file,       # Output
-    concat,
+    keep_targets,
     fasta_path,     # Original
     fasta_correct,  # Expected
     correct_count,
@@ -237,59 +237,69 @@ def test_to_fasta_path(
 
     orig = SeqIO.parse(fasta_path, 'fasta')
     corrects = SeqIO.parse(fasta_correct, 'fasta')
-    corrects = _if_concat(orig, corrects, concat)
+    corrects = _if_concat(orig, corrects, keep_targets)
 
-    count = pydecoys.to_fasta(input, tmp_file, 'reverse', concat=concat)
+    count = pydecoys.to_fasta(input, tmp_file, 'reverse', keep_targets=keep_targets)
     decoys = SeqIO.parse(tmp_file, 'fasta')
-    assert count == (correct_count*2 if concat else correct_count)
+    assert count == (correct_count*2 if keep_targets else correct_count)
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert_decoy_equal(decoy, correct)
 
 
 # Non-IO inputs
 @pytest.mark.parametrize(
-    ['input', 'concat'],
+    ['input', 'keep_targets'],
     itertools.product(
         [SEQ_RECORD, [SEQ_RECORD]],
         [True, False]
     )
 )
-def test_to_fasta_not_IO(input, concat, tmp_file):
+def test_to_fasta_not_IO(input, keep_targets, tmp_file):
     corrects = [DEC_RECORD]
-    corrects = _if_concat([SEQ_RECORD], corrects, concat)
+    corrects = _if_concat([SEQ_RECORD], corrects, keep_targets)
 
-    count = pydecoys.to_fasta(input, tmp_file, 'reverse', concat=concat)
+    count = pydecoys.to_fasta(input, tmp_file, 'reverse', keep_targets=keep_targets)
 
-    assert count == (2 if concat else 1)
+    assert count == (2 if keep_targets else 1)
     decoys = SeqIO.parse(tmp_file, 'fasta')
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert_decoy_equal(decoy, correct)
 
 
 # Testing outputs
-@pytest.mark.parametrize('concat', [True, False])
+@pytest.mark.parametrize('keep_targets', [True, False])
 def test_to_fasta_output(
     fasta_path,
     tmp_file,
-    concat,
+    keep_targets,
     correct_count,
     fasta_correct
 ):
 
     orig = SeqIO.parse(fasta_path, 'fasta')
     corrects = SeqIO.parse(fasta_correct, 'fasta')
-    corrects = list(_if_concat(orig, corrects, concat))
+    corrects = list(_if_concat(orig, corrects, keep_targets))
 
-    count = pydecoys.to_fasta(fasta_path, tmp_file, 'reverse', concat=concat)
+    count = pydecoys.to_fasta(
+        fasta_path,
+        tmp_file,
+        'reverse',
+        keep_targets=keep_targets
+    )
     decoys = SeqIO.parse(tmp_file, 'fasta')
-    assert count == (correct_count*2 if concat else correct_count)
+    assert count == (correct_count*2 if keep_targets else correct_count)
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert_decoy_equal(decoy, correct)
 
     with open(tmp_file, 'w') as handle:
-        count = pydecoys.to_fasta(fasta_path, handle, 'reverse', concat=concat)
+        count = pydecoys.to_fasta(
+            fasta_path,
+            handle,
+            'reverse',
+            keep_targets=keep_targets
+        )
     decoys = SeqIO.parse(tmp_file, 'fasta')
-    assert count == (correct_count*2 if concat else correct_count)
+    assert count == (correct_count*2 if keep_targets else correct_count)
     for decoy, correct in zip(decoys, corrects, strict=True):
         assert_decoy_equal(decoy, correct)
 

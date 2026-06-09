@@ -5,6 +5,8 @@ pydecoys.strategies
 
 .. automodule:: pydecoys.strategies
 
+**Types:**
+
 .. autotype:: SeqLike
 
    `SeqLike` objects can be indexed and spliced; `str` at runtime.
@@ -18,6 +20,8 @@ pydecoys.strategies
 
    A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
    :type:`SeqLike`.
+
+**Global CONSTS:**
 
 .. data:: RAND
    :type: typing.Final[random.Random]
@@ -63,6 +67,8 @@ pydecoys.strategies
    - Z: Glutamic acid (E) or Glutamine (Q)
    - X: Any aminoacid
 
+**Protocols and ABCs:**
+
 .. autoclass:: ContextfulGenerator
    :show-inheritance:
    :special-members: __call__
@@ -77,22 +83,28 @@ pydecoys.strategies
    :special-members: __call__
    :members:
 
-.. autoclass:: ReversePep
-   :show-inheritance:
-   :special-members: __call__
-   :members:
+**Utils:**
 
-.. autoclass:: ShufflePep
-   :show-inheritance:
-   :special-members: __call__
-   :members:
+.. autofunction:: seq_cast
 
-.. autoclass:: RandomizePep
-   :show-inheritance:
-   :special-members: __call__
-   :members:
+**Factory functions:**
 
 .. autofunction:: keepsn
 .. autofunction:: keepsc
 .. autofunction:: keepsterm
-.. autofunction:: fuses
+
+**Decorators:**
+
+.. autofunction:: register_function
+.. autofunction:: register_class
+.. autofunction:: register_cleavage_aware
+
+**Register functions:**
+
+.. autofunction:: register_cleavage_agent
+.. autofunction:: register_callable
+
+**Registry utils:**
+
+.. autofunction:: view_strategies
+.. autofunction:: view_cleavage_agents

@@ -45,5 +45,4 @@ sequence:**
 
 **Utils:**
 
-.. autofunction:: register
 .. autofunction:: get_contextualized_strategy

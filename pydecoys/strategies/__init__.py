@@ -85,8 +85,8 @@ __all__ = [
     'register_class',
     'register_cleavage_aware',
     'register_function',
-    'add_callable',
-    'add_cleavage_agent',
+    'register_callable',
+    'register_cleavage_agent',
     'view_cleavage_agents',
     'view_strategies',
 ]
@@ -107,8 +107,8 @@ from pydecoys.strategies.registry import (
     register_class,
     register_cleavage_aware,
     register_function,
-    add_callable,
-    add_cleavage_agent,
+    register_callable,
+    register_cleavage_agent,
     view_cleavage_agents,
     view_strategies,
 )

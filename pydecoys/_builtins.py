@@ -550,4 +550,4 @@ _ENZYMES: list[_Enzyme] = [
 ]
 
 for enzyme in _ENZYMES:
-    r.add_cleavage_agent(enzyme[2], enzyme[0], enzyme[1])
+    r.register_cleavage_agent(enzyme[2], enzyme[0], enzyme[1])

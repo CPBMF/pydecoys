@@ -641,79 +641,12 @@ def seq_as_decoy[T: SeqLike](
     return fuse.join((sequence, decoy_generator(sequence)))  # type: ignore
 
 
-def register(
-    strategy_key: str,
-    strategy_fn: strategies.DecoyGenerator
-) -> None:
-    """Register a new decoy strategy.
-
-    Parameters
-    ----------
-    strategy_key
-        Lower case string identifying the decoy strategy. Must not be already
-        defined.
-    strategy_fn
-        A function following the :type:`strategies.DecoyGenerator` signature.
-
-    Examples
-    --------
-    Given a `random_seq` function that takes a sequence and returns a new,
-    unrelated sequence of same size:
-
-    >>> def random_seq(sequence): ...
-    >>> register('randomseq', random_seq)
-    >>> seq = 'DNIDYKAVYR'
-    >>> seq_as_decoy(seq, 'randomseq')  # doctest: +SKIP
-    'LLEETLSWQC'
-
-    The strategy key must be a lowercase string:
-
-    >>> register(5, random_seq)
-    Traceback (most recent call last):
-        ...
-    TypeError: Need a string for the decoy strategy (lower case)
-    >>> register('RANDOMSEQ', random_seq)
-    Traceback (most recent call last):
-        ...
-    ValueError: Strategy key 'RANDOMSEQ' should be lower case
-
-    It must not be already defined:
-
-    >>> register('randomseq', random_seq)
-    Traceback (most recent call last):
-        ...
-    ValueError: Strategy key 'randomseq' already defined
-
-    The second argument must be a callable:
-
-    >>> register('randomseq2', 'randomseq2')
-    Traceback (most recent call last):
-        ...
-    TypeError: Strategy function must be a callable
-    """
-
-    if not isinstance(strategy_key, str):
-        raise TypeError("Need a string for the decoy strategy (lower case)")
-    if not strategy_key:
-        raise ValueError("Strategy required (lower case string)")
-    if not strategy_key.islower():
-        raise ValueError(f"Strategy key '{strategy_key}' should be lower case")
-
-    if strategy_key in DECOY_STRATEGIES:
-        raise ValueError(f"Strategy key '{strategy_key}' already defined")
-
-    if not callable(strategy_fn):
-        raise TypeError("Strategy function must be a callable")
-
-    DECOY_STRATEGIES[strategy_key] = strategy_fn
-
-
 def get_contextualized_strategy(
     sequences: t.Iterable[SeqLike],
     strategy_key: str
-) -> strategies.ContextfulGenerator:
-    """Return a bare :type:`strategies.ContextfulGenerator` from a
-    context-based strategy key, with added context.
+) -> strategies.DecoyGenerator:
+    """Return a bare callable strategy from a context-based strategy key, with
+    added context.
 
     Parameters
     ----------
@@ -722,22 +655,19 @@ def get_contextualized_strategy(
 
     Returns
     -------
-    ContextfulGenerator
+    DecoyGenerator
         The correspondent decoy strategy.
 
     Examples
     --------
     >>> database = ['DNIDYKAVYR']
     >>> strategy = get_contextualized_strategy(database, 'randomize')
-    >>> isinstance(strategy, strategies.ContextfulGenerator)
-    True
-    >>> strategy.is_set
-    True
     >>> strategy = get_contextualized_strategy(database, 'reverse')
     Traceback (most recent call last):
         ...
     ValueError: Strategy 'reverse' is not contextful
     """
+    # TODO: Fix this docstring
 
     import copy
 
@@ -752,7 +682,7 @@ def get_contextualized_strategy(
     strategy = copy.deepcopy(strategy)
     strategy.learn_context(sequences)
 
-    return strategy
+    return strategy.__call__
 
 
 def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:

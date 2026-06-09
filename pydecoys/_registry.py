@@ -116,13 +116,69 @@ def add_cleavage_agent(str_key: str, pattern: str, sense: Literal['N', 'C', 'bot
         add_callable(f'{key}', fn(pattern, sense, **kwargs))
 
 
-def add_callable(str_key: str, fn):
-    DECOY_STRATEGIES[str_key] = fn
+def add_callable(strategy_key: str, strategy_fn: s.DecoyGenerator):
+    """Add a new decoy strategy.
+
+    Parameters
+    ----------
+    strategy_key
+        Lower case string identifying the decoy strategy. Must not be already
+        defined.
+    strategy_fn
+        A function following the :type:`strategies.DecoyGenerator` signature.
+
+    Examples
+    --------
+    Given a `random_seq` function that takes a sequence and returns a new,
+    unrelated sequence of same size:
+
+    >>> def random_seq(sequence): ...
+    >>> add_callable('randomseq', random_seq)
+    >>> seq = 'DNIDYKAVYR'
+    >>> seq_as_decoy(seq, 'randomseq')  # doctest: +SKIP
+    'LLEETLSWQC'
+
+    The strategy key must be a lowercase string:
+
+    >>> add_callable(5, random_seq)
+    Traceback (most recent call last):
+        ...
+    TypeError: Need a string for the decoy strategy (lower case)
+    >>> add_callable('RANDOMSEQ', random_seq)
+    Traceback (most recent call last):
+        ...
+    ValueError: Strategy key 'RANDOMSEQ' should be lower case
+
+    It must not be already defined:
+
+    >>> add_callable('randomseq', random_seq)
+    Traceback (most recent call last):
+        ...
+    ValueError: Strategy key 'randomseq' already defined
+
+    The second argument must be a callable:
+
+    >>> add_callable('randomseq2', 'randomseq2')
+    Traceback (most recent call last):
+        ...
+    TypeError: Strategy function must be a callable
+    """
+
+    if not isinstance(strategy_key, str):
+        raise TypeError("Need a string for the decoy strategy (lower case)")
+    if not strategy_key:
+        raise ValueError("Strategy required (lower case string)")
+    if not strategy_key.islower():
+        raise ValueError(f"Strategy key '{strategy_key}' should be lower case")
+
+    if strategy_key in DECOY_STRATEGIES:
+        raise ValueError(f"Strategy key '{strategy_key}' already defined")
+    DECOY_STRATEGIES[strategy_key] = strategy_fn
 
 
-def strategies() -> KeysView[str]:
+def view_strategies() -> KeysView[str]:
     return DECOY_STRATEGIES.keys()
 
 
-def cleavage_agents() -> MappingProxyType[str, _Enzyme]:
+def view_cleavage_agents() -> MappingProxyType[str, _Enzyme]:
     return MappingProxyType(CLEAVAGE_AGENTS)

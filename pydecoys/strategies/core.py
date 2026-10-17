@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # PyDecoys. If not, see <https://www.gnu.org/licenses/>.
 
+# TODO: Fix docstrings
+
 """Core API (protocols, ABCs, types and utility) for :mod:`strategies`."""
 
 from __future__ import annotations
@@ -32,11 +34,21 @@ if t.TYPE_CHECKING:
 type SeqLike = 'str | Seq | MutableSeq'
 """`SeqLike` objects can be indexed and spliced; `str` at runtime."""
 
-type DecoyGenerator[T: SeqLike] = t.Callable[[T], T]
-"""TypeAlias specifying the signature for decoy strategies.
+type SimpleGenerator[T: SeqLike] = t.Callable[[T], T]
+"""TypeAlias specifying the signature for decoy strategies that don't take
+cleavage agents into account.
+"""
 
-A decoy strategy should be a ``Callable[[T], T]`` where ``T`` is a
-:type:`SeqLike`.
+type CleavageGenerator[T: SeqLike] = t.Callable[
+    [T, re.Pattern, t.Literal['N', 'C', 'both']],
+    T
+]
+"""TypeAlias specifying the signature for decoy strategies that take cleavage
+agents into account.
+"""
+
+type DecoyGenerator = SimpleGenerator | CleavageGenerator
+"""TypeAlias specifying the signature for all decoy strategies.
 """
 
 # So shuffled decoys are always reproducible
@@ -100,13 +112,15 @@ class ContextfulGenerator(t.Protocol):
         """Whether the generator has context (`True`) or not (`False`)."""
         ...
 
-    def __call__[T: SeqLike](self, sequence: T) -> T:
+    def __call__[T: SeqLike](self, sequence: T, *args) -> T:
         """Receive a sequence and return a decoy based on previous context.
 
         Parameters
         ----------
         sequence
             A single sequence.
+        args
+            Arguments for cleavage-aware generators.
 
         Returns
         -------
@@ -119,68 +133,29 @@ class ContextfulGenerator(t.Protocol):
 class EnzymeSpecificGenerator(ABC):
     """Abstract base class for enzymatic aware decoy generation.
 
-    Sequences can be split with :meth:`split_sequence`. The class is
-    case-insensitive.
-
-    The regex MUST match **only** the cleavage sites that shouldn't be
-    altered. The cleavage sites MUST be captured by the regex pattern. Else,
-    the resulting iterator from :meth:`split_sequence` won't yield all
-    aminoacid residues.
-
-    Parameters
-    ----------
-    pattern
-        A regex pattern that must capture the desired cleavage sites. For
-        example, for trypsin: ``r'([KR])(?!P)'``.
-    sense
-        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
-        of the cleavage site. This is unused by default, but can be useful for
-        subclasses overriding the class. Case sensitive.
-
-    Examples
-    --------
-    >>> class DummyEnzymeGenerator(EnzymeSpecificGenerator):
-    ...     def __call__(sequence): raise NotImplementedError
-    >>> dummy = DummyEnzymeGenerator(r"(R)", sense="N")
-    >>> print(dummy.pattern)
-    re.compile('(R)', re.IGNORECASE)
-    >>> dummy = DummyEnzymeGenerator(r"([KR])(?!P)")
-    >>> print(dummy.pattern)
-    re.compile('([KR])(?!P)', re.IGNORECASE)
-
-    The pattern argument cannot be an empty string:
-
-    >>> dummy = DummyEnzymeGenerator("")
-    Traceback (most recent call last):
-        ...
-    ValueError: Need string or re.Pattern for pattern
+    Sequences can be split with :meth:`split_sequence`.
     """
-
-    def __init__(
-        self,
-        pattern: str | re.Pattern[str],
-        sense: t.Literal['N', 'C', 'both'] = 'C'
-    ):
-        if isinstance(pattern, str):
-            if not pattern:
-                raise ValueError('Need string or re.Pattern for pattern')
-            self.__pattern = re.compile(pattern, re.IGNORECASE)
-        elif isinstance(pattern, re.Pattern):
-            self.__pattern = pattern
-        else:
-            raise TypeError('The pattern must be a string or a re.Pattern obj')
-
     def split_sequence(
         self,
-        sequence: SeqLike
+        sequence: SeqLike,
+        pattern: re.Pattern
     ) -> t.Generator[tuple[str, bool], None, None]:
         """Split a given sequence into enzymatic fragments (minus the clevage
         site) and cleavage sites, in the order they appear.
+
+        The regex MUST match **only** the cleavage sites that shouldn't be
+        altered. The cleavage sites MUST be captured by the regex pattern. Else,
+        the resulting iterator from :meth:`split_sequence` won't yield all
+        aminoacid residues.
+
+        The function is case-insensitive.
 
         Parameters
         ----------
         sequence
             Aminoacid sequence to be split.
+        pattern
+            A regex pattern that matches cleavage sites.
 
         Yields
         ------
@@ -192,8 +167,8 @@ class EnzymeSpecificGenerator(ABC):
         --------
         >>> class DummySpecificGenerator(EnzymeSpecificGenerator):
         ...     def __call__(self, sequence): raise NotImplementedError
-        >>> splitter = DummySpecificGenerator.from_enzyme('KR')
-        >>> for val in splitter.split_sequence('QSYKPTRTHQ'):
+        >>> splitter = DummySpecificGenerator()
+        >>> for val in splitter.split_sequence('QSYKPTRTHQ', r'([KR])'):
         ...     print(val)
         ('QSY', False)
         ('K', True)
@@ -202,16 +177,20 @@ class EnzymeSpecificGenerator(ABC):
         ('THQ', False)
         """
 
-        for i, frag in enumerate(re.split(self.__pattern, str(sequence))):
+        for i, frag in enumerate(re.split(pattern, str(sequence), flags=re.IGNORECASE)):
             if frag:
                 # Captured values (in this case, cleavage sites) are
                 # guaranteed to be in odd indexes
                 yield frag, i % 2 == 1
 
     @abstractmethod
-    def __call__[T: SeqLike](self, sequence: T) -> T:
+    def __call__[T: SeqLike](
+        self,
+        sequence: T,
+        pattern: re.Pattern,
+        sense = t.Literal['N', 'C', 'both']
+    ) -> T:
         """Receive a sequence and return a decoy based on enzymatic peptides.
-
         Parameters
         ----------
         sequence
@@ -220,131 +199,10 @@ class EnzymeSpecificGenerator(ABC):
         Returns
         -------
         T
-            A decoy version of `sequence`, according to the enzyme
-            specifications given at class instantiation.
+            A decoy version of `sequence`, according to the cleavage agent
+            specification.
         """
         ...
-
-    @property
-    def pattern(self) -> re.Pattern:
-        """Regex pattern to capture cleavage sites."""
-        return self.__pattern
-
-    @classmethod
-    def from_enzyme(
-        cls,
-        cut: str,
-        nocut: str | None = None,
-        nocut_n: str | None = None,
-        sense: t.Literal['N', 'C', 'both'] = 'C',
-    ) -> t.Self:
-        """
-        Create regex pattern from enzyme specifications and return a new
-        instance with this regex pattern.
-
-        Parameters
-        ----------
-        cut
-            Cleavage sites as a string.
-        nocut
-            Aminoacids that stop cleavage when at C-terminal as a string, or
-            `None`. If given, the enzyme will ignore `cut` aminoacids followed
-            by these at the C-terminal.
-        nocut_n
-            Aminoacids that stop cleavage when at N-terminal as a string, or
-            `None`. If given, the enzyme will ignore `cut` aminoacids
-            preceeded by these at the N-terminal.
-        sense
-            Whether the enzyme cleaves the C-terminal, N-terminal or both
-            termini of the cleavage site. This is unused by default, but can
-            be useful for subclasses overriding the class. Case sensitive.
-
-        Returns
-        -------
-        Self
-            An instance of the class with a regex pattern constructed from the
-            parameters as such: ``rf'(?<![{nocut_n}])([{cut}])(?![{nocut}])'``.
-
-        Examples
-        --------
-        >>> class DummyEnzymeGenerator(EnzymeSpecificGenerator):
-        ...     def __call__(sequence): raise NotImplementedError
-        >>> dummy = DummyEnzymeGenerator.from_enzyme("R", sense="N")
-        >>> print(dummy.pattern)
-        re.compile('(R)', re.IGNORECASE)
-        >>> dummy = DummyEnzymeGenerator.from_enzyme("KR", nocut="P")
-        >>> print(dummy.pattern)
-        re.compile('([KR])(?!P)', re.IGNORECASE)
-
-        Cut argument cannot be an empty string:
-
-        >>> dummy = DummyEnzymeGenerator.from_enzyme("")
-        Traceback (most recent call last):
-            ...
-        ValueError: Need string for cut aminoacids
-
-        Aminoacids must be one of the :data:`EXT_AMINOACIDS` single-letter
-        codes:
-
-        >>> dummy = DummyEnzymeGenerator.from_enzyme("KR", nocut="7")
-        Traceback (most recent call last):
-            ...
-        ValueError: Not a valid aminoacid single-letter code: '7'
-        """
-
-        # A lot of type-guarding...
-        if not isinstance(cut, str):
-            raise TypeError("Cut aminoacids must be string")
-        cut = cut.upper()
-        if not cut:
-            raise ValueError("Need string for cut aminoacids")
-        cls._check_if_aa(cut)
-
-        if nocut is None:
-            pass
-        elif isinstance(nocut, str):
-            if not nocut:
-                raise ValueError("Need string for nocut aminoacids (or None)")
-            nocut = nocut.upper()
-            cls._check_if_aa(nocut)
-        else:
-            raise TypeError("Nocut aminoacids must be string or None")
-
-        if nocut_n is None:
-            pass
-        elif isinstance(nocut_n, str):
-            if not nocut_n:
-                raise ValueError("Need string for nocut_n aminoacids (or None)")
-            nocut_n = nocut_n.upper()
-            cls._check_if_aa(nocut_n)
-        else:
-            raise TypeError("Nocut_n aminoacids must be string or None")
-
-        pattern = rf"([{cut}])" if len(cut) > 1 else rf"({cut})"
-
-        if nocut is not None:
-            pattern += rf"(?![{nocut}])" if len(nocut) > 1 else rf"(?!{nocut})"
-        if nocut_n is not None:
-            pattern = (
-                (
-                    rf"(?<![{nocut_n}])"
-                    if len(nocut_n) > 1
-                    else rf"(?<!{nocut_n})"
-                )
-                + pattern
-            )
-
-        return cls(pattern, sense)
-
-    @staticmethod
-    def _check_if_aa(sequence: str):
-        """Raise a ValueError if a given sequence is not composed of
-        :data:`EXT_AMINOACIDS` only.
-        """
-
-        for aa in sequence:
-            if aa not in EXT_AMINOACIDS:
-                raise ValueError(f"Not a valid aminoacid single-letter code: '{aa}'")
 
 
 class ReversePep(EnzymeSpecificGenerator):
@@ -358,49 +216,16 @@ class ReversePep(EnzymeSpecificGenerator):
 
     This better preserves actual peptide amount and sizes from the targets to
     the decoys.
-
-    The regex MUST match **only** the cleavage sites that shouldn't be
-    altered. The cleavage sites MUST be captured by the regex pattern. Else,
-    the resulting iterator from :meth:`split_sequence` won't yield all
-    aminoacid residues.
-
-    Parameters
-    ----------
-    pattern
-        A regex pattern that must capture the desired cleavage sites. For
-        example, for trypsin: ``r'([KR])(?!P)'``.
-    sense
-        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
-        of the cleavage site. This is unused by default, but can be useful for
-        subclasses overriding the class. Case sensitive.
     """
 
     @t.override
-    def __call__[T: SeqLike](self, sequence: T) -> T:
-        """Receive a sequence and return a pseudo-reversed decoy.
-
-        Parameters
-        ----------
-        sequence
-            A single sequence.
-
-        Returns
-        -------
-        T
-            A pseudo-reversed version of `sequence`, according to the enzyme
-            specifications given at class instantiation.
-
-        Examples
-        --------
-        >>> rev = ReversePep.from_enzyme("KR", nocut="P")
-        >>> rev('QSYKPTRTHQ')
-        'TPKYSQRQHT'
-        >>> rev = ReversePep.from_enzyme("K", sense="N")
-        >>> rev('QSYKPTRTHQ')
-        'YSQKQHTRTP'
-        """
-
-        fragments = self.split_sequence(sequence)
+    def __call__[T: SeqLike](
+        self,
+        sequence: T,
+        pattern: re.Pattern,
+        sense = t.Literal['N', 'C', 'both']
+    ) -> T:
+        fragments = self.split_sequence(sequence, pattern)
         rev_frags = []
 
         for frag, cleavage in fragments:
@@ -422,49 +247,16 @@ class ShufflePep(EnzymeSpecificGenerator):
 
     This better preserves actual peptide amount and sizes from the targets to
     the decoys.
-
-    The regex MUST match **only** the cleavage sites that shouldn't be
-    altered. The cleavage sites MUST be captured by the regex pattern. Else,
-    the resulting iterator from :meth:`split_sequence` won't yield all
-    aminoacid residues.
-
-    Parameters
-    ----------
-    pattern
-        A regex pattern that must capture the desired cleavage sites. For
-        example, for trypsin: ``r'([KR])(?!P)'``.
-    sense
-        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
-        of the cleavage site. This is unused by default, but can be useful for
-        subclasses overriding the class. Case sensitive.
     """
 
     @t.override
-    def __call__[T: SeqLike](self, sequence: T) -> T:
-        """Receive a sequence and return a pseudo-shuffled decoy.
-
-        Parameters
-        ----------
-        sequence
-            A single sequence.
-
-        Returns
-        -------
-        T
-            A pseudo-shuffled version of `sequence`, according to the enzyme
-            specifications given at class instantiation.
-
-        Examples
-        --------
-        >>> shuf = ShufflePep.from_enzyme("KR", nocut="P")
-        >>> shuf('QSYKPTRTHQ')
-        'YTSKQPRQHT'
-        >>> shuf = ShufflePep.from_enzyme("K", sense="N")
-        >>> shuf('QSYKPTRTHQ')
-        'QYSKTHRPTQ'
-        """
-
-        fragments = self.split_sequence(sequence)
+    def __call__[T: SeqLike](
+        self,
+        sequence: T,
+        pattern: re.Pattern,
+        sense = t.Literal['N', 'C', 'both']
+    ) -> T:
+        fragments = self.split_sequence(sequence, pattern)
         shuf_frags = []
 
         for frag, cleavage in fragments:
@@ -495,61 +287,23 @@ class RandomizePep(EnzymeSpecificGenerator):
 
     This better preserves actual peptide amount and sizes from the targets to
     the decoys.
-
-    The regex MUST match **only** the cleavage sites that shouldn't be
-    altered. The cleavage sites MUST be captured by the regex pattern. Else,
-    the resulting iterator from :meth:`split_sequence` won't yield all
-    aminoacid residues.
-
-    Parameters
-    ----------
-    pattern
-        A regex pattern that must capture the desired cleavage sites. For
-        example, for trypsin: ``r'([KR])(?!P)'``.
-    sense
-        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
-        of the cleavage site. This is unused by default, but can be useful for
-        subclasses overriding the class. Case sensitive.
     """
 
     _AA_TO_INDEX = {aa: i for i, aa in enumerate(EXT_AMINOACIDS)}
 
     @t.override
-    def __init__(
-        self,
-        pattern: str | re.Pattern[str],
-        sense: t.Literal['N', 'C', 'both'] = 'C',
-    ) -> None:
-        super().__init__(pattern, sense)
+    def __init__(self) -> None:
         self._weights: list[int] | None = None
 
     @t.override
-    def __call__[T: SeqLike](self, sequence: T) -> T:
-        """Receive a sequence and return a pseudo-randomized decoy.
-
-        Parameters
-        ----------
-        sequence
-            A single sequence.
-
-        Returns
-        -------
-        T
-            A pseudo-randomized version of `sequence`, according to the enzyme
-            specifications given at class instantiation.
-
-        Examples
-        --------
-        >>> rand = RandomizePep.from_enzyme("KR", nocut="P")
-        >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
-        'DSDPCCRGIS'
-        >>> rand = RandomizePep.from_enzyme("K", sense="N")
-        >>> rand('QSYKPTRTHQ')  # doctest: +SKIP
-        'PINKMEVDAP'
-        """
-
+    def __call__[T: SeqLike](
+        self,
+        sequence: T,
+        pattern: re.Pattern,
+        sense = t.Literal['N', 'C', 'both']
+    ) -> T:
         rand_frags = []
-        fragments = self.split_sequence(sequence)
+        fragments = self.split_sequence(sequence, pattern)
 
         for frag, cleavage in fragments:
             if not cleavage:
@@ -559,7 +313,12 @@ class RandomizePep(EnzymeSpecificGenerator):
         decoy = "".join(rand_frags)
         return seq_cast(sequence, decoy)
 
-    def learn_context(self, sequences: t.Iterable[SeqLike]) -> None:
+    def learn_context(
+            self,
+            sequences: t.Iterable[SeqLike],
+            pattern: re.Pattern,
+            sense: t.Literal['N', 'C', 'both']
+        ) -> None:
         """Receive the target proteins set to learn aminoacid proportions and
         use them as weights during randomization.
 
@@ -577,7 +336,7 @@ class RandomizePep(EnzymeSpecificGenerator):
         self._weights = [0] * len(EXT_AMINOACIDS)
 
         for seq in sequences:
-            for frag, cleavage in self.split_sequence(seq):
+            for frag, cleavage in self.split_sequence(seq, pattern):
                 # We don't count cleavage sites in the weights since they'll
                 # be directly preserved
                 if cleavage:
@@ -615,20 +374,8 @@ class MarkovPep(EnzymeSpecificGenerator):
     This better preserves actual peptide amount and sizes from the targets to
     the decoys.
 
-    The regex MUST match **only** the cleavage sites that shouldn't be
-    altered. The cleavage sites MUST be captured by the regex pattern. Else,
-    the resulting iterator from :meth:`split_sequence` won't yield all
-    aminoacid residues.
-
     Parameters
     ----------
-    pattern
-        A regex pattern that must capture the desired cleavage sites. For
-        example, for trypsin: ``r'([KR])(?!P)'``.
-    sense
-        Whether the enzyme cleaves the C-terminal, N-terminal or both termini
-        of the cleavage site. This is unused by default, but can be useful for
-        subclasses overriding the class. Case sensitive.
     k
         The state-space for the Markov-chain model. The next aminoacid of the
         sequence will have its probability determined by the `k` aminoacids
@@ -636,21 +383,21 @@ class MarkovPep(EnzymeSpecificGenerator):
     """
 
     @t.override
-    def __init__(
-        self,
-        pattern: str | re.Pattern[str],
-        sense: t.Literal['N', 'C', 'both'] = 'C',
-        k: int = 1,
-    ) -> None:
-        super().__init__(pattern, sense)
+    def __init__(self, k: int) -> None:
         self._weights: dict[
             tuple[str | None, ...],
             tuple[list[str], list[int]]
         ] | None = None
+        self._global_weights: tuple[list[str], list[int]] | None = None
         self._initial_state = (None, ) * k
 
     @t.override
-    def __call__[T: SeqLike](self, sequence: T) -> T:
+    def __call__[T: SeqLike](
+        self,
+        sequence: T,
+        pattern: re.Pattern,
+        sense = t.Literal['N', 'C', 'both']
+    ) -> T:
         """Receive a sequence and return a pseudo-markov-chain generated decoy.
 
         Parameters
@@ -678,7 +425,7 @@ class MarkovPep(EnzymeSpecificGenerator):
             raise RuntimeError("The generator has no context.")
 
         markov_frags = []
-        fragments = self.split_sequence(sequence)
+        fragments = self.split_sequence(sequence, pattern)
 
         state: tuple[str | None, ...] = self._initial_state
         for frag, cleavage in fragments:
@@ -705,14 +452,19 @@ class MarkovPep(EnzymeSpecificGenerator):
         decoy = "".join(markov_frags)
         return seq_cast(sequence, decoy)
 
-    def learn_context(self, sequences: t.Iterable[SeqLike]):
+    def learn_context(
+        self,
+        sequences: t.Iterable[SeqLike],
+        pattern: re.Pattern,
+        sense = t.Literal['N', 'C', 'both']
+    ):
         weights: dict[tuple[str | None, ...], Counter[str]] = defaultdict(Counter)
         global_weights: Counter[str] = Counter()
 
         for sequence in sequences:
             prev: tuple[str | None, ...] = self._initial_state
 
-            fragments = self.split_sequence(sequence)
+            fragments = self.split_sequence(sequence, pattern)
             for frag, cleavage in fragments:
                 if cleavage:
                     prev = (*prev[len(frag):], *frag)
@@ -735,6 +487,7 @@ class MarkovPep(EnzymeSpecificGenerator):
     def reset(self) -> None:
         """Reset the generator, erasing its previous context."""
         self._weights = None
+        self._global_weights = None
 
     @property
     def is_set(self) -> bool:

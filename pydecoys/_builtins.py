@@ -17,14 +17,55 @@
 
 """Internal logic for implemented strategies."""
 
+import re
 from collections import Counter, defaultdict
-from itertools import product
 from typing import Callable, Iterable, Literal, cast
 
 from pydecoys import strategies as s
 
 
-decoy_strategy: dict[str, s.DecoyGenerator] = {}
+type _Enzyme = tuple[re.Pattern, Literal['N', 'C', 'both']]
+
+
+decoy_strategies: dict[tuple[str, bool | str, bool], s.DecoyGenerator] = {}
+"""The key is the strategy name, `True`, `False` or `'M'` on whether to keep
+the N-terminal, and `True` or `False` on whether to keep the C-terminal.
+"""
+
+
+# Pre-defined enzymes
+# Those specifications were taken from <https://github.com/HUPO-PSI/psi-ms-CV>
+#
+# (regex, cleavage sense)
+# The regex patterns MUST ONLY match the cleavage site and MUST capture it.
+# Because of this, we cannot use the regex patterns from PSI MS Ontology.
+
+def _compile(pattern: str) -> re.Pattern:
+    return re.compile(pattern)
+
+enzymes: dict[str, _Enzyme] = {
+    'AlphaLP': (_compile(r'([TASV])'), 'C'),
+    'Arg-C': (_compile(r'(R)(?!P)'), 'C'),
+    'Asp-N': (_compile(r'([BD])'), 'N'),
+    'Asp-N_ambic': (_compile(r'([DE])'), 'N'),
+    'Chymotrypsin': (_compile(r'([FYWL])(?!P)'), 'C'),
+    'CNBr': (_compile(r'(M)'), 'C'),
+    'Formic_acid': (_compile(r'(D)'), 'both'),
+    'Glu-C': (_compile(r'(?<!E)(E)'), 'C'),
+    'elastase': (_compile(r'([ALIV])(?!P)'), 'C'),
+    'Lys-C': (_compile(r'(K)(?!P)'), 'C'),
+    'Lys-C/P': (_compile(r'(K)'), 'C'),
+    'Lys-N': (_compile(r'(K)'), 'N'),
+    'PepsinA': (_compile(r'([FL])'), 'C'),
+    'Pro-C': (_compile(r'([HKR]P)(?!P)'), 'C'),
+    'Trypsin': (_compile(r'([KR])(?!P)'), 'C'),
+    'Trypsin/P': (_compile(r'([KR])'), 'C'),
+    'TrypChymo': (_compile(r'([FYWLKR])(?!P)'), 'C'),
+    'Tryp-N': (_compile(r'([KR])'), 'N'),
+    '2-iodobenzoate': (_compile(r'(W)'), 'C'),
+    'V8-DE': (_compile(r'([BDEZ])(?!P)'), 'C'),
+    'V8-E': (_compile(r'([EZ])(?!P)'), 'C'),
+}
 
 
 def reverse[T: s.SeqLike](sequence: T) -> T:
@@ -135,41 +176,7 @@ class Markov:
         return s.seq_cast(sequence, "".join(decoy))
 
 
-# Pre-defined enzymes
-# Those specifications were taken from <https://github.com/HUPO-PSI/psi-ms-CV>
-#
-# (regex, cleavage sense, str key)
-# The regex patterns MUST ONLY match the cleavage site and MUST capture it.
-# Because of this, we cannot use the regex patterns from PSI MS Ontology.
-
-type _Enzyme = tuple[str, Literal['N', 'C', 'both'], str]
-
-_ENZYMES: list[_Enzyme] = [
-    (r'([TASV])',        'C',    'alphalp'),        # AlphaLP
-    (r'(R)(?!P)',        'C',    'argc'),           # Arg-C
-    (r'([BD])',          'N',    'aspn'),           # Asp-N
-    (r'([DE])',          'N',    'aspnambic'),      # Asp-N_ambic
-    (r'([FYWL])(?!P)',   'C',    'chymo'),          # Chymotrypsin
-    (r'(M)',             'C',    'cnbr'),           # CNBr
-    (r'(D)',             'both', 'formicacid'),     # Formic_acid
-    (r'(?<!E)(E)',       'C',    'gluc'),           # glutamyl endopeptidase
-    (r'([ALIV])(?!P)',   'C',    'elastase'),       # leukocyte elastase
-    (r'(K)(?!P)',        'C',    'lysc'),           # Lys-C
-    (r'(K)',             'C',    'lyscp'),          # Lys-C/P
-    (r'(K)',             'N',    'lysn'),           # Lys-N
-    (r'([FL])',          'C',    'pepsina'),        # PepsinA
-    (r'([HKR]P)(?!P)',   'C',    'proc'),           # proline endopeptidase
-    (r'([KR])(?!P)',     'C',    'trypsin'),        # Trypsin
-    (r'([KR])',          'C',    'trypsinp'),       # Trypsin/P
-    (r'([FYWLKR])(?!P)', 'C',    'trypchymo'),      # TrypChymo
-    (r'([KR])',          'N',    'trypn'),          # Tryp-N
-    (r'(W)',             'C',    '2iodobenzoate'),  # 2-iodobenzoate
-    (r'([BDEZ])(?!P)',   'C',    'v8de'),           # V8-DE
-    (r'([EZ])(?!P)',     'C',    'v8e'),            # V8-E
-]
-
-
-_PLAIN_STRATEGIES: list[tuple[str, Callable[[], s.DecoyGenerator]]] = [
+_PLAIN_STRATEGIES: list[tuple[str, Callable[[], s.SimpleGenerator]]] = [
     ('reverse',   lambda: reverse),  # noqa: E272
     ('shuffle',   lambda: shuffle),  # noqa: E272
     ('randomize', Randomize)
@@ -183,42 +190,25 @@ _ENZYME_STRATEGIES: list[tuple[str, type[s.EnzymeSpecificGenerator]]] = [
 ]
 
 
-# The do-nothing cases allow the code to just loop over those lists blindly
-# registering each factory
-_TERMINAL_FACTORIES: list[
-    tuple[str, Callable[[s.DecoyGenerator], s.DecoyGenerator]]
-] = [
-    ('',          lambda x: x),  # noqa: E272
-    ('-keepn',    s.keepsn),
-    ('-keepc',    s.keepsc),
-    ('-keepterm', s.keepsterm)
-]
-
-
-_OTHER_FACTORIES: list[
-    tuple[str, Callable[[s.DecoyGenerator], s.DecoyGenerator]]
-] = [
-    ('',      lambda x: x),  # noqa: E272
-    ('-fuse', s.fuses)
-]
-
-
 # Functional programming hell
 def _register_all() -> None:
-    all_strategies = list(product(_TERMINAL_FACTORIES, _OTHER_FACTORIES))
+    for key, fn in _PLAIN_STRATEGIES:
+        decoy_strategies[(key, False, False)] = fn()
+        decoy_strategies[(key, True, False)] = s.keepsn(fn())
+        decoy_strategies[(key, 'M', False)] = s.keepsm(fn())
 
-    for base_key, make in _PLAIN_STRATEGIES:
-        for (suffix, factory), (suffix2, factory2) in all_strategies:
-            key = base_key + suffix + suffix2
-            decoy_strategy[key] = factory2(factory(make()))
+        decoy_strategies[(key, False, True)] = s.keepsc(fn())
+        decoy_strategies[(key, True, True)] = s.keepsc(s.keepsn(fn()))
+        decoy_strategies[(key, 'M', True)] = s.keepsc(s.keepsm(fn()))
 
-    for class_key, cls in _ENZYME_STRATEGIES:
-        for regex, sense, enzyme_key in _ENZYMES:
-            base_key = f'{class_key}-{enzyme_key}'
+    for key, fn in _ENZYME_STRATEGIES:
+        cleavage_strategies[(key, False, False)] = fn()
+        cleavage_strategies[(key, True, False)] = s.keepsn(fn())
+        cleavage_strategies[(key, 'M', False)] = s.keepsm(fn())
 
-            for (suffix, factory), (suffix2, factory2) in all_strategies:
-                key = base_key + suffix + suffix2
-                decoy_strategy[key] = factory2(factory(cls(regex, sense)))
+        cleavage_strategies[(key, False, True)] = s.keepsc(fn())
+        cleavage_strategies[(key, True, True)] = s.keepsc(s.keepsn(fn()))
+        cleavage_strategies[(key, 'M', True)] = s.keepsc(s.keepsm(fn()))
 
 
 _register_all()

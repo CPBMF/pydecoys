@@ -24,7 +24,7 @@ def main(arg_list: list[str] | None = None) -> None:
     import argparse
 
     from pydecoys import __version__
-    from pydecoys._builtins import decoy_strategy
+    from pydecoys._builtins import decoy_strategies
 
     parser = argparse.ArgumentParser(
         prog="pydecoys",
@@ -52,7 +52,7 @@ def main(arg_list: list[str] | None = None) -> None:
     )
     parser.add_argument(
         '-s', '--strategy',
-        choices=decoy_strategy.keys(),
+        choices=decoy_strategies.keys(),
         default='reverse',
         help='decoy generation strategy (default: \'%(default)s\')'
     )

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import io
 import os
+import re
 import typing as t
 from contextlib import contextmanager, nullcontext
 
@@ -34,7 +35,7 @@ except ImportError as e:
     warn(f"Module 'Biopython' not found: {str(e)}")
 
 from pydecoys import strategies
-from pydecoys._builtins import decoy_strategy
+from pydecoys._builtins import decoy_strategies, cleavage_strategies
 from pydecoys.strategies import SeqLike
 
 type _PathOrIO = str | os.PathLike[str] | t.TextIO
@@ -44,8 +45,11 @@ type _Strategy = str | strategies.DecoyGenerator
 def from_fasta(
     input: _PathOrIO,
     strategy: _Strategy,
+    agent: str | None = None,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
 ) -> t.Iterable[SeqRecord]:
     """Apply a decoy generator to entries from a fasta file. Requires
     `Biopython`.
@@ -90,15 +94,18 @@ def from_fasta(
 
     from Bio import SeqIO
     targets = SeqIO.parse(input, format='fasta')
-    yield from from_SeqRecords(targets, strategy, decoy_tag, prefix)
+    yield from from_SeqRecords(targets, strategy, agent, decoy_tag, prefix, keep_n, keep_c)
 
 
 def to_fasta(
     input: _PathOrIO | t.Iterable[SeqRecord] | SeqRecord,
     output: _PathOrIO,
     strategy: _Strategy,
+    agent: str | None = None,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
     concat: bool = False
 ) -> int:
     """Apply a decoy generator to a set of sequences and write them to a file.
@@ -168,10 +175,10 @@ def to_fasta(
     if concat:
         from itertools import chain
         sequences = list(sequences)
-        decoys = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
+        decoys = from_SeqRecords(sequences, strategy, agent, decoy_tag, prefix, keep_n, keep_c)  # type: ignore
         write = chain(sequences, decoys)
     else:
-        write = from_SeqRecords(sequences, strategy, decoy_tag, prefix)  # type: ignore
+        write = from_SeqRecords(sequences, strategy, agent, decoy_tag, prefix, keep_n, keep_c)  # type: ignore
 
     return SeqIO.write(write, output, format='fasta')  # type: ignore
 
@@ -179,8 +186,11 @@ def to_fasta(
 def from_SeqRecords(
     sequences: t.Iterable[SeqRecord] | SeqRecord,
     strategy: _Strategy,
+    agent: str | None = None,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
 ) -> t.Generator[SeqRecord, None, None]:
     """Apply a decoy generation strategy to a set of sequences. Requires
     `Biopython`.
@@ -242,7 +252,7 @@ def from_SeqRecords(
     from pydecoys import _bio
     sequences = _bio.iter_SeqRecord(sequences)
     tuples = (_bio.SeqRecord_to_tuple(record) for record in sequences)
-    decoys = from_tuples(tuples, strategy, decoy_tag, prefix)
+    decoys = from_tuples(tuples, strategy, agent, decoy_tag, prefix, keep_n, keep_c)
     records = (_bio.tuple_to_SeqRecord(decoy) for decoy in decoys)
     yield from records
 
@@ -250,8 +260,11 @@ def from_SeqRecords(
 def from_tuples[T: SeqLike](
     sequences: t.Iterable[tuple[str, T]],
     strategy: _Strategy,
+    agent: str | None = None,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
 ) -> t.Generator[tuple[str, T], None, None]:
     """Apply a decoy generation strategy to a set of tuples.
 
@@ -311,7 +324,7 @@ def from_tuples[T: SeqLike](
     This function will automatically pass the sequences as context to an unset
     :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.
     """
-    decoy_generator = _validate_strategy(strategy)
+    decoy_generator = _validate_strategy(strategy, keep_n, keep_c, agent)
 
     _validate_tag(decoy_tag)
 
@@ -328,6 +341,9 @@ def from_tuples[T: SeqLike](
 def from_seqs[T: SeqLike](
     sequences: t.Iterable[T] | T,
     strategy: _Strategy,
+    enzyme: str | None = None,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
 ) -> t.Generator[T, None, None]:
     """Apply a decoy generation strategy to a set of sequences.
 
@@ -385,7 +401,7 @@ def from_seqs[T: SeqLike](
     :class:`strategies.ContextfulGenerator` strategy and reset it afterwards.
     """
 
-    decoy_generator = _validate_strategy(strategy)
+    decoy_generator = _validate_strategy(strategy, keep_n, keep_c, enzyme)
 
     if _HAS_BIO:
         from Bio.Seq import MutableSeq, Seq
@@ -408,8 +424,11 @@ def from_seqs[T: SeqLike](
 def SeqRecord_as_decoy(
     sequence: SeqRecord,
     strategy: _Strategy,
+    enzyme: str | None = None,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
 ) -> SeqRecord:
     """Get a decoy from a given `SeqRecord`.
 
@@ -456,15 +475,18 @@ def SeqRecord_as_decoy(
 
     from pydecoys import _bio
     seq_tuple = _bio.SeqRecord_to_tuple(sequence)
-    decoy = tuple_as_decoy(seq_tuple, strategy, decoy_tag, prefix)
+    decoy = tuple_as_decoy(seq_tuple, strategy, enzyme, decoy_tag, prefix, keep_n, keep_c)
     return _bio.tuple_to_SeqRecord(decoy)
 
 
 def tuple_as_decoy[T: SeqLike](
     sequence: tuple[str, T],
     strategy: _Strategy,
+    enzyme: str | None = None,
     decoy_tag: str = 'decoy_',
     prefix: bool = True,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
 ) -> tuple[str, T]:
     """Get a decoy from a given `tuple`.
 
@@ -510,7 +532,7 @@ def tuple_as_decoy[T: SeqLike](
     with :func:`get_contextualized_strategy`.
     """
 
-    decoy_generator = _validate_strategy(strategy)
+    decoy_generator = _validate_strategy(strategy, keep_n, keep_c, enzyme)
 
     _validate_tag(decoy_tag)
 
@@ -535,6 +557,9 @@ def tuple_as_decoy[T: SeqLike](
 def seq_as_decoy[T: SeqLike](
     sequence: T,
     strategy: _Strategy,
+    enzyme: str | None = None,
+    keep_n: bool | t.Literal['M'] = False,
+    keep_c: bool = False,
 ) -> T:
     """Get a decoy from a given :type:`SeqLike`.
 
@@ -569,7 +594,7 @@ def seq_as_decoy[T: SeqLike](
     with :func:`get_contextualized_strategy`.
     """
 
-    decoy_generator = _validate_strategy(strategy)
+    decoy_generator = _validate_strategy(strategy, keep_n, keep_c, enzyme)
 
     if (
         isinstance(decoy_generator, strategies.ContextfulGenerator)
@@ -644,13 +669,13 @@ def register(
     if not strategy_key.islower():
         raise ValueError(f"Strategy key '{strategy_key}' should be lower case")
 
-    if strategy_key in decoy_strategy:
+    if strategy_key in decoy_strategies:
         raise ValueError(f"Strategy key '{strategy_key}' already defined")
 
     if not callable(strategy_fn):
         raise TypeError("Strategy function must be a callable")
 
-    decoy_strategy[strategy_key] = strategy_fn
+    decoy_strategies[strategy_key] = strategy_fn
 
 
 def get_contextualized_strategy(
@@ -700,7 +725,12 @@ def get_contextualized_strategy(
     return strategy
 
 
-def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
+def _validate_strategy(
+    strategy: _Strategy,
+    keep_n: bool | t.Literal['M'],
+    keep_c: bool,
+    agent: str | None
+) -> strategies.DecoyGenerator:
     if callable(strategy):
         return strategy
 
@@ -711,12 +741,33 @@ def _validate_strategy(strategy: _Strategy) -> strategies.DecoyGenerator:
     if not strategy.islower():
         raise ValueError(f"Strategy string '{strategy}' should be lower case")
 
-    decoy_generator = decoy_strategy.get(strategy)
-
+    decoy_generator = decoy_strategies.get((strategy, keep_n, keep_c))
     if decoy_generator is None:
-        raise ValueError(f"Unknown strategy: '{strategy}'")
+        raise ValueError(
+            f"Unknown strategy: '{strategy}'")
 
     return decoy_generator
+
+
+def _validate_cleavage_agent(
+    agent: str | None
+) -> tuple[re.Pattern, t.Literal['N', 'C', 'both']]:
+    if agent is None:
+        return None, None
+
+    if not isinstance(agent, str):
+        raise TypeError("Need a string or callable for the cleavage agent (lower case)")
+    if not agent:
+        raise ValueError("Cleavage agent should not be empty string")
+    if not agent.islower():
+        raise ValueError(f"Cleavage agent string '{agent}' should be lower case")
+
+    agent_tuple = cleavage_strategies.get(agent)
+
+    if agent_tuple is None:
+        ValueError(f"Unknown cleavage agent: '{agent}'")
+
+    return agent_tuple
 
 
 def _validate_tag(decoy_tag: t.Any):
